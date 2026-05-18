@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .soft-saas-shadow {
+            box-shadow: 0 12px 16px -4px rgba(11, 28, 48, 0.06);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#bc4800",
+                        "secondary-fixed": "#dae2fd",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-container": "#ffede6",
+                        "inverse-primary": "#b4c5ff",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#360f00",
+                        "surface": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary": "#565e74",
+                        "on-secondary-fixed": "#131b2e",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "primary-container": "#2563eb",
+                        "primary-fixed": "#dbe1ff",
+                        "outline": "#737686",
+                        "surface-container": "#e5eeff",
+                        "tertiary-fixed": "#ffdbcd",
+                        "on-primary-fixed": "#00174b",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#0b1c30",
+                        "surface-variant": "#d3e4fe",
+                        "surface-tint": "#0053db",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "outline-variant": "#c3c6d7",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#eff4ff",
+                        "primary": "#004ac6",
+                        "background": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-high": "#dce9ff",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-background": "#0b1c30",
+                        "on-primary-container": "#eeefff",
+                        "error": "#ba1a1a",
+                        "tertiary": "#943700",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "secondary-container": "#dae2fd",
+                        "on-surface-variant": "#434655",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-secondary-container": "#5c647a",
+                        "surface-dim": "#cbdbf5"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "2xl": "48px",
+                        "xs": "4px",
+                        "gutter": "24px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "margin-desktop": "40px",
+                        "sm": "8px",
+                        "margin-mobile": "16px",
+                        "lg": "24px"
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-lowest flex flex-col py-xl px-md shadow-[0_0_12px_rgba(11,28,48,0.04)] z-50">
+<div class="mb-2xl px-sm">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">BookPro</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Client Portal</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-md p-md rounded-lg text-on-secondary-container hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md p-md rounded-lg text-on-secondary-container hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-body-md text-body-md">Bookings</span>
+</a>
+<a class="flex items-center gap-md p-md rounded-lg text-primary font-bold border-r-4 border-primary bg-surface-container" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</nav>
+<div class="mt-auto">
+<button class="w-full bg-primary text-on-primary font-bold py-md px-lg rounded-xl flex items-center justify-center gap-sm transition-transform active:scale-95">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+<span>New Booking</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<div class="flex-1 ml-64 flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-40 bg-surface border-b border-outline-variant flex justify-between items-center w-full px-margin-desktop py-md">
+<div class="flex items-center gap-lg">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="bg-surface-container-low border-none rounded-full py-sm pl-2xl pr-lg w-64 focus:ring-2 focus:ring-primary text-body-sm" placeholder="Search settings..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="flex items-center gap-md border-l border-outline-variant pl-lg">
+<img alt="Client Avatar" class="w-10 h-10 rounded-full object-cover" data-alt="A professional headshot of a smiling middle-aged man with short dark hair in a well-lit corporate office environment. The lighting is soft and natural, emphasizing a friendly and approachable personality. He is wearing a crisp white shirt against a softly blurred background of a modern glass-walled conference room with blue accents. The overall aesthetic is clean, high-resolution, and professional." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXX-tSMt-ARmslEj_wqAdAs8dtGrD7zIKuIFTmD37kgyP30efDNIuqsoSMTUR-uM8IvwVcUKF5LsjiZNQdJMuEac6-M53VwfHMowhKBHZ10sbQ38eALUCkVRdwZQ7PeEAJC-mpR3U9_Bo5zykUQhS_w7f7ZXy433VrC7pQPWuhTxi6DSzEjG9hKrayCe2pCfzfGhDEwvFTzC23OkJxp4QrIwyFimgrvyqQkTo64Uih4aSnDWf3GzgJ0DWr-nMb_OQfAHpGv2S1_Xg"/>
+<div class="text-left">
+<p class="font-label-md text-label-md text-on-surface">Alex Johnson</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Admin Account</p>
+</div>
+</div>
+</div>
+</header>
+<!-- Page Canvas -->
+<main class="flex-1 p-margin-desktop bg-surface-container-low">
+<div class="max-w-5xl mx-auto">
+<div class="mb-xl">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Account Settings</h2>
+<p class="text-on-surface-variant font-body-md mt-xs">Manage your professional profile and security preferences.</p>
+</div>
+<!-- Bento-style Layout -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Sidebar Navigation (Internal) -->
+<div class="col-span-3 space-y-sm">
+<button class="w-full text-left p-md rounded-lg bg-white soft-saas-shadow border-l-4 border-primary text-primary font-bold flex items-center gap-md">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-label-md">Profile</span>
+</button>
+<button class="w-full text-left p-md rounded-lg hover:bg-white transition-all text-on-surface-variant flex items-center gap-md">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="text-label-md">Security</span>
+</button>
+<button class="w-full text-left p-md rounded-lg hover:bg-white transition-all text-on-surface-variant flex items-center gap-md">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+<span class="text-label-md">Notifications</span>
+</button>
+<button class="w-full text-left p-md rounded-lg hover:bg-white transition-all text-on-surface-variant flex items-center gap-md">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="text-label-md">Billing &amp; Sync</span>
+</button>
+</div>
+<!-- Main Form Section -->
+<div class="col-span-9 space-y-xl">
+<!-- Profile Card -->
+<div class="bg-white rounded-xl soft-saas-shadow p-lg">
+<div class="flex justify-between items-center border-b border-outline-variant pb-md mb-lg">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Personal Information</h3>
+<button class="text-primary font-label-md hover:underline">Update Changes</button>
+</div>
+<div class="flex gap-2xl items-start">
+<div class="flex flex-col items-center gap-md">
+<div class="relative group">
+<img alt="User Profile Avatar" class="w-32 h-32 rounded-full border-4 border-surface-container object-cover" data-alt="Close up portrait of a professional man in a bright studio environment with clean blue and white lighting. The image shows high detail in skin texture and hair, conveying a sense of reliability and modern professionalism. The background is a minimalist, slightly out-of-focus tech office setting. The composition is centered and balanced, reflecting a corporate modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiJLIzyVBqhB8Q59H0qEGTXP6UPkgy3LoCjEMmohZHoBAos-zbTKdbP6g5xuv0YH87N_S1HzMrndDCW8g7EOGW4d6GRTrsJZlEKsaOCCOkcvSWWz6-2W-2iXFeTsZlfIvjhIDYYvwDSIRmUY6ECEY_EOGPjGKrGi72W6gK448SrIOqbCTIW6v81spY9zLvjTaFNZHnzeFm2J7LXhWXkpjdvWmlAYzjL4S1FmwJBSIxSNCmW00wQW7ukBh61yQD6l6D1zpcUQLRFs0"/>
+<div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined text-white" data-icon="photo_camera">photo_camera</span>
+</div>
+</div>
+<p class="text-label-sm text-on-surface-variant text-center">JPG or PNG, max 2MB</p>
+</div>
+<div class="flex-1 grid grid-cols-2 gap-lg">
+<div class="flex flex-col gap-xs">
+<label class="text-label-md text-on-surface">Full Name</label>
+<input class="border border-outline-variant rounded-lg p-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-body-md" type="text" value="Alex Johnson"/>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="text-label-md text-on-surface">Email Address</label>
+<input class="border border-outline-variant rounded-lg p-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-body-md" type="email" value="alex.j@bookpro.com"/>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="text-label-md text-on-surface">Phone Number</label>
+<input class="border border-outline-variant rounded-lg p-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-body-md" type="tel" value="+1 (555) 000-0000"/>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="text-label-md text-on-surface">Timezone</label>
+<select class="border border-outline-variant rounded-lg p-md focus:border-primary focus:ring-1 focus:ring-primary outline-none text-body-md appearance-none bg-no-repeat bg-[right_16px_center]">
+<option>Eastern Time (ET)</option>
+<option>Pacific Time (PT)</option>
+<option>Central Time (CT)</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<!-- Security & Integrations Section -->
+<div class="grid grid-cols-2 gap-gutter">
+<!-- Security Toggle -->
+<div class="bg-white rounded-xl soft-saas-shadow p-lg">
+<div class="flex items-center gap-md mb-lg">
+<div class="p-sm bg-secondary-container rounded-lg">
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="lock_open">lock_open</span>
+</div>
+<h4 class="font-label-md text-label-md">Two-Factor Auth</h4>
+</div>
+<p class="text-body-sm text-on-surface-variant mb-xl">Add an extra layer of security to your account.</p>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-on-surface">Enabled</span>
+<div class="w-12 h-6 bg-primary rounded-full relative p-xs cursor-pointer">
+<div class="w-4 h-4 bg-white rounded-full ml-auto"></div>
+</div>
+</div>
+</div>
+<!-- Integration Card -->
+<div class="bg-white rounded-xl soft-saas-shadow p-lg">
+<div class="flex items-center gap-md mb-lg">
+<div class="p-sm bg-tertiary-fixed rounded-lg">
+<span class="material-symbols-outlined text-tertiary" data-icon="event_repeat">event_repeat</span>
+</div>
+<h4 class="font-label-md text-label-md">Google Calendar</h4>
+</div>
+<p class="text-body-sm text-on-surface-variant mb-xl">Sync all your BookPro appointments automatically.</p>
+<button class="w-full border border-outline-variant py-sm rounded-lg text-label-md hover:bg-surface-container-low transition-colors">Sync Account</button>
+</div>
+</div>
+<!-- Notifications Card -->
+<div class="bg-white rounded-xl soft-saas-shadow p-lg">
+<h3 class="font-headline-sm text-headline-sm text-on-surface border-b border-outline-variant pb-md mb-lg">Notification Preferences</h3>
+<div class="space-y-lg">
+<div class="flex justify-between items-center">
+<div>
+<p class="font-label-md text-on-surface">Booking Updates</p>
+<p class="text-body-sm text-on-surface-variant">Receive alerts when a booking is confirmed or changed.</p>
+</div>
+<div class="flex gap-xl">
+<div class="flex items-center gap-sm">
+<input checked="" class="w-5 h-5 rounded text-primary focus:ring-primary border-outline-variant" type="checkbox"/>
+<span class="text-label-sm">Email</span>
+</div>
+<div class="flex items-center gap-sm">
+<input class="w-5 h-5 rounded text-primary focus:ring-primary border-outline-variant" type="checkbox"/>
+<span class="text-label-sm">SMS</span>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<div>
+<p class="font-label-md text-on-surface">Newsletter &amp; Tips</p>
+<p class="text-body-sm text-on-surface-variant">Occasional updates on new features and industry news.</p>
+</div>
+<div class="flex gap-xl">
+<div class="flex items-center gap-sm">
+<input class="w-5 h-5 rounded text-primary focus:ring-primary border-outline-variant" type="checkbox"/>
+<span class="text-label-sm">Email</span>
+</div>
+<div class="flex items-center gap-sm opacity-50 cursor-not-allowed">
+<input class="w-5 h-5 rounded text-primary border-outline-variant" disabled="" type="checkbox"/>
+<span class="text-label-sm">SMS</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-auto bg-surface-container-low border-t border-outline-variant flex justify-between items-center px-margin-desktop py-lg">
+<p class="font-label-sm text-label-sm text-on-surface-variant">© 2024 BookPro Real Estate Services. All rights reserved.</p>
+<div class="flex gap-xl">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Contact Support</a>
+</div>
+</footer>
+</div>
+</body></html>

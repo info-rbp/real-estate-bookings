@@ -1,0 +1,278 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>BookPro | Seamless Bookings for Your Business</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container": "#e5eeff",
+                        "surface-bright": "#f8f9ff",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "outline": "#737686",
+                        "on-primary-container": "#eeefff",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "surface-dim": "#cbdbf5",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-error": "#ffffff",
+                        "primary-container": "#2563eb",
+                        "error-container": "#ffdad6",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary-container": "#ffede6",
+                        "surface-container-high": "#dce9ff",
+                        "tertiary-container": "#bc4800",
+                        "inverse-surface": "#213145",
+                        "on-surface-variant": "#434655",
+                        "tertiary": "#943700",
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#dae2fd",
+                        "background": "#f8f9ff",
+                        "surface-variant": "#d3e4fe",
+                        "secondary": "#565e74",
+                        "on-surface": "#0b1c30",
+                        "inverse-primary": "#b4c5ff",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f8f9ff",
+                        "surface-container-low": "#eff4ff",
+                        "tertiary-fixed": "#ffdbcd",
+                        "on-secondary": "#ffffff",
+                        "primary": "#004ac6",
+                        "surface-tint": "#0053db",
+                        "on-primary-fixed": "#00174b",
+                        "on-secondary-container": "#5c647a",
+                        "outline-variant": "#c3c6d7",
+                        "on-tertiary-fixed": "#360f00",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "secondary-fixed": "#dae2fd",
+                        "on-background": "#0b1c30",
+                        "on-secondary-fixed": "#131b2e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "margin-desktop": "40px",
+                        "md": "16px",
+                        "2xl": "48px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "sm": "8px",
+                        "base": "8px",
+                        "xs": "4px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "label-md": ["14px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .soft-saas-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 74, 198, 0.04), 0 8px 10px -6px rgba(0, 74, 198, 0.04);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none fixed top-0 left-0 right-0 z-50">
+<nav class="flex justify-between items-center px-margin-desktop h-20 w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-xl">
+<a href="{{DATA:SCREEN:SCREEN_10}}" class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed hover:opacity-80 transition-opacity">BookPro</a>
+<div class="hidden md:flex gap-lg">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors" href="{{DATA:SCREEN:SCREEN_12}}">Services</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Pricing</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">About</a>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<a href="{{DATA:SCREEN:SCREEN_3}}" class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant transition-all duration-200 active:scale-95 flex items-center justify-center">Login</a>
+<a href="{{DATA:SCREEN:SCREEN_3}}" class="bg-primary text-on-primary font-label-md text-label-md px-lg py-sm rounded-lg transition-all duration-200 active:scale-95 flex items-center justify-center">Get Started</a>
+</div>
+</nav>
+</header>
+<main class="pt-20">
+<!-- Hero Section -->
+<section class="relative overflow-hidden bg-surface-bright py-2xl lg:py-[120px]">
+<div class="max-w-7xl mx-auto px-margin-desktop grid grid-cols-1 lg:grid-cols-2 gap-2xl items-center">
+<div class="flex flex-col gap-md text-left">
+<span class="bg-primary-container text-on-primary-container px-md py-xs rounded-full w-fit font-label-md text-label-md">Release v2.0 is out</span>
+<h1 class="font-display-lg text-display-lg text-on-surface">Seamless Bookings for Your Business.</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
+                        Manage schedules, track status, and sync with Google Calendar effortlessly. The all-in-one platform designed to scale your service-based business.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-md mt-sm">
+<a href="{{DATA:SCREEN:SCREEN_3}}" class="bg-primary text-on-primary font-label-md text-label-md px-2xl py-md rounded-xl soft-saas-shadow transition-all duration-200 active:scale-95 text-center flex items-center justify-center">Get Started</a>
+<button class="border border-outline text-primary font-label-md text-label-md px-2xl py-md rounded-xl transition-all duration-200 active:scale-95 text-center">Book a Demo</button>
+</div>
+</div>
+<div class="relative lg:block">
+<div class="bg-surface-container rounded-2xl overflow-hidden soft-saas-shadow aspect-video flex items-center justify-center border border-outline-variant">
+<img alt="SaaS Dashboard Preview" class="w-full h-full object-cover" data-alt="A clean and professional dashboard interface showing a booking calendar with blue accents. The UI is displayed on a high-resolution sleek laptop screen placed in a bright, modern office setting with natural light and minimalist decor. The color scheme is consistent with a primary blue and soft neutral slate tones, conveying a sense of reliability and architectural clarity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRYZc3LHrGst9g15fMqFicfk_ok-7gCH1HvKEh_HvPpKxOx98vuIV9eDF3lJGXug5D8IMdjjHGea6XButlg4MmVE6yNUudlc_H8TbQmNdE_C0TiqWynlxyxP0WTAsWUkLXcuN3h5gBTS3Q4ZcGtYc6BmloR8vosqh6fVHMxT1xAZUbPSZ6n8Ko80ORlspoMz_aMY-tapWz5IyXGAEB0gDxU0FZQyjT8yKAsUKNf0t9ZVn2T3a_pGGTg7DTmwiBfDXNUhzqQSBOfNA">
+</div>
+</div>
+</div>
+</section>
+<!-- How it Works Section -->
+<section class="py-2xl bg-surface">
+<div class="max-w-7xl mx-auto px-margin-desktop">
+<div class="text-center mb-2xl">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-md">How it Works</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mx-auto">Getting your booking system up and running is as simple as three steps. Focus on your work while we handle the logistics.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-xl">
+<!-- Step 1 -->
+<div class="flex flex-col items-center text-center p-lg bg-surface-container-low rounded-xl border border-transparent hover:border-outline-variant transition-all">
+<div class="bg-primary text-on-primary w-16 h-16 rounded-full flex items-center justify-center mb-lg">
+<span class="material-symbols-outlined text-[32px]" data-icon="category">category</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-sm">Choose Service</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Select the specific service or resource you want to offer for client scheduling.</p>
+</div>
+<!-- Step 2 -->
+<div class="flex flex-col items-center text-center p-lg bg-surface-container-low rounded-xl border border-transparent hover:border-outline-variant transition-all">
+<div class="bg-primary text-on-primary w-16 h-16 rounded-full flex items-center justify-center mb-lg">
+<span class="material-symbols-outlined text-[32px]" data-icon="schedule">schedule</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-sm">Pick Time</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Clients select their preferred slot from your real-time availability calendar.</p>
+</div>
+<!-- Step 3 -->
+<div class="flex flex-col items-center text-center p-lg bg-surface-container-low rounded-xl border border-transparent hover:border-outline-variant transition-all">
+<div class="bg-primary text-on-primary w-16 h-16 rounded-full flex items-center justify-center mb-lg">
+<span class="material-symbols-outlined text-[32px]" data-icon="check_circle">check_circle</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-sm">Get Confirmation</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Instant notifications are sent to both parties, and the event is synced automatically.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Core Features Grid (Bento Style) -->
+<section class="py-2xl bg-surface-bright">
+<div class="max-w-7xl mx-auto px-margin-desktop">
+<div class="flex flex-col md:flex-row justify-between items-end gap-md mb-2xl">
+<div class="max-w-xl">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-md">Core Features</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Powerful tools designed for growing businesses. Automation and data-driven insights at your fingertips.</p>
+</div>
+<button class="font-label-md text-label-md text-primary flex items-center gap-xs">View all features <span class="material-symbols-outlined">arrow_forward</span></button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Feature 1: Google Calendar Sync -->
+<div class="md:col-span-8 bg-surface-container-lowest p-xl rounded-2xl border border-outline-variant soft-saas-shadow flex flex-col md:flex-row items-center gap-xl">
+<div class="flex-1 space-y-md">
+<div class="bg-secondary-container text-on-secondary-container w-12 h-12 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="sync">sync</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Google Calendar Sync</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Bidirectional synchronization ensures your personal and professional calendars never conflict. Update one, and the other follows instantly.</p>
+</div>
+<div class="w-full md:w-1/2 bg-surface-container h-48 rounded-xl overflow-hidden">
+<img alt="Calendar Sync Visual" class="w-full h-full object-cover" data-alt="A macro shot of a sleek digital calendar interface on a mobile device, showing beautifully organized event chips in blue and white. The background is a clean white marble desk with a modern ceramic mug. The lighting is bright and airy, emphasizing a minimal and efficient productivity-focused lifestyle." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsUDJb5hOhtbnODqldCEyT8o1GlEvBwFaq4xAusBjaW8yNX5q98mjrlJURteRHxwvBIa9RK0BTDez5gu_vrb5zIOVcOH9CoOy6bz_kKrmW3UfPbSDbFBaP_LC4Xv7E2sjD2IYMvDh-zIdwAQ0LhT-SW_Lyrwxd3vTm5k-fA60O7KDvaavOUgCdxKJMTiAKeIgvKOILZSdybB5S73TBQ1kUyW0RBlrglcdJJZ_XrXRo2dCErtyYzOTZCsTz3f_RcpxRgdueBtBdidk">
+</div>
+</div>
+<!-- Feature 2: Real-time Status -->
+<div class="md:col-span-4 bg-primary text-on-primary p-xl rounded-2xl border border-primary soft-saas-shadow flex flex-col justify-between">
+<div class="space-y-md">
+<div class="bg-white/20 w-12 h-12 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm">Real-time Status</h3>
+<p class="font-body-sm text-body-sm opacity-90">Track every booking status from pending to completed. Get push notifications for every new appointment as it happens.</p>
+</div>
+<div class="mt-lg flex -space-x-2">
+<div class="w-8 h-8 rounded-full border-2 border-primary bg-surface-variant"></div>
+<div class="w-8 h-8 rounded-full border-2 border-primary bg-secondary"></div>
+<div class="w-8 h-8 rounded-full border-2 border-primary bg-tertiary"></div>
+</div>
+</div>
+<!-- Feature 3: Admin Dashboard -->
+<div class="md:col-span-12 bg-surface-container-lowest p-xl rounded-2xl border border-outline-variant soft-saas-shadow flex flex-col lg:flex-row-reverse items-center gap-xl">
+<div class="flex-1 space-y-md">
+<div class="bg-tertiary-container text-on-tertiary-container w-12 h-12 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Admin Dashboard</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">A comprehensive overview of your business performance. Track revenue, client retention, and peak booking times with intuitive data visualizations.</p>
+<button class="text-primary font-label-md text-label-md px-xl py-sm border border-primary rounded-lg mt-md">Explore Analytics</button>
+</div>
+<div class="w-full lg:w-3/5 bg-surface-container rounded-xl overflow-hidden h-64">
+<img alt="Analytics Dashboard" class="w-full h-full object-cover" data-alt="An expansive data visualization dashboard showing multiple charts, growth graphs, and scheduling metrics. The design is sleek and modern with high contrast and blue accents, presented in a minimalist high-key aesthetic that conveys professionalism and trust. The overall vibe is one of corporate efficiency and technical sophistication." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbuSXWgODUK3fQCZ2MRFJa2jU-dtjyG7Qi01ZyMt7Gvzh0VTHo-pEFht75NYyZd58aHuvseHEXxoK3Jz3aXuD6h6zpI9ScmUYvaupyH_YqAKvRRG_iKF_p2FDw87WH_lUD0pRloiX2h8UDLOiFCO12MiBcFYe2L_MSOITa-g4kci_ggt91TrSBR7aaJGD407U6R0astBg5qhDK4mww2mpRF-ipHAND99nKd7D2OyZTFA_OyF7ekmwpLoUezVfyTuYIlTuQgkqvw3U">
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="py-2xl bg-on-surface">
+<div class="max-w-7xl mx-auto px-margin-desktop text-center">
+<h2 class="font-headline-lg text-headline-lg text-surface-bright mb-md">Ready to streamline your workflow?</h2>
+<p class="font-body-lg text-body-lg text-outline-variant mb-xl max-w-xl mx-auto">Join over 5,000 businesses already using BookPro to manage their daily schedules.</p>
+<div class="flex flex-wrap justify-center gap-md">
+<a href="{{DATA:SCREEN:SCREEN_3}}" class="bg-primary text-on-primary font-label-md text-label-md px-2xl py-md rounded-xl transition-all duration-200 active:scale-95 flex items-center justify-center">Get Started Free</a>
+<button class="border border-outline-variant text-surface-bright font-label-md text-label-md px-2xl py-md rounded-xl transition-all duration-200 active:scale-95">Talk to Sales</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-on-surface dark:bg-surface-container-lowest border-t border-outline-variant w-full py-xl">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-desktop gap-gutter w-full max-w-7xl mx-auto">
+<div class="flex flex-col gap-sm">
+<span class="font-headline-sm text-headline-sm text-surface-bright dark:text-primary">BookPro</span>
+<p class="font-body-sm text-body-sm text-outline-variant dark:text-on-surface-variant">© 2024 BookPro Inc. All rights reserved.</p>
+</div>
+<div class="flex gap-xl">
+<a class="font-body-sm text-body-sm text-outline-variant dark:text-on-surface-variant hover:text-primary-fixed-dim dark:hover:text-primary transition-opacity" href="#">Privacy Policy</a>
+<a class="font-body-sm text-body-sm text-outline-variant dark:text-on-surface-variant hover:text-primary-fixed-dim dark:hover:text-primary transition-opacity" href="#">Terms of Service</a>
+<a class="font-body-sm text-body-sm text-outline-variant dark:text-on-surface-variant hover:text-primary-fixed-dim dark:hover:text-primary transition-opacity" href="#">Contact Support</a>
+</div>
+</div>
+</footer>
+
+
+</body></html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BookPro Client Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container": "#e5eeff",
+                        "surface-bright": "#f8f9ff",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "outline": "#737686",
+                        "on-primary-container": "#eeefff",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "surface-dim": "#cbdbf5",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-error": "#ffffff",
+                        "primary-container": "#2563eb",
+                        "error-container": "#ffdad6",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary-container": "#ffede6",
+                        "surface-container-high": "#dce9ff",
+                        "tertiary-container": "#bc4800",
+                        "inverse-surface": "#213145",
+                        "on-surface-variant": "#434655",
+                        "tertiary": "#943700",
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#dae2fd",
+                        "background": "#f8f9ff",
+                        "surface-variant": "#d3e4fe",
+                        "secondary": "#565e74",
+                        "on-surface": "#0b1c30",
+                        "inverse-primary": "#b4c5ff",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f8f9ff",
+                        "surface-container-low": "#eff4ff",
+                        "tertiary-fixed": "#ffdbcd",
+                        "on-secondary": "#ffffff",
+                        "primary": "#004ac6",
+                        "surface-tint": "#0053db",
+                        "on-primary-fixed": "#00174b",
+                        "on-secondary-container": "#5c647a",
+                        "outline-variant": "#c3c6d7",
+                        "on-tertiary-fixed": "#360f00",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "secondary-fixed": "#dae2fd",
+                        "on-background": "#0b1c30",
+                        "on-secondary-fixed": "#131b2e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "margin-desktop": "40px",
+                        "md": "16px",
+                        "2xl": "48px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "sm": "8px",
+                        "base": "8px",
+                        "xs": "4px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "label-md": ["14px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #F8FAFC;
+            font-family: 'Inter', sans-serif;
+        }
+        .soft-saas-shadow {
+            box-shadow: 0 12px 16px -4px rgba(11, 28, 48, 0.05);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background">
+<!-- Sidebar Navigation -->
+<nav class="h-screen w-64 fixed left-0 top-0 bg-surface-container border-r border-outline-variant flex flex-col py-xl">
+<div class="px-md mb-xl">
+<h1 class="font-headline-sm text-headline-sm font-black text-primary">BookPro</h1>
+</div>
+<div class="flex items-center gap-md px-md mb-xl">
+<img alt="Client Profile Picture" class="w-12 h-12 rounded-full object-cover" data-alt="A professional, high-resolution headshot of a smiling person in their early 30s with a warm and friendly expression. They are wearing professional corporate attire in a brightly lit, modern architectural office space with soft bokeh. The lighting is clean and high-key, matching a premium minimalist digital interface aesthetic. The overall mood is trustworthy and efficient." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxLcjcE9HbS313DQ8DkzqFK4qPt6vnERCT7aqf6vleh5vE9wF7QHcAQyjxuRY1kTs_QyEW7Ict8V_d5isokBqc9mKn1QXtThB9xPYcWMH7YV5C-OcluraLeuIMCINFgKbX5SNIQGlKT_BLzZR-r_3ScIkZYp2Hmt5JGLf0NEJBg9QcslEQyHcJWYLcDUClVKs9aeBL79iqLHDPAQrunYyrRsfGNrOOZRQtAhljZNe0dMqgFOjTgM75lsEUzsT5dd1BpRfKteBAj8Q"/>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Alex Rivers</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Premium Client</p>
+</div>
+</div>
+<div class="flex-grow space-y-sm px-xs">
+<!-- Dashboard (Active) -->
+<a class="bg-primary-container text-on-primary-container rounded-lg mx-2 my-1 flex items-center gap-md px-md py-base transition-transform duration-150 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<!-- Bookings -->
+<a class="text-on-surface-variant hover:bg-surface-container-high mx-2 my-1 rounded-lg flex items-center gap-md px-md py-base transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="font-label-md text-label-md">Bookings</span>
+</a>
+<!-- Settings -->
+<a class="text-on-surface-variant hover:bg-surface-container-high mx-2 my-1 rounded-lg flex items-center gap-md px-md py-base transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+<div class="px-md mt-auto">
+<button class="w-full bg-primary text-on-primary font-label-md text-label-md py-md rounded-lg flex items-center justify-center gap-sm transition-all duration-200 hover:opacity-90 active:scale-95">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+                New Booking
+            </button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="ml-64 p-margin-desktop min-h-screen">
+<!-- Header Section -->
+<header class="flex justify-between items-center mb-2xl">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Welcome back, Alex!</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Here is what is happening with your projects today.</p>
+</div>
+<div class="flex gap-md">
+<button class="bg-surface-container-highest text-on-surface-variant p-sm rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="bg-primary text-on-primary font-label-md text-label-md px-lg py-md rounded-lg flex items-center gap-sm soft-saas-shadow hover:opacity-90 active:scale-95">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+                    New Booking
+                </button>
+</div>
+</header>
+<!-- Status Grid (Summary Bar) -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-2xl">
+<!-- Upcoming -->
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant soft-saas-shadow">
+<div class="flex justify-between items-start mb-md">
+<div class="p-sm bg-primary-fixed rounded-lg text-primary">
+<span class="material-symbols-outlined" data-icon="event_available">event_available</span>
+</div>
+<span class="text-primary font-label-md text-label-md">+12%</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xs">Upcoming Bookings</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">14</h3>
+</div>
+<!-- Pending -->
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant soft-saas-shadow">
+<div class="flex justify-between items-start mb-md">
+<div class="p-sm bg-tertiary-fixed rounded-lg text-tertiary">
+<span class="material-symbols-outlined" data-icon="pending_actions">pending_actions</span>
+</div>
+<span class="text-tertiary font-label-md text-label-md">Active</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xs">Pending Requests</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">06</h3>
+</div>
+<!-- Completed -->
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant soft-saas-shadow">
+<div class="flex justify-between items-start mb-md">
+<div class="p-sm bg-surface-container-highest rounded-lg text-on-secondary-container">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+</div>
+<span class="text-on-surface-variant font-label-md text-label-md">Total</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xs">Completed</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">128</h3>
+</div>
+<!-- Cancelled -->
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant soft-saas-shadow">
+<div class="flex justify-between items-start mb-md">
+<div class="p-sm bg-error-container rounded-lg text-error">
+<span class="material-symbols-outlined" data-icon="cancel">cancel</span>
+</div>
+<span class="text-error font-label-md text-label-md">-2%</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xs">Cancelled</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">03</h3>
+</div>
+</section>
+<!-- Main Grid Layout -->
+<!-- Book a Service Section -->
+<section class="mb-2xl">
+<div class="flex justify-between items-center mb-md">
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Book a Service</h4>
+<button class="text-primary font-label-md text-label-md hover:underline">Browse All</button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-sm">
+<!-- Property Condition Report -->
+<div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant soft-saas-shadow flex flex-col gap-sm hover:border-primary transition-colors">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed-dim/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface line-clamp-1 truncate">Condition Report</p>
+<p class="text-primary font-bold text-label-sm">$180</p>
+</div>
+<button class="w-full bg-primary text-on-primary py-xs rounded-lg font-label-sm text-label-sm transition-all active:scale-95">Book Now</button>
+</div>
+<!-- Routine Inspection -->
+<div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant soft-saas-shadow flex flex-col gap-sm hover:border-primary transition-colors">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed-dim/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="content_paste_search">content_paste_search</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface line-clamp-1 truncate">Routine Inspection</p>
+<p class="text-primary font-bold text-label-sm">$120</p>
+</div>
+<button class="w-full bg-primary text-on-primary py-xs rounded-lg font-label-sm text-label-sm transition-all active:scale-95">Book Now</button>
+</div>
+<!-- Exit Inspection -->
+<div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant soft-saas-shadow flex flex-col gap-sm hover:border-primary transition-colors">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed-dim/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="door_open">door_open</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface line-clamp-1 truncate">Exit Inspection</p>
+<p class="text-primary font-bold text-label-sm">$150</p>
+</div>
+<button class="w-full bg-primary text-on-primary py-xs rounded-lg font-label-sm text-label-sm transition-all active:scale-95">Book Now</button>
+</div>
+<!-- Open for Inspection -->
+<div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant soft-saas-shadow flex flex-col gap-sm hover:border-primary transition-colors">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed-dim/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface line-clamp-1 truncate">Open Viewing</p>
+<p class="text-primary font-bold text-label-sm">$200</p>
+</div>
+<button class="w-full bg-primary text-on-primary py-xs rounded-lg font-label-sm text-label-sm transition-all active:scale-95">Book Now</button>
+</div>
+<!-- Maintenance Coordination -->
+<div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant soft-saas-shadow flex flex-col gap-sm hover:border-primary transition-colors">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed-dim/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="build">build</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface line-clamp-1 truncate">Maintenance</p>
+<p class="text-primary font-bold text-label-sm">$95</p>
+</div>
+<button class="w-full bg-primary text-on-primary py-xs rounded-lg font-label-sm text-label-sm transition-all active:scale-95">Book Now</button>
+</div>
+<!-- Insurance Claims Management -->
+<div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant soft-saas-shadow flex flex-col gap-sm hover:border-primary transition-colors">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed-dim/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface line-clamp-1 truncate">Insurance Claims</p>
+<p class="text-primary font-bold text-label-sm">$250</p>
+</div>
+<button class="w-full bg-primary text-on-primary py-xs rounded-lg font-label-sm text-label-sm transition-all active:scale-95">Book Now</button>
+</div>
+</div>
+</section><div class="grid grid-cols-12 gap-gutter">
+<!-- Recent Activity / Upcoming List (8 Columns) -->
+<section class="col-span-12 lg:col-span-8">
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant soft-saas-shadow overflow-hidden">
+<div class="px-lg py-md border-b border-outline-variant flex justify-between items-center">
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Upcoming Bookings</h4>
+<button class="text-primary font-label-md text-label-md hover:underline">View All</button>
+</div>
+<div class="divide-y divide-outline-variant">
+<!-- Item 1 -->
+<div class="p-lg flex items-center justify-between hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-lg">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="architecture">architecture</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Architectural Review</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Tomorrow at 10:00 AM</p>
+</div>
+</div>
+<div class="flex items-center gap-xl">
+<span class="bg-primary-fixed text-on-primary-fixed-variant px-md py-xs rounded-full font-label-sm text-label-sm flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                                    Confirmed
+                                </span>
+<button class="text-outline hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="p-lg flex items-center justify-between hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-lg">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="brush">brush</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Interior Design Consultation</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Oct 24, 2:30 PM</p>
+</div>
+</div>
+<div class="flex items-center gap-xl">
+<span class="bg-tertiary-fixed text-on-tertiary-fixed-variant px-md py-xs rounded-full font-label-sm text-label-sm flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+                                    Pending
+                                </span>
+<button class="text-outline hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="p-lg flex items-center justify-between hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-lg">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="construction">construction</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Site Inspection - Zone B</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Oct 26, 09:00 AM</p>
+</div>
+</div>
+<div class="flex items-center gap-xl">
+<span class="bg-primary-fixed text-on-primary-fixed-variant px-md py-xs rounded-full font-label-sm text-label-sm flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                                    Confirmed
+                                </span>
+<button class="text-outline hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Secondary Info (4 Columns) -->
+<aside class="col-span-12 lg:col-span-4 space-y-gutter">
+<!-- Mini Calendar Card -->
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant soft-saas-shadow">
+<div class="flex justify-between items-center mb-lg">
+<h4 class="font-label-md text-label-md text-on-surface">Schedule Preview</h4>
+<p class="font-label-sm text-label-sm text-primary">October 2024</p>
+</div>
+<div class="grid grid-cols-7 gap-xs text-center mb-md">
+<span class="font-label-sm text-label-sm text-outline">M</span>
+<span class="font-label-sm text-label-sm text-outline">T</span>
+<span class="font-label-sm text-label-sm text-outline">W</span>
+<span class="font-label-sm text-label-sm text-outline">T</span>
+<span class="font-label-sm text-label-sm text-outline">F</span>
+<span class="font-label-sm text-label-sm text-outline">S</span>
+<span class="font-label-sm text-label-sm text-outline">S</span>
+</div>
+<div class="grid grid-cols-7 gap-xs text-center">
+<span class="py-sm font-body-sm text-body-sm text-on-surface-variant">20</span>
+<span class="py-sm font-body-sm text-body-sm text-on-surface-variant">21</span>
+<span class="py-sm font-body-sm text-body-sm bg-primary text-on-primary rounded-lg font-bold">22</span>
+<span class="py-sm font-body-sm text-body-sm text-on-surface-variant">23</span>
+<span class="py-sm font-body-sm text-body-sm text-on-surface-variant">24</span>
+<span class="py-sm font-body-sm text-body-sm text-on-surface-variant">25</span>
+<span class="py-sm font-body-sm text-body-sm text-on-surface-variant">26</span>
+</div>
+</div>
+<!-- Promotion / Tip Card -->
+<div class="bg-primary-container p-lg rounded-xl text-on-primary-container border border-primary soft-saas-shadow">
+<span class="material-symbols-outlined mb-md text-on-primary-container" data-icon="auto_awesome">auto_awesome</span>
+<h5 class="font-headline-sm text-headline-sm mb-xs">Pro Tip: Recurring Bookings</h5>
+<p class="font-body-sm text-body-sm mb-lg opacity-90">Schedule weekly check-ins to save up to 15% on your monthly resource allocation.</p>
+<button class="bg-on-primary-container text-primary-container font-label-md text-label-md px-md py-base rounded-lg w-full transition-all duration-200 hover:opacity-90">Learn More</button>
+</div>
+</aside>
+</div>
+</main>
+<!-- Footer -->
+<footer class="ml-64 bg-on-surface py-xl border-t border-outline-variant">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-desktop gap-gutter w-full">
+<div class="flex flex-col items-center md:items-start gap-xs">
+<span class="font-headline-sm text-headline-sm text-surface-bright">BookPro</span>
+<p class="font-body-sm text-body-sm text-outline-variant">© 2024 BookPro Inc. All rights reserved.</p>
+</div>
+<div class="flex gap-xl">
+<a class="font-body-sm text-body-sm text-outline-variant hover:text-primary-fixed-dim transition-opacity" href="#">Privacy Policy</a>
+<a class="font-body-sm text-body-sm text-outline-variant hover:text-primary-fixed-dim transition-opacity" href="#">Terms of Service</a>
+<a class="font-body-sm text-body-sm text-outline-variant hover:text-primary-fixed-dim transition-opacity" href="#">Contact Support</a>
+</div>
+</div>
+</footer>
+</body></html>

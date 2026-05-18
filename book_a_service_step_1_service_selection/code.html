@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "surface-tint": "#0053db",
+                  "on-error-container": "#93000a",
+                  "secondary-container": "#dae2fd",
+                  "primary-fixed": "#dbe1ff",
+                  "outline": "#737686",
+                  "on-secondary": "#ffffff",
+                  "on-primary": "#ffffff",
+                  "inverse-primary": "#b4c5ff",
+                  "on-secondary-fixed": "#131b2e",
+                  "surface-variant": "#d3e4fe",
+                  "surface-container-low": "#eff4ff",
+                  "on-secondary-fixed-variant": "#3f465c",
+                  "surface-container-highest": "#d3e4fe",
+                  "tertiary": "#943700",
+                  "on-tertiary-fixed": "#360f00",
+                  "primary-fixed-dim": "#b4c5ff",
+                  "outline-variant": "#c3c6d7",
+                  "on-surface-variant": "#434655",
+                  "on-error": "#ffffff",
+                  "inverse-surface": "#213145",
+                  "surface-container": "#e5eeff",
+                  "on-surface": "#0b1c30",
+                  "on-primary-fixed-variant": "#003ea8",
+                  "secondary-fixed-dim": "#bec6e0",
+                  "on-primary-container": "#eeefff",
+                  "primary": "#004ac6",
+                  "surface-container-high": "#dce9ff",
+                  "on-secondary-container": "#5c647a",
+                  "surface": "#f8f9ff",
+                  "on-tertiary": "#ffffff",
+                  "secondary": "#565e74",
+                  "on-tertiary-fixed-variant": "#7d2d00",
+                  "inverse-on-surface": "#eaf1ff",
+                  "tertiary-fixed-dim": "#ffb596",
+                  "surface-bright": "#f8f9ff",
+                  "surface-container-lowest": "#ffffff",
+                  "on-tertiary-container": "#ffede6",
+                  "tertiary-fixed": "#ffdbcd",
+                  "on-primary-fixed": "#00174b",
+                  "error": "#ba1a1a",
+                  "error-container": "#ffdad6",
+                  "secondary-fixed": "#dae2fd",
+                  "background": "#f8f9ff",
+                  "surface-dim": "#cbdbf5",
+                  "primary-container": "#2563eb",
+                  "tertiary-container": "#bc4800",
+                  "on-background": "#0b1c30"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "2xl": "48px",
+                  "md": "16px",
+                  "margin-mobile": "16px",
+                  "margin-desktop": "40px",
+                  "lg": "24px",
+                  "base": "8px",
+                  "gutter": "24px",
+                  "sm": "8px",
+                  "xl": "32px",
+                  "xs": "4px"
+          },
+          "fontFamily": {
+                  "headline-lg-mobile": ["Inter"],
+                  "label-md": ["Inter"],
+                  "body-lg": ["Inter"],
+                  "headline-sm": ["Inter"],
+                  "label-sm": ["Inter"],
+                  "display-lg": ["Inter"],
+                  "body-sm": ["Inter"],
+                  "body-md": ["Inter"],
+                  "headline-lg": ["Inter"],
+                  "headline-md": ["Inter"]
+          },
+          "fontSize": {
+                  "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                  "label-md": ["14px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                  "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                  "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                  "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                  "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                  "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                  "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                  "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                  "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body { font-family: 'Inter', sans-serif; background-color: #f8f9ff; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .soft-saas-shadow {
+      box-shadow: 0 12px 16px -4px rgba(11, 28, 48, 0.04), 0 4px 6px -2px rgba(11, 28, 48, 0.02);
+    }
+    .service-card-selected {
+      border: 2px solid #004ac6;
+      background-color: #e5eeff;
+    }
+  </style>
+</head>
+<body class="text-on-background">
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest dark:bg-on-background docked full-width top-0 border-b border-outline-variant dark:border-outline shadow-sm flex justify-between items-center w-full px-margin-desktop h-16 sticky z-50">
+<div class="flex items-center gap-md">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-inverse-primary">BookPro</span>
+</div>
+<div class="hidden md:flex items-center gap-xl h-full">
+<nav class="flex items-center gap-lg h-full">
+<a class="text-on-surface-variant dark:surface-variant hover:bg-surface-container-low transition-colors px-md h-full flex items-center font-label-md text-label-md" href="#">Dashboard</a>
+<a class="text-primary dark:text-inverse-primary border-b-2 border-primary transition-colors px-md h-full flex items-center font-label-md text-label-md" href="#">Bookings</a>
+<a class="text-on-surface-variant dark:surface-variant hover:bg-surface-container-low transition-colors px-md h-full flex items-center font-label-md text-label-md" href="#">Services</a>
+<a class="text-on-surface-variant dark:surface-variant hover:bg-surface-container-low transition-colors px-md h-full flex items-center font-label-md text-label-md" href="#">Support</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-low p-xs rounded-full transition-colors">help</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-low p-xs rounded-full transition-colors">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-low p-xs rounded-full transition-colors">account_circle</button>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-xl">
+<!-- Progress Stepper -->
+<section class="mb-2xl">
+<div class="flex justify-between items-center mb-md max-w-2xl mx-auto">
+<div class="flex flex-col items-center gap-xs">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold">1</div>
+<span class="font-label-sm text-label-sm text-primary">Services</span>
+</div>
+<div class="flex-1 h-[2px] bg-outline-variant mx-sm mb-6"></div>
+<div class="flex flex-col items-center gap-xs">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold">2</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Details</span>
+</div>
+<div class="flex-1 h-[2px] bg-outline-variant mx-sm mb-6"></div>
+<div class="flex flex-col items-center gap-xs">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold">3</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Schedule</span>
+</div>
+<div class="flex-1 h-[2px] bg-outline-variant mx-sm mb-6"></div>
+<div class="flex flex-col items-center gap-xs">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold">4</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Confirm</span>
+</div>
+</div>
+<div class="text-center">
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-xs">Select a Service</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Step 1 of 4: Choose the inspection or management service required for your property.</p>
+</div>
+</section>
+<!-- Service Selection Grid (Bento Style Layout) -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Property Condition Report -->
+<div class="md:col-span-8 group cursor-pointer bg-surface-container-lowest border border-outline-variant rounded-xl p-lg soft-saas-shadow hover:border-primary transition-all active:scale-[0.98]">
+<div class="flex flex-col md:flex-row gap-lg">
+<div class="w-full md:w-1/3 aspect-video md:aspect-square overflow-hidden rounded-lg">
+<img alt="Property Condition Report" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A professional real estate inspector taking notes on a digital tablet inside a brightly lit, modern apartment with large windows. The scene captures a clean, corporate aesthetic with a focus on attention to detail and professional reliability. The lighting is soft and natural, emphasizing the pristine condition of the property interior." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1GH2POBPPcJUS4XPCx8kmsjOL9SwQlnIEzmP8cbuHhMEmzmj0FEEtrtciB_UIhk3NBYJT_mJl4iosygN6wWifenRw5zu8T3bSLUO4e1m50Y36kZ1Jo7ufxy6CNI21tWvNcaDmBJhePziVSsusgemJVlLYG6nvQRRE14CmpR6AvC0_veiJvkQesFTX1aA80K1I8B0p6ZmLTPzAjrjCvcITs86VqxT_RIIPjO14Bibkog48HtiNj0vRgBT4f0n6_sHks3MkSWpMVqM"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Property Condition Report</h3>
+<span class="bg-secondary-container text-on-secondary-container px-sm py-xs rounded-full font-label-md text-label-md">$249.00</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md leading-relaxed">A comprehensive document outlining the detailed state of the property at the commencement or end of a lease. Includes high-resolution photographic evidence and structural assessment.</p>
+</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-md text-label-md text-on-surface">Most Popular for New Leases</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Routine Inspection -->
+<div class="md:col-span-4 group cursor-pointer bg-surface-container-lowest border border-outline-variant rounded-xl p-lg soft-saas-shadow hover:border-primary transition-all active:scale-[0.98]">
+<div class="h-full flex flex-col">
+<div class="flex justify-between items-start mb-md">
+<div class="p-base bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-primary">event_repeat</span>
+</div>
+<span class="bg-surface-container text-on-surface-variant px-sm py-xs rounded-full font-label-sm text-label-sm">$120.00</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-sm">Routine Inspection</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xl">Periodic check-up to ensure lease compliance and identify immediate maintenance needs.</p>
+<div class="mt-auto flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary">Select Service</span>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+</div>
+<!-- Exit Inspection -->
+<div class="md:col-span-4 group cursor-pointer bg-surface-container-lowest border border-outline-variant rounded-xl p-lg soft-saas-shadow hover:border-primary transition-all active:scale-[0.98]">
+<div class="h-full flex flex-col">
+<div class="flex justify-between items-start mb-md">
+<div class="p-base bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-primary">exit_to_app</span>
+</div>
+<span class="bg-surface-container text-on-surface-variant px-sm py-xs rounded-full font-label-sm text-label-sm">$180.00</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-sm">Exit Inspection</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xl">Final assessment of property condition before bond release and tenant departure.</p>
+<div class="mt-auto flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary">Select Service</span>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+</div>
+<!-- Open for Inspection -->
+<div class="md:col-span-4 group cursor-pointer bg-surface-container-lowest border border-outline-variant rounded-xl p-lg soft-saas-shadow hover:border-primary transition-all active:scale-[0.98]">
+<div class="h-full flex flex-col">
+<div class="flex justify-between items-start mb-md">
+<div class="p-base bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-primary">door_open</span>
+</div>
+<span class="bg-surface-container text-on-surface-variant px-sm py-xs rounded-full font-label-sm text-label-sm">$95.00</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-sm">Open for Inspection</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xl">Professional hosting of prospective tenants or buyers during scheduled viewings.</p>
+<div class="mt-auto flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary">Select Service</span>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+</div>
+<!-- Maintenance Coordination -->
+<div class="md:col-span-4 group cursor-pointer bg-surface-container-lowest border border-outline-variant rounded-xl p-lg soft-saas-shadow hover:border-primary transition-all active:scale-[0.98]">
+<div class="h-full flex flex-col">
+<div class="flex justify-between items-start mb-md">
+<div class="p-base bg-surface-container-high rounded-lg">
+<span class="material-symbols-outlined text-primary">build</span>
+</div>
+<span class="bg-surface-container text-on-surface-variant px-sm py-xs rounded-full font-label-sm text-label-sm">$55.00/hr</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-sm">Maintenance Coordination</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xl">Liaising with tradespeople and tenants to resolve property issues efficiently.</p>
+<div class="mt-auto flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary">Select Service</span>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</div>
+</div>
+<!-- Insurance Claims Management -->
+<div class="md:col-span-12 group cursor-pointer bg-surface-container-lowest border border-outline-variant rounded-xl p-lg soft-saas-shadow hover:border-primary transition-all active:scale-[0.98]">
+<div class="flex flex-col md:flex-row items-center gap-lg">
+<div class="p-lg bg-surface-container-high rounded-full">
+<span class="material-symbols-outlined text-primary" style="font-size: 40px;">shield_with_house</span>
+</div>
+<div class="flex-1 text-center md:text-left">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-xs">Insurance Claims Management</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">End-to-end handling of property insurance claims, documentation, and vendor quotes.</p>
+</div>
+<div class="flex flex-col items-end gap-sm">
+<span class="bg-primary text-on-primary px-lg py-sm rounded-lg font-label-md text-label-md">Quote Based</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Contact for Details</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sticky Bottom Navigation -->
+<div class="mt-2xl flex flex-col md:flex-row items-center justify-between p-lg bg-surface-container-lowest border border-outline-variant rounded-xl soft-saas-shadow sticky bottom-8 z-40">
+<div class="flex items-center gap-md mb-md md:mb-0">
+<div class="hidden sm:block">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Currently Selected</p>
+<p class="font-headline-sm text-headline-sm text-on-surface">None</p>
+</div>
+</div>
+<div class="flex gap-md w-full md:w-auto">
+<button class="flex-1 md:flex-none px-xl py-md font-label-md text-label-md text-primary border border-primary rounded-lg hover:bg-surface-container-low transition-colors">Save Draft</button>
+<button class="flex-1 md:flex-none px-2xl py-md font-label-md text-label-md bg-primary text-on-primary rounded-lg hover:shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-sm">
+          Next Step
+          <span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-on-background full-width bottom-0 border-t border-outline-variant dark:border-outline flex flex-col md:flex-row justify-between items-center px-margin-desktop py-lg w-full mt-2xl">
+<div class="flex flex-col md:flex-row items-center gap-lg">
+<span class="font-label-md text-label-md font-bold text-primary">BookPro</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">© 2024 BookPro Real Estate Services. All rights reserved.</p>
+</div>
+<div class="flex gap-xl mt-md md:mt-0">
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Contact Support</a>
+</div>
+</footer>
+</body></html>

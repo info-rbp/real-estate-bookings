@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "primary-fixed": "#dbe1ff",
+                    "surface-container": "#e5eeff",
+                    "surface-bright": "#f8f9ff",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "on-tertiary-fixed-variant": "#7d2d00",
+                    "outline": "#737686",
+                    "on-primary-container": "#eeefff",
+                    "error": "#ba1a1a",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "surface-dim": "#cbdbf5",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#d3e4fe",
+                    "on-error": "#ffffff",
+                    "primary-container": "#2563eb",
+                    "error-container": "#ffdad6",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-tertiary-container": "#ffede6",
+                    "surface-container-high": "#dce9ff",
+                    "tertiary-container": "#bc4800",
+                    "inverse-surface": "#213145",
+                    "on-surface-variant": "#434655",
+                    "tertiary": "#943700",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#dae2fd",
+                    "background": "#f8f9ff",
+                    "surface-variant": "#d3e4fe",
+                    "secondary": "#565e74",
+                    "on-surface": "#0b1c30",
+                    "inverse-primary": "#b4c5ff",
+                    "tertiary-fixed-dim": "#ffb596",
+                    "on-tertiary": "#ffffff",
+                    "surface": "#f8f9ff",
+                    "surface-container-low": "#eff4ff",
+                    "tertiary-fixed": "#ffdbcd",
+                    "on-secondary": "#ffffff",
+                    "primary": "#004ac6",
+                    "surface-tint": "#0053db",
+                    "on-primary-fixed": "#00174b",
+                    "on-secondary-container": "#5c647a",
+                    "outline-variant": "#c3c6d7",
+                    "on-tertiary-fixed": "#360f00",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "secondary-fixed": "#dae2fd",
+                    "on-background": "#0b1c30",
+                    "on-secondary-fixed": "#131b2e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "32px",
+                    "margin-desktop": "40px",
+                    "md": "16px",
+                    "2xl": "48px",
+                    "margin-mobile": "16px",
+                    "gutter": "24px",
+                    "sm": "8px",
+                    "base": "8px",
+                    "xs": "4px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "headline-sm": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "label-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "label-md": ["14px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .soft-saas-shadow {
+            box-shadow: 0 12px 16px -4px rgba(11, 28, 48, 0.05), 0 4px 6px -2px rgba(11, 28, 48, 0.03);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-primary-fixed">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none dock-full-width top-0 sticky z-50">
+<div class="flex justify-between items-center px-margin-desktop h-20 w-full max-w-7xl mx-auto">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">
+                BookPro
+            </div>
+<nav class="hidden md:flex items-center gap-xl">
+<a class="font-body-md text-body-md text-primary dark:text-primary-fixed border-b-2 border-primary dark:border-primary-fixed pb-1 hover:text-primary dark:hover:text-primary-fixed transition-colors transition-all duration-200 active:scale-95" href="#">Services</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors transition-all duration-200 active:scale-95" href="#">Pricing</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors transition-all duration-200 active:scale-95" href="#">About</a>
+</nav>
+<div class="flex items-center gap-md">
+<button class="transition-all duration-200 active:scale-95 bg-primary text-on-primary px-lg py-sm rounded-lg font-label-md text-label-md">
+                    Login
+                </button>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-2xl">
+<!-- Hero & Search Section -->
+<section class="mb-2xl flex flex-col items-center text-center max-w-3xl mx-auto">
+<h1 class="font-headline-lg text-headline-lg md:text-display-lg font-bold mb-md text-on-surface">Explore Professional Services</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-xl">Find and book the expert support your project needs in just a few clicks.</p>
+<div class="w-full relative group">
+<div class="absolute inset-y-0 left-md flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</div>
+<input class="w-full pl-xl pr-md py-md bg-surface-container-lowest border border-outline-variant rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all soft-saas-shadow outline-none font-body-md" placeholder="Search for services (e.g. Site Visit)..." type="text"/>
+</div>
+</section>
+<!-- Category Filters -->
+<div class="flex flex-wrap items-center justify-center gap-sm mb-2xl">
+<button class="px-lg py-sm rounded-full bg-primary text-on-primary font-label-md text-label-md transition-all active:scale-95">All</button>
+<button class="px-lg py-sm rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container font-label-md text-label-md transition-all active:scale-95">Consultation</button>
+<button class="px-lg py-sm rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container font-label-md text-label-md transition-all active:scale-95">Technical</button>
+<button class="px-lg py-sm rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container font-label-md text-label-md transition-all active:scale-95">Management</button>
+<button class="px-lg py-sm rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container font-label-md text-label-md transition-all active:scale-95">Maintenance</button>
+</div>
+<!-- Service Catalog Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden soft-saas-shadow border border-outline-variant flex flex-col transition-transform hover:-translate-y-1">
+<div class="h-48 overflow-hidden bg-surface-variant relative">
+<img alt="Consultation session" class="w-full h-full object-cover" data-alt="A professional business consultation environment featuring a sleek glass table with a digital tablet and architectural blueprints. Two colleagues in business attire are engaged in deep discussion in a bright, airy office with floor-to-ceiling windows. The lighting is crisp and natural, emphasizing a high-end corporate modern aesthetic with shades of clean white and professional blue accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCctH4HsTCz6-byzIhkzDCdrU1sXqeBwvkDowKdn6lDPPm8zHDUvvXNa339UL1k3VTu0pSig58-p5mQN440TUjViEwTDTYtWVBxK8kH0raLv9JdCkrgcPU9_gxbWWmpszf_hkpyqsKs4ZcF7mZzVvsLCGHW7m3e3zUsFtGhCKzJXmN2lhXISEYl8eDIKGrG4mcWi0DnU5VC13vgMNZubUDhxoQnSbmEh1SPOKLxR45tCjllbQwdv-VImNvDUGHOfUtZdFb_5BsTTZw"/>
+<div class="absolute top-md right-md">
+<span class="bg-surface-container-lowest/90 backdrop-blur-md text-on-surface-variant px-sm py-xs rounded-lg font-label-sm text-label-sm flex items-center gap-xs">
+<span class="material-symbols-outlined !text-[14px]" data-icon="schedule">schedule</span>
+                            60 mins
+                        </span>
+</div>
+</div>
+<div class="p-lg flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Consultation</h3>
+<span class="text-primary font-bold text-headline-sm">$120</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-lg flex-grow">
+                        In-depth strategic session to evaluate project goals, identify potential risks, and outline a roadmap for success.
+                    </p>
+<div class="flex gap-sm">
+<button class="flex-1 bg-primary text-on-primary py-sm rounded-lg font-label-md text-label-md transition-all active:scale-95">Book Now</button>
+<button class="px-md bg-surface-container-high text-on-surface-variant py-sm rounded-lg font-label-md text-label-md transition-all active:scale-95 border border-outline-variant">
+<span class="material-symbols-outlined align-middle" data-icon="info">info</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden soft-saas-shadow border border-outline-variant flex flex-col transition-transform hover:-translate-y-1">
+<div class="h-48 overflow-hidden bg-surface-variant relative">
+<img alt="Site visit inspection" class="w-full h-full object-cover" data-alt="A professional site visit inspection taking place at a modern construction site with clean steel and concrete structures. A safety-conscious professional in a white hardhat and high-visibility gear is reviewing details on a tablet. The background is slightly blurred with soft daylight, maintaining a clean architectural clarity and a palette of slate greys and professional blues." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6tlPm1FEscVilIaphCxHwrMFPpCknzHWPFnNoFeRt7ydFBpE5SNKqSGqbKq7REvVdhik3zWS7V2tFKne0M-VxP6yYtLL0OonZYJocPatXS33JLfUihLWx9PrsqSR6dPb_jm4Fe9ALHVjvzUk19s3a5dvO9tE3Tn6ImKSZRr7HBdaNm3wJO1hOF0BvwVNZh4x2V-P2EzArlw5Q7AHla1TUOgCAZh7Tcb8PrGgqxeom4D1EzcN1TWPf_PWSnMoz1yGo1Aa4AmdXXPk"/>
+<div class="absolute top-md right-md">
+<span class="bg-surface-container-lowest/90 backdrop-blur-md text-on-surface-variant px-sm py-xs rounded-lg font-label-sm text-label-sm flex items-center gap-xs">
+<span class="material-symbols-outlined !text-[14px]" data-icon="schedule">schedule</span>
+                            90 mins
+                        </span>
+</div>
+</div>
+<div class="p-lg flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Site Visit</h3>
+<span class="text-primary font-bold text-headline-sm">$250</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-lg flex-grow">
+                        On-site physical inspection for technical validation, measurement verification, and environmental assessment.
+                    </p>
+<div class="flex gap-sm">
+<button class="flex-1 bg-primary text-on-primary py-sm rounded-lg font-label-md text-label-md transition-all active:scale-95">Book Now</button>
+<button class="px-md bg-surface-container-high text-on-surface-variant py-sm rounded-lg font-label-md text-label-md transition-all active:scale-95 border border-outline-variant">
+<span class="material-symbols-outlined align-middle" data-icon="info">info</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden soft-saas-shadow border border-outline-variant flex flex-col transition-transform hover:-translate-y-1">
+<div class="h-48 overflow-hidden bg-surface-variant relative">
+<img alt="Technical maintenance" class="w-full h-full object-cover" data-alt="A focused close-up of technical maintenance on a sophisticated server rack system. Gloved hands are precision-tuning high-end networking equipment. The scene is illuminated with cold blue and soft white LED indicator lights, creating a high-tech, reliable atmosphere. The visual style is minimalist and industrial with a focus on mathematical harmony and precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJOW6TnrXxbQhlLQTz4Ewzq0RNIIhxPP99vl6r4zY_0ml9PhX_2JC0xaR6_4TAVkbDfrgKjePimepo8tGore2rbqZoTkd91VjR5Wq0jxIKEtf0fQLlmxR9NoIKy4oDAG5QbQ70BSjFJ7bCJnt-w8sEHYRhM5OavH05Mh1Bz79fhd9z4CQ-lBSHXMc4EwtC7NFLcT0t7DYpOINYEzfDHqKWuDCCTBijH1i6YFunPL5OY03EJg1SSF8O5aycWXy3vAQNy1XxTpFVC4w"/>
+<div class="absolute top-md right-md">
+<span class="bg-surface-container-lowest/90 backdrop-blur-md text-on-surface-variant px-sm py-xs rounded-lg font-label-sm text-label-sm flex items-center gap-xs">
+<span class="material-symbols-outlined !text-[14px]" data-icon="schedule">schedule</span>
+                            45 mins
+                        </span>
+</div>
+</div>
+<div class="p-lg flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Maintenance</h3>
+<span class="text-primary font-bold text-headline-sm">$95</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-lg flex-grow">
+                        Regular preventative maintenance checkups to ensure optimal performance and long-term hardware reliability.
+                    </p>
+<div class="flex gap-sm">
+<button class="flex-1 bg-primary text-on-primary py-sm rounded-lg font-label-md text-label-md transition-all active:scale-95">Book Now</button>
+<button class="px-md bg-surface-container-high text-on-surface-variant py-sm rounded-lg font-label-md text-label-md transition-all active:scale-95 border border-outline-variant">
+<span class="material-symbols-outlined align-middle" data-icon="info">info</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden soft-saas-shadow border border-outline-variant flex flex-col transition-transform hover:-translate-y-1">
+<div class="h-48 overflow-hidden bg-surface-variant relative">
+<img alt="Project management" class="w-full h-full object-cover" data-alt="A dynamic workshop setting for project management, showing a large white board filled with colorful sticky notes and flowcharts. In the foreground, a professional-grade laptop is open, showing a complex Gantt chart. The room is modern and collaborative with high-key lighting. The style is Corporate Modern, focusing on organization, clarity, and efficient team resource management." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDJBVm9JpCcz7o-6EUg913CBjRyXTZjfRatAGiDc8ED3yiQ-vT4qZmtKOsDGbDQByELsiMKvNQt0SwuIkCrkscoZK-UDFYZnvSjZM0MwcFdblZFtGOl0u1jvDk1S3iDcStn-SWVGRYgmVLWyNGxViSyB43fob3wTzSxP8qLgiSx8lBULTrThJcdV0LEoomJW3viDjDBiS0Bc3A5gnwHsdlXANNZI5tG2CZz23vIYETwHZYbVUUVKHuynSRlV9G6OqsTuL08ibsYUc"/>
+<div class="absolute top-md right-md">
+<span class="bg-surface-container-lowest/90 backdrop-blur-md text-on-surface-variant px-sm py-xs rounded-lg font-label-sm text-label-sm flex items-center gap-xs">
+<span class="material-symbols-outlined !text-[14px]" data-icon="schedule">schedule</span>
+                            120 mins
+                        </span>
+</div>
+</div>
+<div class="p-lg flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Project Planning</h3>
+<span class="text-primary font-bold text-headline-sm">$180</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-lg flex-grow">
+                        Comprehensive resource allocation and timeline structuring for large-scale enterprise deployments.
+                    </p>
+<div class="flex gap-sm">
+<button class="flex-1 bg-primary text-on-primary py-sm rounded-lg font-label-md text-label-md transition-all active:scale-95">Book Now</button>
+<button class="px-md bg-surface-container-high text-on-surface-variant py-sm rounded-lg font-label-md text-label-md transition-all active:scale-95 border border-outline-variant">
+<span class="material-symbols-outlined align-middle" data-icon="info">info</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden soft-saas-shadow border border-outline-variant flex flex-col transition-transform hover:-translate-y-1">
+<div class="h-48 overflow-hidden bg-surface-variant relative">
+<img alt="Technical audit" class="w-full h-full object-cover" data-alt="A high-contrast digital workspace representing a technical audit. Glowing data visualizations are projected on a dark screen, with a clean mechanical keyboard in the foreground. The lighting is focused and moody, emphasizing security and precision. The aesthetic is Minimalist but technologically advanced, using a palette of deep navy and electric blue accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqxlvVu-3GUg909fE-EwEdRnfPpe3Oi4OGRp0aUIbWEYKejkimoYFHftbdbdxqZ6dFgGHyBR2EG8QHrjpdYoONIWCu5wesn65i5WopgvTxfEV2jboWTpVLRWjPwsWlqXVmcxiDKH1yUivqS5nLPR5uwFnrLeR4G3MUPoXH0yYsQ1KX1dEsFixvNPx5IQuqstO14WE8dLZ7LOQi_PtUnF7o-8Ut6UtOx3NIBfZm-ahmu0ufF9LU8Pd7y0Od5bNmj1iL7ZvGSnj7krY"/>
+<div class="absolute top-md right-md">
+<span class="bg-surface-container-lowest/90 backdrop-blur-md text-on-surface-variant px-sm py-xs rounded-lg font-label-sm text-label-sm flex items-center gap-xs">
+<span class="material-symbols-outlined !text-[14px]" data-icon="schedule">schedule</span>
+                            180 mins
+                        </span>
+</div>
+</div>
+<div class="p-lg flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Security Audit</h3>
+<span class="text-primary font-bold text-headline-sm">$320</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-lg flex-grow">
+                        Full-spectrum analysis of digital infrastructure to identify vulnerabilities and recommend hardening protocols.
+                    </p>
+<div class="flex gap-sm">
+<button class="flex-1 bg-primary text-on-primary py-sm rounded-lg font-label-md text-label-md transition-all active:scale-95">Book Now</button>
+<button class="px-md bg-surface-container-high text-on-surface-variant py-sm rounded-lg font-label-md text-label-md transition-all active:scale-95 border border-outline-variant">
+<span class="material-symbols-outlined align-middle" data-icon="info">info</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden soft-saas-shadow border border-outline-variant flex flex-col transition-transform hover:-translate-y-1">
+<div class="h-48 overflow-hidden bg-surface-variant relative">
+<img alt="System integration" class="w-full h-full object-cover" data-alt="An abstract representation of system integration with high-speed light trails flowing through a translucent digital circuit board. The image conveys seamless connection and data flow. The colors are vibrant yet controlled, with a focus on deep blues and bright white glows. The overall feel is one of calm control and technological trust, fitting a premium corporate booking portal." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAB6j6tcYPZAW4sIxTjXxDCyX0-cLQxcw449euozjW2LVuAcxyLiFbcAkFXAWM1OToVBzmSmXeXhrXTj9bbDO_0V0zz4WZ0A9hb9tWcAlIsW4zarF6Sn_2uIwf0RZILzlpIzhOnoPY7aKA7gmpuX7DajB8SXHsatL8BcJqukB7k8cAJaNXCiMXcmDpaTvC7xqhKi49lIyIWGBQ58Scd_SRpzyeKdhjoIlaC8Z6ningFq6Cl1d7TKQBija8Pt7DdK7Yo-xYyKZcrO40"/>
+<div class="absolute top-md right-md">
+<span class="bg-surface-container-lowest/90 backdrop-blur-md text-on-surface-variant px-sm py-xs rounded-lg font-label-sm text-label-sm flex items-center gap-xs">
+<span class="material-symbols-outlined !text-[14px]" data-icon="schedule">schedule</span>
+                            60 mins
+                        </span>
+</div>
+</div>
+<div class="p-lg flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Integration</h3>
+<span class="text-primary font-bold text-headline-sm">$150</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-lg flex-grow">
+                        Configuring seamless data flow between legacy systems and modern cloud-based architecture.
+                    </p>
+<div class="flex gap-sm">
+<button class="flex-1 bg-primary text-on-primary py-sm rounded-lg font-label-md text-label-md transition-all active:scale-95">Book Now</button>
+<button class="px-md bg-surface-container-high text-on-surface-variant py-sm rounded-lg font-label-md text-label-md transition-all active:scale-95 border border-outline-variant">
+<span class="material-symbols-outlined align-middle" data-icon="info">info</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-on-surface dark:bg-surface-container-lowest border-t border-outline-variant w-full py-xl">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-desktop gap-gutter w-full max-w-7xl mx-auto">
+<div class="flex flex-col gap-sm">
+<div class="font-headline-sm text-headline-sm text-surface-bright dark:text-primary">BookPro</div>
+<p class="font-body-sm text-body-sm text-outline-variant dark:text-on-surface-variant">© 2024 BookPro Inc. All rights reserved.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-xl">
+<a class="font-body-sm text-body-sm text-outline-variant dark:text-on-surface-variant hover:text-primary-fixed-dim dark:hover:text-primary transition-opacity opacity-90 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="font-body-sm text-body-sm text-outline-variant dark:text-on-surface-variant hover:text-primary-fixed-dim dark:hover:text-primary transition-opacity opacity-90 hover:opacity-100" href="#">Terms of Service</a>
+<a class="font-body-sm text-body-sm text-outline-variant dark:text-on-surface-variant hover:text-primary-fixed-dim dark:hover:text-primary transition-opacity opacity-90 hover:opacity-100" href="#">Contact Support</a>
+</div>
+<div class="flex gap-md">
+<button class="text-surface-bright dark:text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="language">language</span>
+</button>
+<button class="text-surface-bright dark:text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+</div>
+</div>
+</footer>
+</body></html>
