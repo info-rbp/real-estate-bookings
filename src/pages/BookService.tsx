@@ -5,7 +5,6 @@ import type { Service } from '../types/database'
 import ProgressBar from '../components/ProgressBar'
 import { CircleCheck as CheckCircle, CircleAlert as AlertCircle } from 'lucide-react'
 
-// Mock data to replace Supabase calls
 const mockServices: Service[] = [
   { id: '1', name: 'Standard Inspection', description: 'A comprehensive inspection of the property.', price: 250, price_type: 'fixed', duration_minutes: 120, is_active: true, icon_name: 'assignment', category: 'Inspections', created_at: '2024-01-01T00:00:00.000Z' },
   { id: '2', name: 'Pest & Termite Inspection', description: 'Specialized inspection for pests and termites.', price: 150, price_type: 'fixed', duration_minutes: 90, is_active: true, icon_name: 'shield_with_house', category: 'Inspections', created_at: '2024-01-01T00:00:00.000Z' },
@@ -54,7 +53,6 @@ export default function BookService() {
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
 
   useEffect(() => {
-    // Replace Supabase call with mock data
     setServices(mockServices);
   }, [])
 
@@ -70,7 +68,6 @@ export default function BookService() {
 
   async function fetchCalendarEvents() {
     setLoadingCalendar(true);
-    // Replace Supabase function call with mock data
     setCalendarEvents(mockCalendarEvents);
     setLoadingCalendar(false);
   }
@@ -82,7 +79,6 @@ export default function BookService() {
     const duration = selectedService.duration_minutes
 
     const available = allSlots.filter(time => {
-      const [hours, mins] = time.split(':').map(Number)
       const slotStart = new Date(`${bookingDate}T${time}:00`)
       const slotEnd = new Date(slotStart.getTime() + duration * 60 * 1000)
 
@@ -109,9 +105,8 @@ export default function BookService() {
   async function handleConfirm() {
     if (!profile || !selectedService) return
     setSubmitting(true)
-    // Mock booking creation
     console.log('Creating booking:', {
-      user_id: profile.id,
+      user_id: profile.$id,
       service_id: selectedService.id,
       property_address: propertyAddress,
       property_city: propertyCity,
@@ -157,7 +152,6 @@ export default function BookService() {
     <div className="max-w-6xl mx-auto">
       <ProgressBar steps={steps} currentStep={currentStep} />
 
-      {/* Step 1: Service Selection */}
       {currentStep === 1 && (
         <div>
           <div className="text-center mb-8">
@@ -192,7 +186,6 @@ export default function BookService() {
         </div>
       )}
 
-      {/* Step 2: Property Details */}
       {currentStep === 2 && (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           <div className="md:col-span-7">
@@ -290,7 +283,6 @@ export default function BookService() {
         </div>
       )}
 
-      {/* Step 3: Scheduling */}
       {currentStep === 3 && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-7">
@@ -358,7 +350,6 @@ export default function BookService() {
         </div>
       )}
 
-      {/* Step 4: Review & Confirm */}
       {currentStep === 4 && selectedService && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8 space-y-6">
@@ -425,7 +416,7 @@ export default function BookService() {
                   </button>
                 </div>
                 <p className="mt-4 text-center text-xs text-on-surface-variant italic">
-                  By confirming, you agree to our <a href="#" className="text-primary underline">Terms of Service</a>.
+                  By confirming, you agree to our <a href="/terms" className="text-primary underline">Terms of Service</a>.
                 </p>
               </section>
               <div className="bg-surface-container-high rounded-xl p-4 flex items-start gap-3">
@@ -437,7 +428,6 @@ export default function BookService() {
         </div>
       )}
 
-      {/* Navigation */}
       <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-4">
         {currentStep > 1 ? (
           <button
