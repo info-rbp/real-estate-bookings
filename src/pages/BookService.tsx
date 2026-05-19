@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import type { Service } from '../types/database'
 import ProgressBar from '../components/ProgressBar'
-import { CircleCheck as CheckCircle } from 'lucide-react'
+import { CircleCheck as CheckCircle, CircleAlert as AlertCircle } from 'lucide-react'
 
 const steps = [
   { label: 'Services' },
@@ -12,6 +12,14 @@ const steps = [
   { label: 'Schedule' },
   { label: 'Confirm' },
 ]
+
+interface CalendarEvent {
+  id: string
+  title: string
+  start: string
+  end: string
+  isAllDay: boolean
+}
 
 export default function BookService() {
   const { profile } = useAuth()
@@ -29,11 +37,70 @@ export default function BookService() {
   const [bookingTime, setBookingTime] = useState('09:00')
   const [submitting, setSubmitting] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([])
+  const [loadingCalendar, setLoadingCalendar] = useState(false)
+  const [availableSlots, setAvailableSlots] = useState<string[]>([])
 
   useEffect(() => {
     supabase.from('services').select('*').eq('is_active', true).order('name')
       .then(({ data }) => { if (data) setServices(data as Service[]) })
   }, [])
+
+  useEffect(() => {
+    fetchCalendarEvents()
+  }, [])
+
+  useEffect(() => {
+    if (bookingDate && selectedService) {
+      calculateAvailableSlots()
+    }
+  }, [bookingDate, selectedService, calendarEvents])
+
+  async function fetchCalendarEvents() {
+    setLoadingCalendar(true)
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-calendar-events`, {
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      })
+      const data = await response.json()
+      if (data.events) {
+        setCalendarEvents(data.events)
+      }
+    } catch (error) {
+      console.error('Failed to fetch calendar events:', error)
+    }
+    setLoadingCalendar(false)
+  }
+
+  function calculateAvailableSlots() {
+    if (!bookingDate || !selectedService) return
+
+    const allSlots = ['09:00', '10:30', '13:00', '14:30', '16:00']
+    const duration = selectedService.duration_minutes
+
+    const available = allSlots.filter(time => {
+      const [hours, mins] = time.split(':').map(Number)
+      const slotStart = new Date(`${bookingDate}T${time}:00`)
+      const slotEnd = new Date(slotStart.getTime() + duration * 60 * 1000)
+
+      const isConflict = calendarEvents.some(event => {
+        if (event.isAllDay) return false
+        const eventStart = new Date(event.start)
+        const eventEnd = new Date(event.end)
+        return (slotStart < eventEnd && slotEnd > eventStart)
+      })
+
+      return !isConflict
+    })
+
+    setAvailableSlots(available)
+    if (available.length > 0 && !available.includes(bookingTime)) {
+      setBookingTime(available[0])
+    }
+  }
 
   const travelSurcharge = 50
   const basePrice = selectedService?.price_type === 'quote' ? 0 : (selectedService?.price || 0)
@@ -241,21 +308,38 @@ export default function BookService() {
             <div className="bg-surface-container-lowest p-6 rounded-xl soft-saas-shadow border border-outline-variant">
               <h3 className="text-sm font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Available Slots</h3>
               {bookingDate && <p className="text-sm text-on-surface-variant mb-4">{new Date(bookingDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>}
-              <div className="grid grid-cols-2 gap-3">
-                {['09:00', '10:30', '13:00', '14:30', '16:00'].map(time => (
-                  <button
-                    key={time}
-                    onClick={() => setBookingTime(time)}
-                    className={`py-3 px-4 rounded-lg text-sm font-semibold transition-all text-center ${
-                      bookingTime === time
-                        ? 'bg-primary text-on-primary shadow-md'
-                        : 'border border-outline-variant hover:border-primary hover:text-primary'
-                    }`}
-                  >
-                    {formatTime(time)}
-                  </button>
-                ))}
-              </div>
+
+              {loadingCalendar ? (
+                <div className="text-center py-4 text-on-surface-variant">Loading calendar...</div>
+              ) : availableSlots.length === 0 && bookingDate ? (
+                <div className="bg-warning-light border border-warning rounded-lg p-4 flex gap-3">
+                  <AlertCircle size={18} className="text-warning shrink-0" />
+                  <div className="text-sm text-warning">No available slots for this date. Please select another date.</div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  {['09:00', '10:30', '13:00', '14:30', '16:00'].map(time => {
+                    const isAvailable = availableSlots.includes(time)
+                    return (
+                      <button
+                        key={time}
+                        onClick={() => isAvailable && setBookingTime(time)}
+                        disabled={!isAvailable}
+                        className={`py-3 px-4 rounded-lg text-sm font-semibold transition-all text-center ${
+                          bookingTime === time
+                            ? 'bg-primary text-on-primary shadow-md'
+                            : isAvailable
+                            ? 'border border-outline-variant hover:border-primary hover:text-primary'
+                            : 'border border-outline-variant bg-surface-container-high text-on-surface-variant cursor-not-allowed opacity-50'
+                        }`}
+                      >
+                        {formatTime(time)}
+                        {!isAvailable && <span className="text-xs block">Booked</span>}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
             </div>
             {selectedService && (
               <div className="bg-primary-container p-6 rounded-xl border border-primary/20">
