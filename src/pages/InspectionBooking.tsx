@@ -61,8 +61,8 @@ export const InspectionBooking = () => {
           <button type="submit" className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition">Confirm Booking</button>
         </form>
         <p className="text-sm text-center text-slate-500">
-          Can't make the inspection time, reach out?{' '}
-          <Link to="/contact" className="text-blue-600 font-semibold hover:underline">Contact Us</Link>
+          Can't make the inspection time?{' '}
+          <Link to="/engage-us" className="text-blue-600 font-semibold hover:underline">Contact Us</Link>
         </p>
       </div>
     </div>
