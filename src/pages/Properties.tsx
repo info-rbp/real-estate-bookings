@@ -17,7 +17,6 @@ export default function PropertiesPage() {
         <div className="bg-white">
             <PublicNav />
             <main className="isolate">
-                {/* Hero Section */}
                 <div className="relative pt-14">
                     <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80" aria-hidden="true">
                         <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" style={{ clipPath: 'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)' }}></div>
@@ -32,7 +31,6 @@ export default function PropertiesPage() {
                     </div>
                 </div>
 
-                {/* Properties Grid Section */}
                 <div className="bg-gray-50 py-24 sm:py-32">
                     <div className="mx-auto max-w-7xl px-6 lg:px-8">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-12">
@@ -54,25 +52,24 @@ export default function PropertiesPage() {
                         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
                             {properties.map((property) => (
                                 <div key={property.id} className="group relative">
-                                    <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
-                                        <img src={property.imageUrl} alt="" className="h-full w-full object-cover object-center group-hover:opacity-75" />
-                                    </div>
-                                    <div className="mt-4 flex justify-between">
-                                        <div>
-                                            <h3 className="text-sm text-gray-700">
-                                                <a href="#">
-                                                    <span aria-hidden="true" className="absolute inset-0" />
-                                                    <MapPin className="inline h-4 w-4 mr-1 text-gray-500"/> {property.address}
-                                                </a>
-                                            </h3>
-                                            <div className="mt-2 flex items-center text-sm text-gray-500">
-                                                <span className="mr-4 flex items-center"><BedDouble className="h-4 w-4 mr-1"/> {property.beds}</span>
-                                                <span className="mr-4 flex items-center"><Bath className="h-4 w-4 mr-1"/> {property.baths}</span>
-                                                <span className="flex items-center"><Car className="h-4 w-4 mr-1"/> {property.cars}</span>
-                                            </div>
+                                    <Link to={`/properties/${property.id}`} className="block">
+                                        <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
+                                            <img src={property.imageUrl} alt={property.address} className="h-full w-full object-cover object-center group-hover:opacity-75" />
                                         </div>
-                                        <p className="text-lg font-medium text-gray-900">${property.price}<span className="text-sm font-normal text-gray-500">/wk</span></p>
-                                    </div>
+                                        <div className="mt-4 flex justify-between">
+                                            <div>
+                                                <h3 className="text-sm text-gray-700 flex items-center">
+                                                    <MapPin className="inline h-4 w-4 mr-1 text-gray-500"/> {property.address}
+                                                </h3>
+                                                <div className="mt-2 flex items-center text-sm text-gray-500">
+                                                    <span className="mr-4 flex items-center"><BedDouble className="h-4 w-4 mr-1"/> {property.beds}</span>
+                                                    <span className="mr-4 flex items-center"><Bath className="h-4 w-4 mr-1"/> {property.baths}</span>
+                                                    <span className="flex items-center"><Car className="h-4 w-4 mr-1"/> {property.cars}</span>
+                                                </div>
+                                            </div>
+                                            <p className="text-lg font-medium text-gray-900">${property.price}<span className="text-sm font-normal text-gray-500">/wk</span></p>
+                                        </div>
+                                    </Link>
                                     <span className={`absolute top-2 left-2 rounded-full px-3 py-1 text-xs font-semibold ${property.status === 'For Rent' ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-800'}`}>
                                         {property.status}
                                     </span>
@@ -82,14 +79,13 @@ export default function PropertiesPage() {
                     </div>
                 </div>
 
-                {/* CTA Section */}
                 <div className="bg-white">
                     <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
                         <div className="relative isolate overflow-hidden bg-primary px-6 py-24 text-center shadow-2xl sm:rounded-3xl sm:px-16">
                             <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl">Are You an Agency Looking for Support?</h2>
                             <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-indigo-100">BookPro provides the reliable field support you need to manage your portfolio efficiently. Let us handle the inspections, so you can focus on your clients.</p>
                             <div className="mt-10 flex items-center justify-center gap-x-6">
-                                <Link to="/EngageUs" className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-primary shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Book a Consultation</Link>
+                                <Link to="/engage-us" className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-primary shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Book a Consultation</Link>
                             </div>
                         </div>
                     </div>
