@@ -61,7 +61,6 @@ export const PropertyDetail = () => {
     return (
       <>
         <div className="max-w-6xl mx-auto py-12 px-6 space-y-8">
-            {/* Header */}
             <div>
                 <h1 className="text-4xl font-extrabold text-slate-900 tracking-tighter mb-2">{property.title}</h1>
                 <div className="flex items-center text-slate-600 gap-2">
@@ -70,10 +69,8 @@ export const PropertyDetail = () => {
                 </div>
             </div>
 
-            {/* Main Content */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                 <div className="md:col-span-2 space-y-6">
-                    {/* Hero Image & Gallery */}
                     <img src={property.images?.[0] && property.images[0].trim() !== '' ? property.images[0] : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200'} alt={property.title} className="w-full h-96 object-cover rounded-3xl" />
                     {property.images && property.images.length > 1 && (
                         <div className="grid grid-cols-4 gap-4">
@@ -83,7 +80,6 @@ export const PropertyDetail = () => {
                         </div>
                     )}
                     
-                    {/* Quick Stats */}
                     <div className="flex gap-8 bg-slate-50 p-6 rounded-2xl border border-slate-100">
                         <div className="flex items-center gap-2 font-semibold text-lg"><BedDouble className="text-violet-600"/> {property.details?.rooms || 0} Beds</div>
                         <div className="flex items-center gap-2 font-semibold text-lg"><Bath className="text-violet-600"/> {property.details?.bathrooms || 0} Baths</div>
@@ -100,8 +96,8 @@ export const PropertyDetail = () => {
                               <p className="text-slate-500">${room.weeklyRent}/week | {room.furnishedStatus}</p>
                             </div>
                             <div className="flex gap-2">
-                              <Link to={`/book/${property.id}?roomId=${room.id}`} className="bg-slate-100 text-slate-900 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200">Inspect</Link>
-                              <Link to={`/apply/${property.id}?roomId=${room.id}`} className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700">Apply</Link>
+                              <Link to={`/book/inspection/${property.id}?roomId=${room.id}`} className="bg-slate-100 text-slate-900 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200">Inspect</Link>
+                              <Link to="/engage-us" className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700">Apply</Link>
                             </div>
                           </div>
                         ))}
@@ -109,14 +105,13 @@ export const PropertyDetail = () => {
                     )}
                 </div>
 
-                {/* Sidebar Sticky Booking */}
                 <div className="md:col-span-1">
                     {showWholeProperty && (
                       <div className="bg-white border border-slate-100 rounded-3xl p-8 sticky top-28 shadow-sm space-y-6 outline outline-1 outline-slate-100">
                           <h3 className="font-bold text-xl">Interested in the whole property?</h3>
                           <div className="flex flex-col gap-3">
                               <Link to={`/book/inspection/${property.id}`} className="w-full text-center bg-blue-600 text-white font-semibold py-4 rounded-xl hover:bg-blue-700 transition">Inspect Property</Link>
-                              <Link to={`/apply/${property.id}`} className="w-full text-center bg-white border border-slate-900 font-semibold py-4 rounded-xl hover:bg-slate-50 transition">Apply for Property</Link>
+                              <Link to="/engage-us" className="w-full text-center bg-white border border-slate-900 font-semibold py-4 rounded-xl hover:bg-slate-50 transition">Apply for Property</Link>
                           </div>
                       </div>
                     )}
