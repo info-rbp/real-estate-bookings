@@ -1,5 +1,7 @@
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
-import { AuthProvider, useAuth } from './hooks/useAuth'
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
+import { Elements } from '@stripe/react-stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
+import { AuthProvider, type AppUserRole, useAuth } from './hooks/useAuth'
 import Home from './pages/Home'
 import Services from './pages/Services'
 import Login from './pages/Login'
@@ -13,123 +15,140 @@ import DashboardLayout from './components/DashboardNav'
 import Subscription from './pages/Subscription'
 import EngageUs from './pages/EngageUs'
 import Properties from './pages/Properties'
-import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-import { AdminLogin } from './pages/AdminLogin';
-import { AdminDashboard } from './pages/AdminDashboard';
-import { PropertyDetail } from './pages/PropertyDetail';
-import { InspectionBooking } from './pages/InspectionBooking';
+import { AdminLogin } from './pages/AdminLogin'
+import { AdminDashboard } from './pages/AdminDashboard'
+import { PropertyDetail } from './pages/PropertyDetail'
+import { InspectionBooking } from './pages/InspectionBooking'
 
-const stripePromise = loadStripe('pk_test_51T2OhgS9Az4EAUom3ZVILSDU99OoiPdP0qSozhHsz9TuPIAXUXRsyoqqlR2NQi0xrvbZR7R328Dvjn2itRZOfsvL00tPQYHlLZ');
+const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
+  : null
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth()
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-on-surface-variant">Loading...</div>
-  if (!user) return <Navigate to="/login" replace />
+function ProtectedRoute({
+  children,
+  allowedRoles,
+}: {
+  children: React.ReactNode
+  allowedRoles?: AppUserRole[]
+}) {
+  const { user, loading, profile } = useAuth()
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-on-surface-variant">Loading...</div>
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (allowedRoles && (!profile || !allowedRoles.includes(profile.role))) {
+    return <Navigate to="/dashboard" replace />
+  }
+
   return <>{children}</>
 }
 
 const router = createBrowserRouter([
-    {
-        path: "/",
-        element: <Home />,
-    },
-    {
-        path: "/services",
-        element: <Services />,
-    },
-    {
-        path: "/pricing",
-        element: <Pricing />,
-    },
-    {
-        path: "/about",
-        element: <About />,
-    },
-    {
-        path: "/subscription",
-        element: <Subscription />,
-    },
-    {
-        path: "/engage-us",
-        element: <EngageUs />,
-    },
-    {
-        path: "/properties",
-        element: <Properties />,
-    },
-    {
-        path: "/properties/:id",
-        element: <PropertyDetail />,
-    },
-    {
-        path: "/book/inspection/:propertyId",
-        element: <InspectionBooking />,
-    },
-    {
-        path: "/login",
-        element: <Login />,
-    },
-    {
-        path: "/admin/login",
-        element: <AdminLogin />,
-    },
-    {
-        path: "/admin/dashboard",
-        element: (
-            <ProtectedRoute>
-                <AdminDashboard />
-            </ProtectedRoute>
-        ),
-    },
-    {
-        path: "/dashboard",
-        element: (
-            <ProtectedRoute>
-                <DashboardLayout />
-            </ProtectedRoute>
-        ),
-        children: [
-            {
-                index: true,
-                element: <Dashboard />,
-            },
-            {
-                path: "bookings",
-                element: <Bookings />,
-            },
-            {
-                path: "settings",
-                element: <Settings />,
-            },
-        ],
-    },
-    {
-        path: "/book/service",
-        element: (
-            <ProtectedRoute>
-                <DashboardLayout />
-            </ProtectedRoute>
-        ),
-        children: [
-            {
-                index: true,
-                element: <BookService />,
-            }
-        ]
-    },
-    {
-        path: "*",
-        element: <Navigate to="/" replace />,
-    },
-]);
+  {
+    path: '/',
+    element: <Home />,
+  },
+  {
+    path: '/services',
+    element: <Services />,
+  },
+  {
+    path: '/pricing',
+    element: <Pricing />,
+  },
+  {
+    path: '/about',
+    element: <About />,
+  },
+  {
+    path: '/subscription',
+    element: <Subscription />,
+  },
+  {
+    path: '/engage-us',
+    element: <EngageUs />,
+  },
+  {
+    path: '/properties',
+    element: <Properties />,
+  },
+  {
+    path: '/properties/:id',
+    element: <PropertyDetail />,
+  },
+  {
+    path: '/book/inspection/:propertyId',
+    element: <InspectionBooking />,
+  },
+  {
+    path: '/login',
+    element: <Login />,
+  },
+  {
+    path: '/admin/login',
+    element: <AdminLogin />,
+  },
+  {
+    path: '/admin/dashboard',
+    element: (
+      <ProtectedRoute allowedRoles={['admin']}>
+        <AdminDashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/dashboard',
+    element: (
+      <ProtectedRoute allowedRoles={['client', 'client_admin', 'client_user', 'staff', 'admin']}>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <Dashboard />,
+      },
+      {
+        path: 'bookings',
+        element: <Bookings />,
+      },
+      {
+        path: 'settings',
+        element: <Settings />,
+      },
+    ],
+  },
+  {
+    path: '/book/service',
+    element: (
+      <ProtectedRoute allowedRoles={['client', 'client_admin', 'client_user', 'staff', 'admin']}>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <BookService />,
+      },
+    ],
+  },
+  {
+    path: '*',
+    element: <Navigate to="/" replace />,
+  },
+])
 
 export default function App() {
+  const app = <RouterProvider router={router} />
+
   return (
     <AuthProvider>
-        <Elements stripe={stripePromise}>
-            <RouterProvider router={router} />
-        </Elements>
+      {stripePromise ? <Elements stripe={stripePromise}>{app}</Elements> : app}
     </AuthProvider>
   )
 }
