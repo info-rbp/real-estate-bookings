@@ -43,7 +43,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
-const safeProfileFields: EditableProfileField[] = ['full_name', 'phone', 'timezone', 'email_notifications', 'sms_notifications', 'avatar_url']
 const validRoles: AppUserRole[] = ['admin', 'staff', 'client_admin', 'client_user', 'pending']
 
 function getProfileDefaults(user: Models.User<Models.Preferences>): AppProfile {
@@ -88,12 +87,16 @@ function normalizeProfile(user: Models.User<Models.Preferences>, document?: Part
 }
 
 function sanitizeProfileUpdates(updates: EditableProfileUpdates): EditableProfileUpdates {
-  return safeProfileFields.reduce<EditableProfileUpdates>((safeUpdates, field) => {
-    if (Object.prototype.hasOwnProperty.call(updates, field)) {
-      safeUpdates[field] = updates[field] as never
-    }
-    return safeUpdates
-  }, {})
+  const safeUpdates: EditableProfileUpdates = {}
+
+  if (updates.full_name !== undefined) safeUpdates.full_name = updates.full_name
+  if (updates.phone !== undefined) safeUpdates.phone = updates.phone
+  if (updates.timezone !== undefined) safeUpdates.timezone = updates.timezone
+  if (updates.email_notifications !== undefined) safeUpdates.email_notifications = updates.email_notifications
+  if (updates.sms_notifications !== undefined) safeUpdates.sms_notifications = updates.sms_notifications
+  if (updates.avatar_url !== undefined) safeUpdates.avatar_url = updates.avatar_url
+
+  return safeUpdates
 }
 
 function parseProfileExecutionResponse(responseBody?: string): AppProfile | null {
