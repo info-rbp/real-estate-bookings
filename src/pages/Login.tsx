@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { Eye, EyeOff } from 'lucide-react'
-import Footer from '../components/Footer';
+import Footer from '../components/Footer'
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true)
@@ -11,25 +11,65 @@ export default function Login() {
   const [fullName, setFullName] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signIn, signUp } = useAuth()
+  const { requestPasswordReset, signIn, signUp } = useAuth()
   const navigate = useNavigate()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    setNotice('')
     setLoading(true)
 
     if (isLogin) {
-      const { error } = await signIn(email, password)
-      if (error) setError(error)
-      else navigate('/dashboard')
+      const result = await signIn(email, password)
+
+      if (result.error) {
+        setError(result.error)
+      } else if (result.profile?.role === 'admin') {
+        navigate('/admin/dashboard')
+      } else {
+        navigate('/dashboard')
+      }
     } else {
-      if (!fullName.trim()) { setError('Full name is required'); setLoading(false); return }
-      const { error } = await signUp(email, password, fullName)
-      if (error) setError(error)
-      else navigate('/dashboard')
+      if (!fullName.trim()) {
+        setError('Full name is required')
+        setLoading(false)
+        return
+      }
+
+      const result = await signUp(email, password, fullName)
+
+      if (result.error) {
+        setError(result.error)
+      } else {
+        setNotice('Your account was created. Check your email if verification is enabled in Appwrite.')
+        navigate('/dashboard')
+      }
     }
+
+    setLoading(false)
+  }
+
+  async function handlePasswordReset() {
+    setError('')
+    setNotice('')
+
+    if (!email.trim()) {
+      setError('Enter your email address first so we know where to send the reset link.')
+      return
+    }
+
+    setLoading(true)
+    const result = await requestPasswordReset(email)
+
+    if (result.error) {
+      setError(result.error)
+    } else {
+      setNotice('Password reset instructions have been sent if the account exists.')
+    }
+
     setLoading(false)
   }
 
@@ -59,13 +99,21 @@ export default function Login() {
 
           <div className="flex px-8 border-b border-outline-variant">
             <button
-              onClick={() => { setIsLogin(true); setError('') }}
+              onClick={() => {
+                setIsLogin(true)
+                setError('')
+                setNotice('')
+              }}
               className={`flex-1 py-3 text-sm font-semibold transition-all ${isLogin ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:text-primary'}`}
             >
               Login
             </button>
             <button
-              onClick={() => { setIsLogin(false); setError('') }}
+              onClick={() => {
+                setIsLogin(false)
+                setError('')
+                setNotice('')
+              }}
               className={`flex-1 py-3 text-sm font-semibold transition-all ${!isLogin ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:text-primary'}`}
             >
               Sign Up
@@ -77,13 +125,17 @@ export default function Login() {
               <div className="bg-error-container text-on-error-container px-4 py-3 rounded-lg text-sm">{error}</div>
             )}
 
+            {notice && (
+              <div className="bg-primary-container text-on-primary-container px-4 py-3 rounded-lg text-sm">{notice}</div>
+            )}
+
             {!isLogin && (
               <div>
                 <label className="block text-sm font-semibold text-on-surface-variant mb-1">Full Name</label>
                 <input
                   type="text"
                   value={fullName}
-                  onChange={e => setFullName(e.target.value)}
+                  onChange={(e) => setFullName(e.target.value)}
                   placeholder="John Doe"
                   className="w-full px-4 py-2.5 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm bg-white"
                 />
@@ -95,7 +147,7 @@ export default function Login() {
               <input
                 type="email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="alex.rivers@example.com"
                 required
                 className="w-full px-4 py-2.5 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm bg-white"
@@ -105,14 +157,18 @@ export default function Login() {
             <div>
               <div className="flex justify-between items-center mb-1">
                 <label className="text-sm font-semibold text-on-surface-variant">Password</label>
-                {isLogin && <a href="#" className="text-xs text-primary hover:underline">Forgot Password?</a>}
+                {isLogin && (
+                  <button type="button" onClick={handlePasswordReset} className="text-xs text-primary hover:underline">
+                    Forgot Password?
+                  </button>
+                )}
               </div>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="Min. 6 characters"
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Min. 8 characters"
                   required
                   className="w-full px-4 py-2.5 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm bg-white pr-10"
                 />
@@ -141,7 +197,14 @@ export default function Login() {
           <div className="px-8 pb-8 text-center">
             <p className="text-sm text-on-surface-variant">
               {isLogin ? "Don't have an account?" : 'Already have an account?'}
-              <button onClick={() => { setIsLogin(!isLogin); setError('') }} className="text-primary text-sm font-semibold hover:underline ml-1">
+              <button
+                onClick={() => {
+                  setIsLogin(!isLogin)
+                  setError('')
+                  setNotice('')
+                }}
+                className="text-primary text-sm font-semibold hover:underline ml-1"
+              >
                 {isLogin ? 'Register now' : 'Sign In'}
               </button>
             </p>
