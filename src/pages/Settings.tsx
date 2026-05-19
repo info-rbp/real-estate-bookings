@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { User, Shield, Bell, Wallet, Camera, Lock, CalendarSync } from 'lucide-react'
+import PaymentForm from '../components/Payment'
 
 const tabs = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'security', label: 'Security', icon: Shield },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'billing', label: 'Billing & Sync', icon: Wallet },
+  { id: 'payments', label: 'Payments', icon: Wallet },
 ]
 
 export default function Settings() {
@@ -170,6 +172,13 @@ export default function Settings() {
               </div>
             </div>
           )}
+
+        {activeTab === 'payments' && (
+            <div className="bg-white rounded-xl soft-saas-shadow p-6">
+              <h3 className="text-lg font-semibold text-on-surface border-b border-outline-variant pb-4 mb-6">Payment Methods</h3>
+              <PaymentForm />
+              </div>
+        )}
         </div>
       </div>
     </div>

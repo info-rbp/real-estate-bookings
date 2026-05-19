@@ -1,41 +1,63 @@
-import { Outlet } from 'react-router-dom'
-import Sidebar from './Sidebar'
-import { Bell, Circle as HelpCircle } from 'lucide-react'
+import { Link, Outlet, useLocation } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
+import { Bell, Calendar, Home, LogOut, Settings, Plus, Bolt } from 'lucide-react'
+
+const navLinks = [
+  { to: '/dashboard', label: 'Dashboard', icon: Home },
+  { to: '/dashboard/bookings', label: 'Bookings', icon: Calendar },
+  { to: '/dashboard/settings', label: 'Settings', icon: Settings },
+]
 
 export default function DashboardLayout() {
+  const { user, profile, signOut } = useAuth()
+  const location = useLocation()
+
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex-1 ml-64 flex flex-col min-h-screen">
-        <header className="sticky top-0 z-40 bg-surface border-b border-outline-variant flex justify-between items-center px-10 py-4">
-          <div className="relative w-full max-w-md">
-            <input
-              type="text"
-              placeholder="Search services or bookings..."
-              className="w-full bg-surface-container-low rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary-container outline-none"
-            />
+    <div className="min-h-screen bg-surface-container">
+      {/* Sidebar Navigation */}
+      <nav className="h-screen w-64 fixed left-0 top-0 bg-surface-container border-r border-outline-variant flex flex-col py-8">
+        <div className="px-4 mb-8">
+          <Link to="/" className="text-2xl font-bold text-primary">BookPro</Link>
+        </div>
+        <div className="flex items-center gap-4 px-4 mb-8">
+          <img 
+            alt="Client Profile Picture" 
+            className="w-12 h-12 rounded-full object-cover" 
+            src={profile?.avatar_url || `https://ui-avatars.com/api/?name=${profile?.full_name}&background=random`}
+          />
+          <div>
+            <p className="text-sm font-semibold text-on-surface">{profile?.full_name || 'User'}</p>
+            <p className="text-xs text-on-surface-variant">Premium Client</p>
           </div>
-          <div className="flex items-center gap-4">
-            <button className="p-2 text-on-surface-variant hover:text-primary transition-colors">
-              <Bell size={20} />
-            </button>
-            <button className="p-2 text-on-surface-variant hover:text-primary transition-colors">
-              <HelpCircle size={20} />
-            </button>
-          </div>
-        </header>
-        <main className="flex-1 p-8">
-          <Outlet />
-        </main>
-        <footer className="bg-surface-container-lowest border-t border-outline-variant flex justify-between items-center px-10 py-4">
-          <p className="text-xs text-on-surface-variant">&copy; 2024 BookPro Real Estate Services. All rights reserved.</p>
-          <div className="flex gap-6">
-            <a href="#" className="text-xs text-on-surface-variant hover:text-primary transition-colors">Privacy Policy</a>
-            <a href="#" className="text-xs text-on-surface-variant hover:text-primary transition-colors">Terms of Service</a>
-            <a href="#" className="text-xs text-on-surface-variant hover:text-primary transition-colors">Contact Support</a>
-          </div>
-        </footer>
-      </div>
+        </div>
+        <div className="flex-grow space-y-1 px-2">
+          {navLinks.map(link => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`rounded-lg flex items-center gap-3 px-4 py-2 transition-all duration-200 ${
+                location.pathname === link.to
+                  ? 'bg-primary-container text-on-primary-container'
+                  : 'text-on-surface-variant hover:bg-surface-container-high'
+              }`}
+            >
+              <link.icon size={20} />
+              <span className="text-sm font-semibold">{link.label}</span>
+            </Link>
+          ))}
+        </div>
+        <div className="px-4 mt-auto">
+          <Link to="/book/service" className="bg-primary text-on-primary text-sm font-semibold py-3 rounded-lg flex items-center justify-center gap-2 w-full hover:opacity-90 transition-opacity">
+            <Bolt size={18} />
+            New Booking
+          </Link>
+        </div>
+      </nav>
+
+      {/* Main Content Canvas */}
+      <main className="ml-64 p-10 min-h-screen">
+        <Outlet />
+      </main>
     </div>
   )
 }

@@ -17,6 +17,7 @@ const mockProfile = {
   sms_notifications: false,
   two_factor_enabled: false,
   role: 'client',
+  avatar_url: 'https://randomuser.me/api/portraits/men/32.jpg', // Added avatar_url
 };
 
 interface AuthContextType {

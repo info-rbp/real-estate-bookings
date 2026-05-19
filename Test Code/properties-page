@@ -1,0 +1,52 @@
+import { useState, useEffect } from 'react';
+import { db } from '../lib/firebase';
+import { collection, onSnapshot, query } from 'firebase/firestore';
+import { Link } from 'react-router-dom';
+
+export const Properties = () => {
+    const [properties, setProperties] = useState<any[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        const q = query(collection(db, 'properties'));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            setProperties(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        });
+        return () => unsubscribe();
+    }, []);
+
+    const filteredProperties = properties.filter(p => 
+        p.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        p.address.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return (
+        <div className="space-y-10">
+            <div>
+                <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Available For Rent</h1>
+                <p className="text-slate-500 mt-2">Browse our full selection of premium rental properties.</p>
+                <input 
+                    type="text" 
+                    placeholder="Search by title or address..." 
+                    value={searchTerm} 
+                    onChange={(e) => setSearchTerm(e.target.value)} 
+                    className="w-full mt-6 border border-slate-200 p-4 rounded-xl"
+                />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredProperties.map(property => (
+                    <Link to={`/properties/${property.id}`} key={property.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 group cursor-pointer hover:shadow-md transition-shadow">
+                        <img 
+                          src={property.images?.[0] && property.images[0].trim() !== '' ? property.images[0] : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800'} 
+                          alt={property.title} 
+                          className="h-64 w-full object-cover rounded-xl mb-4" 
+                        />
+                        <h3 className="font-bold text-xl text-slate-900 px-1">{property.title}</h3>
+                        <p className="text-sm text-slate-500 px-1 mt-1">{property.address}</p>
+                    </Link>
+                ))}
+            </div>
+        </div>
+    );
+};

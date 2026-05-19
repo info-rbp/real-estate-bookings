@@ -1,0 +1,50 @@
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { db } from '../lib/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { Inspection } from '../types/inspection';
+import { registerForInspection } from '../services/inspectionService';
+
+export const OpenInspectionBooking = () => {
+  const { propertyId } = useParams<{ propertyId: string }>();
+  const [inspections, setInspections] = useState<Inspection[]>([]);
+  const [selectedInspection, setSelectedInspection] = useState<string>('');
+  const [attendee, setAttendee] = useState({ fullName: '', email: '', mobile: '', numberOfAttendees: 1, preferredContactMethod: 'Email' as const });
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    if (!propertyId) return;
+    const q = query(collection(db, 'inspections'), where('propertyId', '==', propertyId), where('status', 'in', ['scheduled', 'full']));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setInspections(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Inspection)));
+    });
+    return () => unsubscribe();
+  }, [propertyId]);
+
+  const handleBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedInspection) return;
+    
+    const result = await registerForInspection(selectedInspection, attendee);
+    setMessage(result.message);
+  };
+
+  return (
+    <div className="max-w-xl mx-auto py-12">
+      <h2 className="text-3xl font-bold mb-6">Book Open Inspection</h2>
+      {message && <div className="bg-green-100 p-4 mb-4 rounded">{message}</div>}
+      <form onSubmit={handleBooking} className="space-y-4">
+        <select value={selectedInspection} onChange={(e) => setSelectedInspection(e.target.value)} className="w-full border p-2 rounded" required>
+          <option value="">Select an inspection...</option>
+          {inspections.map(i => (
+            <option key={i.id} value={i.id}>{new Date(i.startDateTime).toLocaleString()} - ({i.registeredCount}/{i.attendeeCap} spots)</option>
+          ))}
+        </select>
+        <input type="text" placeholder="Name" onChange={e => setAttendee({...attendee, fullName: e.target.value})} className="w-full border p-2 rounded" required />
+        <input type="email" placeholder="Email" onChange={e => setAttendee({...attendee, email: e.target.value})} className="w-full border p-2 rounded" required />
+        <input type="tel" placeholder="Phone" onChange={e => setAttendee({...attendee, mobile: e.target.value})} className="w-full border p-2 rounded" required />
+        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">Register</button>
+      </form>
+    </div>
+  );
+};

@@ -40,12 +40,12 @@ export interface Booking {
   property_address: string
   property_city: string
   property_postal_code: string
-  property_type: 'apartment' | 'house' | 'townhouse'
-  access_method: 'lockbox' | 'tenant' | 'agency'
+  property_type: 'apartment' | 'house' | 'townhouse' | 'commercial' | 'other' // Added more options
+  access_method: 'lockbox' | 'tenant' | 'agency' | 'concierge' | 'owner' | 'other' // Added more options
   access_instructions: string | null
   booking_date: string
   booking_time: string
-  duration_minutes: number
+  duration_minutes?: number
   status: BookingStatus
   assigned_professional_id: string | null
   assigned_professional?: Profile

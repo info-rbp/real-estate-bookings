@@ -1,0 +1,21 @@
+import { useEffect, useState } from 'react';
+import { setupAdminUser } from '../setupAdmin';
+
+export const AdminSetup = () => {
+    const [status, setStatus] = useState('Setting up admin...');
+
+    useEffect(() => {
+        setupAdminUser('real.estate@remotebusinesspartner.com.au')
+            .then(() => setStatus('Admin user setup complete.'))
+            .catch((err) => {
+                console.error(err);
+                setStatus('Error: ' + (err.message || 'Unknown error'));
+            });
+    }, []);
+
+    return (
+        <div className="max-w-md mx-auto py-12 text-center">
+            <h2 className="text-2xl font-bold">{status}</h2>
+        </div>
+    );
+};

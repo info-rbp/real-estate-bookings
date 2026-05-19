@@ -1,0 +1,80 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { db } from '../lib/firebase';
+import { collection, addDoc } from 'firebase/firestore';
+import { ChevronRight } from 'lucide-react';
+import { useForm, FormProvider } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { RentalApplication as RentalApplicationType } from '../types/rentalApplication';
+import { saveApplicationDraft, getApplication } from '../services/rentalApplicationService';
+import Layout from '../components/Layout';
+
+const APPLICATION_STEPS = [
+  "Summary", "Applicant Details", "Identity", "Employment", "Income", "Rental History", "References", "Occupants", "Pets", "Room Preference", "Declarations", "Review & Submit"
+];
+
+// NOTE: Zod schema for full application would be very large. 
+// Starting with basic structure and will expand as needed.
+const applicationSchema = z.object({
+  // ... schema definition
+});
+
+export const RentalApplication: React.FC = () => {
+    const { applicationId } = useParams<{ applicationId: string }>();
+    const [searchParams] = useSearchParams();
+    const propertyId = searchParams.get('propertyId');
+    const roomId = searchParams.get('roomId');
+    const [currentStep, setCurrentStep] = useState(0);
+    const [loading, setLoading] = useState(true);
+
+    const methods = useForm<RentalApplicationType>({
+        // resolver: zodResolver(applicationSchema),
+        defaultValues: {
+            // ... defaults
+        }
+    });
+
+    useEffect(() => {
+        if (applicationId) {
+            getApplication(applicationId!).then(app => {
+                if (app) methods.reset(app);
+                setLoading(false);
+            });
+        } else {
+            setLoading(false);
+        }
+    }, [applicationId, methods]);
+
+    const onSaveDraft = async () => {
+        const data = methods.getValues();
+        await saveApplicationDraft(data);
+        alert('Draft saved!');
+    };
+
+    if (loading) return <div>Loading...</div>;
+
+    return (
+        <Layout title="Rental Application">
+            <FormProvider {...methods}>
+                <form className="max-w-3xl mx-auto py-12 px-4">
+                    <div className="mb-8">
+                        <h2 className="text-xl font-bold">{APPLICATION_STEPS[currentStep]}</h2>
+                        <div className="w-full bg-gray-200 h-2 mt-2 rounded">
+                            <div className="bg-red-600 h-2 rounded" style={{ width: `${(currentStep + 1) / APPLICATION_STEPS.length * 100}%` }}></div>
+                        </div>
+                    </div>
+
+                    {/* Step components will go here */}
+                    
+                    <div className="mt-8 flex justify-between">
+                        <button type="button" disabled={currentStep === 0} onClick={() => setCurrentStep(s => s - 1)} className="px-4 py-2 border rounded">Back</button>
+                        <button type="button" onClick={onSaveDraft} className="px-4 py-2 border rounded">Save Draft</button>
+                        <button type="button" disabled={currentStep === APPLICATION_STEPS.length - 1} onClick={() => setCurrentStep(s => s + 1)} className="px-4 py-2 bg-red-600 text-white rounded">Next</button>
+                    </div>
+                </form>
+            </FormProvider>
+        </Layout>
+    );
+};
+

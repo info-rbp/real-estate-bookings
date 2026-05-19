@@ -1,0 +1,69 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { db } from '../lib/firebase';
+import { collection, query, where, onSnapshot, doc, updateDoc, addDoc } from 'firebase/firestore';
+
+export const InspectionBooking = () => {
+  const { propertyId } = useParams<{ propertyId: string }>();
+  const navigate = useNavigate();
+  const [slots, setSlots] = useState<any[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<string>('');
+  const [applicantName, setApplicantName] = useState('');
+  const [applicantEmail, setApplicantEmail] = useState('');
+  const [applicantPhone, setApplicantPhone] = useState('');
+
+  useEffect(() => {
+    if (!propertyId) return;
+    const q = query(collection(db, 'inspectionSlots'), where('propertyId', '==', propertyId), where('availabilityStatus', '==', 'available'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setSlots(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsubscribe();
+  }, [propertyId]);
+
+  const handleBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedSlot || !propertyId) return;
+
+    try {
+      await updateDoc(doc(db, 'inspectionSlots', selectedSlot), { availabilityStatus: 'booked' });
+      await addDoc(collection(db, 'applications'), {
+        propertyId,
+        applicantDetails: { name: applicantName, email: applicantEmail, phone: applicantPhone },
+        status: 'pending',
+        submissionDate: new Date().toISOString()
+      });
+      alert('Inspection booked and application submitted!');
+      navigate('/');
+    } catch (error) {
+      console.error('Error booking inspection: ', error);
+    }
+  };
+
+  return (
+    <div className="max-w-xl mx-auto py-12">
+      <div className="bg-white p-10 rounded-3xl border border-slate-100 shadow-sm space-y-8">
+        <h2 className="text-3xl font-extrabold tracking-tighter text-slate-900">Book Inspection</h2>
+        <form onSubmit={handleBooking} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-slate-700">Select Available Time</label>
+            <select value={selectedSlot} onChange={(e) => setSelectedSlot(e.target.value)} className="w-full border border-slate-200 p-4 rounded-xl" required>
+              <option value="">Choose a slot...</option>
+              {slots.map(slot => (
+                <option key={slot.id} value={slot.id}>{new Date(slot.dateTime).toLocaleString()}</option>
+              ))}
+            </select>
+          </div>
+          <input type="text" placeholder="Your Name" value={applicantName} onChange={(e) => setApplicantName(e.target.value)} className="w-full border border-slate-200 p-4 rounded-xl" required />
+          <input type="email" placeholder="Your Email" value={applicantEmail} onChange={(e) => setApplicantEmail(e.target.value)} className="w-full border border-slate-200 p-4 rounded-xl" required />
+          <input type="tel" placeholder="Your Phone Number" value={applicantPhone} onChange={(e) => setApplicantPhone(e.target.value)} className="w-full border border-slate-200 p-4 rounded-xl" required />
+          <button type="submit" className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition">Confirm Booking</button>
+        </form>
+        <p className="text-sm text-center text-slate-500">
+          Can't make the inspection time, reach out?{' '}
+          <Link to="/contact" className="text-blue-600 font-semibold hover:underline">Contact Us</Link>
+        </p>
+      </div>
+    </div>
+  );
+};

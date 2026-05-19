@@ -1,35 +1,34 @@
-import { Link } from 'react-router-dom'
-import { RefreshCw, Bell, ChartBar as BarChart3, LayoutGrid, Clock, CircleCheck as CheckCircle } from 'lucide-react'
-import PublicNav from '../components/PublicNav'
+import { Link } from 'react-router-dom';
+import PublicNav from '../components/PublicNav';
+import { ShieldCheck, Clock, Calendar, CheckCircle } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
       <PublicNav />
 
       <main className="flex-1 pt-0">
         {/* Hero */}
-        <section className="relative overflow-hidden bg-surface-bright py-16 lg:py-28">
+        <section className="relative overflow-hidden bg-gray-50 py-24 sm:py-32">
           <div className="max-w-7xl mx-auto px-6 md:px-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="flex flex-col gap-4 text-left">
-              <span className="bg-primary-container text-on-primary-container px-4 py-1 rounded-full w-fit text-sm font-semibold">Release v2.0 is out</span>
-              <h1 className="text-5xl font-bold text-on-surface leading-tight tracking-tight">Seamless Bookings for Your Business.</h1>
-              <p className="text-lg text-on-surface-variant max-w-xl leading-relaxed">
-                Manage schedules, track status, and sync with Google Calendar effortlessly. The all-in-one platform designed to scale your service-based business.
+            <div className="flex flex-col gap-6 text-left">
+              <h1 className="text-5xl font-bold text-gray-900 leading-tight tracking-tight">Reliable Field Support for Real Estate Agencies</h1>
+              <p className="text-lg text-gray-600 max-w-xl leading-relaxed">
+                BookPro provides on-demand property inspection and field services to help your agency save time, reduce workload, and enhance client satisfaction. Focus on what you do best—we’ll handle the rest.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 mt-2">
-                <Link to="/login" className="bg-primary text-on-primary text-sm font-semibold px-8 py-3 rounded-xl soft-saas-shadow hover:opacity-90 transition-opacity text-center">
-                  Get Started
+              <div className="flex flex-col sm:flex-row gap-4 mt-4">
+                <Link to="/EngageUs" className="bg-primary text-white text-sm font-semibold px-8 py-3 rounded-xl shadow-md hover:bg-primary/80 transition-all text-center">
+                  Book a Consultation
                 </Link>
-                <button className="border border-outline text-primary text-sm font-semibold px-8 py-3 rounded-xl transition-all hover:bg-surface-container-low">
-                  Book a Demo
-                </button>
+                <Link to="/pricing" className="border border-outline text-primary text-sm font-semibold px-8 py-3 rounded-xl transition-all hover:bg-primary/5">
+                  View Pricing
+                </Link>
               </div>
             </div>
-            <div className="bg-surface-container rounded-2xl overflow-hidden soft-saas-shadow aspect-video border border-outline-variant flex items-center justify-center">
+            <div className="bg-surface-container rounded-2xl overflow-hidden shadow-lg aspect-video border border-outline-variant flex items-center justify-center">
               <img
-                src="https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=800"
-                alt="SaaS Dashboard Preview"
+                src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                alt="Professional Team Collaboration"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -37,79 +36,64 @@ export default function Home() {
         </section>
 
         {/* How it Works */}
-        <section className="py-16 bg-surface">
+        <section className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-6 md:px-10">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-on-surface mb-4">How it Works</h2>
-              <p className="text-base text-on-surface-variant max-w-2xl mx-auto">Getting your booking system up and running is as simple as three steps.</p>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Streamline Your Workflow in 3 Simple Steps</h2>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto">Our process is designed for maximum efficiency, giving you back valuable time to focus on your clients.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
               {[
-                { icon: LayoutGrid, title: 'Choose Service', desc: 'Select the specific service or resource you want to offer for client scheduling.' },
-                { icon: Clock, title: 'Pick Time', desc: 'Clients select their preferred slot from your real-time availability calendar.' },
-                { icon: CheckCircle, title: 'Get Confirmation', desc: 'Instant notifications are sent to both parties, and the event is synced automatically.' },
+                { icon: Calendar, title: '1. Place Your Booking', desc: 'Select the service you need—from condition reports to routine inspections—via our simple online portal.' },
+                { icon: Clock, title: '2. We Complete the Work', desc: 'Our experienced field professionals complete the task to the highest standard, keeping you informed along the way.' },
+                { icon: CheckCircle, title: '3. Receive Your Report', desc: 'Get detailed, timely reports delivered directly to your inbox, ready to be shared with your clients.' },
               ].map((step, i) => (
-                <div key={i} className="flex flex-col items-center text-center p-6 bg-surface-container-low rounded-xl border border-transparent hover:border-outline-variant transition-all">
-                  <div className="bg-primary text-on-primary w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                <div key={i} className="flex flex-col items-center text-center p-8 bg-gray-50 rounded-2xl border border-transparent hover:border-primary/50 transition-all hover:shadow-lg">
+                  <div className="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mb-6">
                     <step.icon size={32} />
                   </div>
-                  <h3 className="text-xl font-semibold text-on-surface mb-2">{step.title}</h3>
-                  <p className="text-sm text-on-surface-variant">{step.desc}</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">{step.title}</h3>
+                  <p className="text-base text-gray-600">{step.desc}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Core Features */}
-        <section className="py-16 bg-surface-bright">
+        {/* Core Services */}
+        <section className="py-24 bg-gray-100">
           <div className="max-w-7xl mx-auto px-6 md:px-10">
-            <div className="flex flex-col md:flex-row justify-between items-end gap-4 mb-12">
-              <div className="max-w-xl">
-                <h2 className="text-3xl font-bold text-on-surface mb-4">Core Features</h2>
-                <p className="text-base text-on-surface-variant">Powerful tools designed for growing businesses.</p>
-              </div>
+            <div className="text-center mb-16">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Partner in Property Management</h2>
+                <p className="text-lg text-gray-600 max-w-3xl mx-auto">We offer a comprehensive suite of services designed to support real estate agencies at every stage of the tenancy lifecycle.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-              <div className="md:col-span-8 bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant soft-saas-shadow flex flex-col md:flex-row items-center gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+              <div className="md:col-span-7 bg-white p-10 rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row items-center gap-8">
                 <div className="flex-1 space-y-4">
-                  <div className="bg-secondary-container text-on-secondary-container w-12 h-12 rounded-lg flex items-center justify-center">
-                    <RefreshCw size={24} />
-                  </div>
-                  <h3 className="text-xl font-semibold text-on-surface">Google Calendar Sync</h3>
-                  <p className="text-sm text-on-surface-variant">Bidirectional synchronization ensures your personal and professional calendars never conflict.</p>
+                  <h3 className="text-2xl font-semibold text-gray-900">Property Condition Reports</h3>
+                  <p className="text-base text-gray-600">Detailed, unbiased reports with high-quality photos to accurately document property condition at the start of a tenancy.</p>
+                  <Link to="/services" className="text-primary font-semibold">Learn more →</Link>
                 </div>
-                <div className="w-full md:w-1/2 bg-surface-container h-48 rounded-xl overflow-hidden">
-                  <img
-                    src="https://images.pexels.com/photos/3739263/pexels-photo-3739263.jpeg?auto=compress&cs=tinysrgb&w=600"
-                    alt="Calendar Sync"
-                    className="w-full h-full object-cover"
-                  />
+                <div className="w-full md:w-1/3 bg-gray-100 h-48 rounded-xl overflow-hidden">
+                  <img src="https://images.pexels.com/photos/534247/pexels-photo-534247.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Property Report" className="w-full h-full object-cover"/>
                 </div>
               </div>
-              <div className="md:col-span-4 bg-primary text-on-primary p-8 rounded-2xl soft-saas-shadow flex flex-col justify-between">
+              <div className="md:col-span-5 bg-primary text-white p-10 rounded-2xl shadow-lg flex flex-col justify-between">
                 <div className="space-y-4">
-                  <div className="bg-white/20 w-12 h-12 rounded-lg flex items-center justify-center">
-                    <Bell size={24} />
-                  </div>
-                  <h3 className="text-xl font-semibold">Real-time Status</h3>
-                  <p className="text-sm opacity-90">Track every booking status from pending to completed. Get push notifications for every new appointment.</p>
+                  <ShieldCheck size={32} />
+                  <h3 className="text-2xl font-semibold">Routine & Exit Inspections</h3>
+                  <p className="text-base opacity-90">Ensure properties are being maintained and manage tenancy handovers smoothly with our professional inspection services.</p>
+                  <Link to="/services" className="text-white font-semibold underline">Explore all services</Link>
                 </div>
               </div>
-              <div className="md:col-span-12 bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant soft-saas-shadow flex flex-col lg:flex-row-reverse items-center gap-8">
+              <div className="md:col-span-12 bg-white p-10 rounded-2xl border border-gray-200 shadow-sm flex flex-col lg:flex-row-reverse items-center gap-8">
                 <div className="flex-1 space-y-4">
-                  <div className="bg-tertiary-container text-on-tertiary-container w-12 h-12 rounded-lg flex items-center justify-center">
-                    <BarChart3 size={24} />
-                  </div>
-                  <h3 className="text-xl font-semibold text-on-surface">Admin Dashboard</h3>
-                  <p className="text-base text-on-surface-variant">A comprehensive overview of your business performance with intuitive data visualizations.</p>
+                   <h3 className="text-2xl font-semibold text-gray-900">A Full Suite of Support Services</h3>
+                  <p className="text-base text-gray-600">From attending viewings to coordinating maintenance and providing 3D virtual tours, we offer a wide range of services to give your team the capacity it needs to grow.</p>
+                  <Link to="/services" className="text-primary font-semibold">Discover how we can help →</Link>
                 </div>
-                <div className="w-full lg:w-3/5 bg-surface-container rounded-xl overflow-hidden h-64">
-                  <img
-                    src="https://images.pexels.com/photos/669615/pexels-photo-669615.jpeg?auto=compress&cs=tinysrgb&w=800"
-                    alt="Analytics Dashboard"
-                    className="w-full h-full object-cover"
-                  />
+                <div className="w-full lg:w-2/5 bg-gray-100 rounded-xl overflow-hidden h-64">
+                  <img src="https://images.pexels.com/photos/4050318/pexels-photo-4050318.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Virtual Tour Creation" className="w-full h-full object-cover"/>
                 </div>
               </div>
             </div>
@@ -117,32 +101,32 @@ export default function Home() {
         </section>
 
         {/* CTA */}
-        <section className="py-16 bg-on-surface">
+        <section className="py-24 bg-primary">
           <div className="max-w-7xl mx-auto px-6 md:px-10 text-center">
-            <h2 className="text-3xl font-bold text-surface-bright mb-4">Ready to streamline your workflow?</h2>
-            <p className="text-lg text-outline-variant mb-8 max-w-xl mx-auto">Join over 5,000 businesses already using BookPro to manage their daily schedules.</p>
+            <h2 className="text-3xl font-bold text-white mb-4">Ready to Enhance Your Agency's Efficiency?</h2>
+            <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">Let BookPro handle the fieldwork so you can focus on building client relationships and growing your business.</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/login" className="bg-primary text-on-primary text-sm font-semibold px-8 py-3 rounded-xl hover:opacity-90 transition-opacity">
-                Get Started Free
+              <Link to="/EngageUs" className="bg-white text-primary text-sm font-semibold px-8 py-3 rounded-xl hover:bg-gray-100 transition-all">
+                Book a Free Consultation
               </Link>
-              <button className="border border-outline-variant text-surface-bright text-sm font-semibold px-8 py-3 rounded-xl transition-all">
-                Talk to Sales
-              </button>
+              <Link to="/about" className="border border-white/50 text-white text-sm font-semibold px-8 py-3 rounded-xl transition-all hover:bg-white/10">
+                About Us
+              </Link>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="bg-on-surface border-t border-outline-variant w-full py-8">
+      <footer className="bg-gray-900 border-t border-gray-800 w-full py-8">
         <div className="flex flex-col md:flex-row justify-between items-center px-10 gap-6 w-full max-w-7xl mx-auto">
           <div className="flex flex-col gap-1">
-            <span className="text-xl font-semibold text-surface-bright">BookPro</span>
-            <p className="text-sm text-outline-variant">&copy; 2024 BookPro Inc. All rights reserved.</p>
+            <span className="text-xl font-semibold text-white">BookPro</span>
+            <p className="text-sm text-gray-400">&copy; 2024 BookPro Inc. All rights reserved.</p>
           </div>
           <div className="flex gap-8">
-            <a href="#" className="text-sm text-outline-variant hover:text-primary-fixed-dim transition-colors">Privacy Policy</a>
-            <a href="#" className="text-sm text-outline-variant hover:text-primary-fixed-dim transition-colors">Terms of Service</a>
-            <a href="#" className="text-sm text-outline-variant hover:text-primary-fixed-dim transition-colors">Contact Support</a>
+            <Link to="/about" className="text-sm text-gray-400 hover:text-primary transition-colors">About</Link>
+            <Link to="/pricing" className="text-sm text-gray-400 hover:text-primary transition-colors">Pricing</Link>
+            <Link to="/EngageUs" className="text-sm text-gray-400 hover:text-primary transition-colors">Contact</Link>
           </div>
         </div>
       </footer>

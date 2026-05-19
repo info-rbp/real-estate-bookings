@@ -10,6 +10,13 @@ import Bookings from './pages/Bookings'
 import Settings from './pages/Settings'
 import BookService from './pages/BookService'
 import DashboardLayout from './components/DashboardNav'
+import Subscription from './pages/Subscription'
+import EngageUs from './pages/EngageUs'
+import Properties from './pages/Properties'
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe('pk_test_51T2OhgS9Az4EAUom3ZVILSDU99OoiPdP0qSozhHsz9TuPIAXUXRsyoqqlR2NQi0xrvbZR7R328Dvjn2itRZOfsvL00tPQYHlLZ');
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -34,6 +41,18 @@ const router = createBrowserRouter([
     {
         path: "/about",
         element: <About />,
+    },
+    {
+        path: "/subscription",
+        element: <Subscription />,
+    },
+    {
+        path: "/engage-us",
+        element: <EngageUs />,
+    },
+    {
+        path: "/properties",
+        element: <Properties />,
     },
     {
         path: "/login",
@@ -84,7 +103,9 @@ const router = createBrowserRouter([
 export default function App() {
   return (
     <AuthProvider>
-        <RouterProvider router={router} />
+        <Elements stripe={stripePromise}>
+            <RouterProvider router={router} />
+        </Elements>
     </AuthProvider>
   )
 }
