@@ -18,7 +18,7 @@ export default function Home() {
                 BookPro provides on-demand property inspection and field services to help your agency save time, reduce workload, and enhance client satisfaction. Focus on what you do best—we’ll handle the rest.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                <Link to="/EngageUs" className="bg-primary text-white text-sm font-semibold px-8 py-3 rounded-xl shadow-md hover:bg-primary/80 transition-all text-center">
+                <Link to="/engage-us" className="bg-primary text-white text-sm font-semibold px-8 py-3 rounded-xl shadow-md hover:bg-primary/80 transition-all text-center">
                   Book a Consultation
                 </Link>
                 <Link to="/pricing" className="border border-outline text-primary text-sm font-semibold px-8 py-3 rounded-xl transition-all hover:bg-primary/5">
@@ -107,7 +107,7 @@ export default function Home() {
             <h2 className="text-3xl font-bold text-white mb-4">Ready to Enhance Your Agency's Efficiency?</h2>
             <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">Let BookPro handle the fieldwork so you can focus on building client relationships and growing your business.</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/EngageUs" className="bg-white text-primary text-sm font-semibold px-8 py-3 rounded-xl hover:bg-gray-100 transition-all">
+              <Link to="/engage-us" className="bg-white text-primary text-sm font-semibold px-8 py-3 rounded-xl hover:bg-gray-100 transition-all">
                 Book a Free Consultation
               </Link>
               <Link to="/about" className="border border-white/50 text-white text-sm font-semibold px-8 py-3 rounded-xl transition-all hover:bg-white/10">
