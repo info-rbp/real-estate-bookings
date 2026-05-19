@@ -4,18 +4,8 @@ import { useAuth } from '../hooks/useAuth'
 import type { Service } from '../types/database'
 import ProgressBar from '../components/ProgressBar'
 import { CircleCheck as CheckCircle, CircleAlert as AlertCircle } from 'lucide-react'
-
-const mockServices: Service[] = [
-  { id: '1', name: 'Standard Inspection', description: 'A comprehensive inspection of the property.', price: 250, price_type: 'fixed', duration_minutes: 120, is_active: true, icon_name: 'assignment', category: 'Inspections', created_at: '2024-01-01T00:00:00.000Z' },
-  { id: '2', name: 'Pest & Termite Inspection', description: 'Specialized inspection for pests and termites.', price: 150, price_type: 'fixed', duration_minutes: 90, is_active: true, icon_name: 'shield_with_house', category: 'Inspections', created_at: '2024-01-01T00:00:00.000Z' },
-  { id: '3', name: 'Pool & Spa Inspection', description: 'Inspection of the pool and spa equipment.', price: 100, price_type: 'fixed', duration_minutes: 60, is_active: true, icon_name: 'build', category: 'Inspections', created_at: '2024-01-01T00:00:00.000Z' },
-  { id: '4', name: 'Handover Report', description: 'A detailed report for property handover.', price: 300, price_type: 'fixed', duration_minutes: 180, is_active: true, icon_name: 'event_repeat', category: 'Reports', created_at: '2024-01-01T00:00:00.000Z' },
-];
-
-const mockCalendarEvents = [
-  { id: '1', title: 'Booked Slot', start: '2024-08-01T10:30:00', end: '2024-08-01T12:30:00', isAllDay: false },
-  { id: '2', title: 'Booked Slot', start: '2024-08-01T14:30:00', end: '2024-08-01T16:00:00', isAllDay: false },
-];
+import { listActiveServices } from '../lib/services'
+import { createBooking } from '../lib/bookings'
 
 const steps = [
   { label: 'Services' },
@@ -51,9 +41,36 @@ export default function BookService() {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([])
   const [loadingCalendar, setLoadingCalendar] = useState(false)
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
+  const [loadingServices, setLoadingServices] = useState(true)
+  const [serviceError, setServiceError] = useState('')
+  const [bookingError, setBookingError] = useState('')
 
   useEffect(() => {
-    setServices(mockServices);
+    let mounted = true
+
+    async function loadServices() {
+      setLoadingServices(true)
+      setServiceError('')
+
+      try {
+        const nextServices = await listActiveServices()
+        if (!mounted) return
+        setServices(nextServices)
+      } catch (error) {
+        if (!mounted) return
+        setServiceError(error instanceof Error ? error.message : 'Unable to load services right now.')
+      } finally {
+        if (mounted) {
+          setLoadingServices(false)
+        }
+      }
+    }
+
+    loadServices()
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   useEffect(() => {
@@ -67,9 +84,9 @@ export default function BookService() {
   }, [bookingDate, selectedService, calendarEvents])
 
   async function fetchCalendarEvents() {
-    setLoadingCalendar(true);
-    setCalendarEvents(mockCalendarEvents);
-    setLoadingCalendar(false);
+    setLoadingCalendar(true)
+    setCalendarEvents([])
+    setLoadingCalendar(false)
   }
 
   function calculateAvailableSlots() {
@@ -105,25 +122,31 @@ export default function BookService() {
   async function handleConfirm() {
     if (!profile || !selectedService) return
     setSubmitting(true)
-    console.log('Creating booking:', {
-      user_id: profile.$id,
-      service_id: selectedService.id,
-      property_address: propertyAddress,
-      property_city: propertyCity,
-      property_postal_code: propertyPostalCode,
-      property_type: propertyType,
-      access_method: accessMethod,
-      access_instructions: accessInstructions,
-      booking_date: bookingDate,
-      booking_time: bookingTime,
-      duration_minutes: selectedService.duration_minutes,
-      status: 'pending',
-      base_price: basePrice,
-      travel_surcharge: travelSurcharge,
-      total_price: totalPrice,
-    });
-    setSubmitting(false)
-    setConfirmed(true)
+    setBookingError('')
+
+    try {
+      await createBooking({
+        profile,
+        service: selectedService,
+        propertyAddress,
+        propertyCity,
+        propertyPostalCode,
+        propertyType,
+        accessMethod,
+        accessInstructions,
+        bookingDate,
+        bookingTime,
+        durationMinutes: selectedService.duration_minutes,
+        basePrice,
+        travelSurcharge,
+        totalPrice,
+      })
+      setConfirmed(true)
+    } catch (error) {
+      setBookingError(error instanceof Error ? error.message : 'Unable to create your booking right now.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (confirmed) {
@@ -133,8 +156,8 @@ export default function BookService() {
           <div className="w-20 h-20 rounded-full bg-success-light flex items-center justify-center mx-auto mb-6">
             <CheckCircle size={40} className="text-success" />
           </div>
-          <h2 className="text-3xl font-bold text-on-surface mb-3">Booking Confirmed!</h2>
-          <p className="text-base text-on-surface-variant mb-8">Your {selectedService?.name} has been booked successfully. You will receive a confirmation email shortly.</p>
+          <h2 className="text-3xl font-bold text-on-surface mb-3">Booking Created</h2>
+          <p className="text-base text-on-surface-variant mb-8">Your {selectedService?.name} request has been saved and is pending confirmation.</p>
           <div className="flex gap-4 justify-center">
             <button onClick={() => navigate('/dashboard/bookings')} className="bg-primary text-on-primary text-sm font-semibold px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
               View My Bookings
@@ -158,31 +181,38 @@ export default function BookService() {
             <h1 className="text-3xl font-bold text-on-surface mb-2">Select a Service</h1>
             <p className="text-base text-on-surface-variant">Choose the inspection or management service required for your property.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-            {services.map(service => (
-              <div
-                key={service.id}
-                onClick={() => setSelectedService(service)}
-                className={`md:col-span-6 cursor-pointer bg-surface-container-lowest border rounded-xl p-6 soft-saas-shadow transition-all hover:border-primary active:scale-[0.98] ${
-                  selectedService?.id === service.id ? 'border-primary bg-surface-container' : 'border-outline-variant'
-                }`}
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-lg font-semibold text-on-surface">{service.name}</h3>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    selectedService?.id === service.id ? 'bg-primary text-on-primary' : 'bg-secondary-container text-on-secondary-container'
-                  }`}>
-                    {service.price_type === 'quote' ? 'Quote Based' : service.price_type === 'hourly' ? `$${service.price}/hr` : `$${service.price}`}
-                  </span>
+          {serviceError && <div className="mb-6 rounded-lg border border-error/30 bg-error/10 p-4 text-sm font-medium text-error">{serviceError}</div>}
+          {loadingServices ? (
+            <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-8 text-center text-on-surface-variant">Loading services...</div>
+          ) : services.length === 0 ? (
+            <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-8 text-center text-on-surface-variant">No active services are available yet.</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+              {services.map(service => (
+                <div
+                  key={service.id}
+                  onClick={() => setSelectedService(service)}
+                  className={`md:col-span-6 cursor-pointer bg-surface-container-lowest border rounded-xl p-6 soft-saas-shadow transition-all hover:border-primary active:scale-[0.98] ${
+                    selectedService?.id === service.id ? 'border-primary bg-surface-container' : 'border-outline-variant'
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-lg font-semibold text-on-surface">{service.name}</h3>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      selectedService?.id === service.id ? 'bg-primary text-on-primary' : 'bg-secondary-container text-on-secondary-container'
+                    }`}>
+                      {service.price_type === 'quote' ? 'Quote Based' : service.price_type === 'hourly' ? `$${service.price}/hr` : `$${service.price}`}
+                    </span>
+                  </div>
+                  <p className="text-sm text-on-surface-variant mb-4">{service.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-primary">Select Service</span>
+                    {selectedService?.id === service.id && <CheckCircle size={20} className="text-primary" />}
+                  </div>
                 </div>
-                <p className="text-sm text-on-surface-variant mb-4">{service.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-primary">Select Service</span>
-                  {selectedService?.id === service.id && <CheckCircle size={20} className="text-primary" />}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -196,18 +226,18 @@ export default function BookService() {
               <div className="space-y-5">
                 <div>
                   <label className="text-sm font-semibold text-on-surface-variant mb-1 block">Street Address</label>
-                  <input type="text" value={propertyAddress} onChange={e => setPropertyAddress(e.target.value)} placeholder="123 Real Estate Ave, Suite 4B"
+                  <input type="text" value={propertyAddress} onChange={e => setPropertyAddress(e.target.value)} placeholder="123 Real Estate Ave"
                     className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-surface-bright text-sm" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-semibold text-on-surface-variant mb-1 block">City</label>
-                    <input type="text" value={propertyCity} onChange={e => setPropertyCity(e.target.value)} placeholder="New York"
+                    <label className="text-sm font-semibold text-on-surface-variant mb-1 block">Suburb / City</label>
+                    <input type="text" value={propertyCity} onChange={e => setPropertyCity(e.target.value)} placeholder="Perth"
                       className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-surface-bright text-sm" />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold text-on-surface-variant mb-1 block">Postal Code</label>
-                    <input type="text" value={propertyPostalCode} onChange={e => setPropertyPostalCode(e.target.value)} placeholder="10001"
+                    <label className="text-sm font-semibold text-on-surface-variant mb-1 block">Postcode</label>
+                    <input type="text" value={propertyPostalCode} onChange={e => setPropertyPostalCode(e.target.value)} placeholder="6000"
                       className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-surface-bright text-sm" />
                   </div>
                 </div>
@@ -300,7 +330,7 @@ export default function BookService() {
           <div className="lg:col-span-5 space-y-6">
             <div className="bg-surface-container-lowest p-6 rounded-xl soft-saas-shadow border border-outline-variant">
               <h3 className="text-sm font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Available Slots</h3>
-              {bookingDate && <p className="text-sm text-on-surface-variant mb-4">{new Date(bookingDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>}
+              {bookingDate && <p className="text-sm text-on-surface-variant mb-4">{new Date(bookingDate + 'T12:00:00').toLocaleDateString('en-AU', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>}
 
               {loadingCalendar ? (
                 <div className="text-center py-4 text-on-surface-variant">Loading calendar...</div>
@@ -339,7 +369,7 @@ export default function BookService() {
                 <h4 className="text-sm font-semibold text-on-primary-container mb-3">Appointment Summary</h4>
                 <div className="space-y-2">
                   {bookingDate && (
-                    <p className="text-sm text-on-primary-container">{new Date(bookingDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                    <p className="text-sm text-on-primary-container">{new Date(bookingDate + 'T12:00:00').toLocaleDateString('en-AU', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                   )}
                   <p className="text-sm text-on-primary-container">{formatTime(bookingTime)} - {formatTime(addHours(bookingTime, selectedService.duration_minutes / 60))} ({selectedService.duration_minutes}m)</p>
                   <p className="text-sm text-on-primary-container">{selectedService.name}</p>
@@ -379,7 +409,7 @@ export default function BookService() {
                   <p className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">Scheduled Time</p>
                   {bookingDate && (
                     <p className="text-base font-bold text-on-surface">
-                      {new Date(bookingDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                      {new Date(bookingDate + 'T12:00:00').toLocaleDateString('en-AU', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                     </p>
                   )}
                   <p className="text-sm font-bold text-on-surface">{formatTime(bookingTime)} - {formatTime(addHours(bookingTime, selectedService.duration_minutes / 60))}</p>
@@ -392,6 +422,7 @@ export default function BookService() {
               <section className="bg-surface-container-lowest soft-saas-shadow rounded-xl p-6 border border-outline-variant/30 overflow-hidden relative">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
                 <h2 className="text-lg font-semibold text-on-surface mb-5">Order Summary</h2>
+                {bookingError && <div className="mb-4 rounded-lg border border-error/30 bg-error/10 p-3 text-sm font-medium text-error">{bookingError}</div>}
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between items-center text-on-surface-variant">
                     <span className="text-sm">Base Service Fee</span>
@@ -412,7 +443,7 @@ export default function BookService() {
                     disabled={submitting}
                     className="w-full bg-primary text-on-primary text-sm font-bold py-3 px-4 rounded-lg hover:opacity-90 active:scale-95 transition-all flex justify-center items-center gap-2 shadow-lg disabled:opacity-50"
                   >
-                    {submitting ? 'Confirming...' : 'Confirm Booking'}
+                    {submitting ? 'Saving...' : 'Confirm Booking'}
                   </button>
                 </div>
                 <p className="mt-4 text-center text-xs text-on-surface-variant italic">
