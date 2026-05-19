@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { ID, Models, Permission, Query, Role } from 'appwrite'
-import { account, appwriteConfig, databases, isAppwriteConfigured } from '../lib/appwrite'
+import { ID, Models, Query } from 'appwrite'
+import { account, appwriteConfig, databases, functions, isAppwriteConfigured } from '../lib/appwrite'
 
-export type AppUserRole = 'admin' | 'staff' | 'client' | 'client_admin' | 'client_user'
+export type AppUserRole = 'admin' | 'staff' | 'client_admin' | 'client_user' | 'pending'
 
 export interface AppProfile {
   $id: string
@@ -16,8 +16,12 @@ export interface AppProfile {
   sms_notifications: boolean
   two_factor_enabled: boolean
   role: AppUserRole
+  status: 'pending' | 'active' | 'disabled' | 'invited'
   avatar_url: string | null
 }
+
+type EditableProfileField = 'full_name' | 'phone' | 'timezone' | 'email_notifications' | 'sms_notifications' | 'avatar_url'
+export type EditableProfileUpdates = Partial<Pick<AppProfile, EditableProfileField>>
 
 interface AuthResult {
   error: string | null
@@ -34,11 +38,13 @@ interface AuthContextType {
   requestPasswordReset: (email: string) => Promise<{ error: string | null }>
   sendEmailVerification: () => Promise<{ error: string | null }>
   refreshProfile: () => Promise<AppProfile | null>
-  updateProfile: (updates: Partial<AppProfile>) => Promise<{ error: string | null }>
+  updateProfile: (updates: EditableProfileUpdates) => Promise<{ error: string | null }>
   hasRole: (roles: AppUserRole | AppUserRole[]) => boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const safeProfileFields: EditableProfileField[] = ['full_name', 'phone', 'timezone', 'email_notifications', 'sms_notifications', 'avatar_url']
+const validRoles: AppUserRole[] = ['admin', 'staff', 'client_admin', 'client_user', 'pending']
 
 function getProfileDefaults(user: Models.User<Models.Preferences>): AppProfile {
   return {
@@ -52,12 +58,58 @@ function getProfileDefaults(user: Models.User<Models.Preferences>): AppProfile {
     email_notifications: true,
     sms_notifications: false,
     two_factor_enabled: false,
-    role: 'client',
+    role: 'pending',
+    status: 'pending',
     avatar_url: null,
   }
 }
 
-async function fetchProfile(userId: string): Promise<AppProfile | null> {
+function normalizeProfile(user: Models.User<Models.Preferences>, document?: Partial<AppProfile> | null): AppProfile {
+  const defaults = getProfileDefaults(user)
+  const role = document?.role && validRoles.includes(document.role) ? document.role : 'pending'
+
+  return {
+    ...defaults,
+    ...document,
+    $id: document?.$id || user.$id,
+    appwriteUserId: document?.appwriteUserId || user.$id,
+    clientId: document?.clientId || null,
+    email: document?.email || user.email,
+    full_name: document?.full_name || user.name || user.email,
+    phone: document?.phone || null,
+    timezone: document?.timezone || defaults.timezone,
+    email_notifications: document?.email_notifications ?? true,
+    sms_notifications: document?.sms_notifications ?? false,
+    two_factor_enabled: document?.two_factor_enabled ?? false,
+    role,
+    status: document?.status || 'pending',
+    avatar_url: document?.avatar_url || null,
+  }
+}
+
+function sanitizeProfileUpdates(updates: EditableProfileUpdates): EditableProfileUpdates {
+  return safeProfileFields.reduce<EditableProfileUpdates>((safeUpdates, field) => {
+    if (Object.prototype.hasOwnProperty.call(updates, field)) {
+      safeUpdates[field] = updates[field] as never
+    }
+    return safeUpdates
+  }, {})
+}
+
+function parseProfileExecutionResponse(responseBody?: string): AppProfile | null {
+  if (!responseBody) {
+    return null
+  }
+
+  try {
+    const parsed = JSON.parse(responseBody) as { profile?: AppProfile }
+    return parsed.profile || null
+  } catch {
+    return null
+  }
+}
+
+async function fetchProfile(user: Models.User<Models.Preferences>): Promise<AppProfile | null> {
   if (!appwriteConfig.databaseId || !appwriteConfig.usersCollectionId) {
     return null
   }
@@ -66,64 +118,21 @@ async function fetchProfile(userId: string): Promise<AppProfile | null> {
     const document = await databases.getDocument({
       databaseId: appwriteConfig.databaseId,
       collectionId: appwriteConfig.usersCollectionId,
-      documentId: userId,
+      documentId: user.$id,
     })
 
-    return document as unknown as AppProfile
+    return normalizeProfile(user, document as unknown as Partial<AppProfile>)
   } catch {
     try {
       const response = await databases.listDocuments({
         databaseId: appwriteConfig.databaseId,
         collectionId: appwriteConfig.usersCollectionId,
-        queries: [Query.equal('appwriteUserId', userId), Query.limit(1)],
+        queries: [Query.equal('appwriteUserId', user.$id), Query.limit(1)],
       })
 
-      return (response.documents[0] as unknown as AppProfile) || null
+      return response.documents[0] ? normalizeProfile(user, response.documents[0] as unknown as Partial<AppProfile>) : null
     } catch {
       return null
-    }
-  }
-}
-
-async function upsertProfile(user: Models.User<Models.Preferences>, overrides?: Partial<AppProfile>): Promise<AppProfile | null> {
-  if (!appwriteConfig.databaseId || !appwriteConfig.usersCollectionId) {
-    return getProfileDefaults(user)
-  }
-
-  const data = {
-    ...getProfileDefaults(user),
-    ...overrides,
-    appwriteUserId: user.$id,
-    email: overrides?.email || user.email,
-    full_name: overrides?.full_name || user.name || user.email,
-  }
-
-  try {
-    const updated = await databases.updateDocument({
-      databaseId: appwriteConfig.databaseId,
-      collectionId: appwriteConfig.usersCollectionId,
-      documentId: user.$id,
-      data,
-    })
-
-    return updated as unknown as AppProfile
-  } catch {
-    try {
-      const created = await databases.createDocument({
-        databaseId: appwriteConfig.databaseId,
-        collectionId: appwriteConfig.usersCollectionId,
-        documentId: user.$id,
-        data,
-        permissions: [
-          Permission.read(Role.user(user.$id)),
-          Permission.update(Role.user(user.$id)),
-          Permission.delete(Role.user(user.$id)),
-        ],
-      })
-
-      return created as unknown as AppProfile
-    } catch {
-      return data
     }
   }
 }
@@ -139,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return null
     }
 
-    const nextProfile = (await fetchProfile(user.$id)) || getProfileDefaults(user)
+    const nextProfile = (await fetchProfile(user)) || getProfileDefaults(user)
     setProfile(nextProfile)
     return nextProfile
   }
@@ -157,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       try {
         const currentUser = await account.get()
-        const currentProfile = (await fetchProfile(currentUser.$id)) || getProfileDefaults(currentUser)
+        const currentProfile = (await fetchProfile(currentUser)) || getProfileDefaults(currentUser)
 
         if (!mounted) {
           return
@@ -202,7 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await account.createEmailPasswordSession({ email, password })
 
       const currentUser = await account.get()
-      const nextProfile = await upsertProfile(currentUser, { full_name: fullName, role: 'client' })
+      const nextProfile = (await fetchProfile(currentUser)) || getProfileDefaults(currentUser)
 
       setUser(currentUser)
       setProfile(nextProfile)
@@ -221,7 +230,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await account.createEmailPasswordSession({ email, password })
       const currentUser = await account.get()
-      const currentProfile = (await fetchProfile(currentUser.$id)) || (await upsertProfile(currentUser)) || getProfileDefaults(currentUser)
+      const currentProfile = (await fetchProfile(currentUser)) || getProfileDefaults(currentUser)
 
       setUser(currentUser)
       setProfile(currentProfile)
@@ -276,25 +285,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  async function updateProfile(updates: Partial<AppProfile>) {
+  async function updateProfile(updates: EditableProfileUpdates) {
     if (!user) {
       return { error: 'Not authenticated.' }
     }
 
-    if (!appwriteConfig.databaseId || !appwriteConfig.usersCollectionId) {
-      setProfile((previous) => (previous ? { ...previous, ...updates } : null))
+    const safeUpdates = sanitizeProfileUpdates(updates)
+
+    if (Object.keys(safeUpdates).length === 0) {
       return { error: null }
     }
 
-    try {
-      const updated = await databases.updateDocument({
-        databaseId: appwriteConfig.databaseId,
-        collectionId: appwriteConfig.usersCollectionId,
-        documentId: user.$id,
-        data: updates,
-      })
+    if (!appwriteConfig.profileUpdateFunctionId) {
+      return { error: 'Profile updates require the profile update Appwrite Function.' }
+    }
 
-      setProfile(updated as unknown as AppProfile)
+    try {
+      const execution = (await functions.createExecution({
+        functionId: appwriteConfig.profileUpdateFunctionId,
+        body: JSON.stringify(safeUpdates),
+        async: false,
+        method: 'POST',
+      })) as unknown as { responseBody?: string; responseStatusCode?: number }
+
+      if (execution.responseStatusCode && execution.responseStatusCode >= 400) {
+        return { error: 'Unable to save your profile changes.' }
+      }
+
+      const updatedProfile = parseProfileExecutionResponse(execution.responseBody)
+      setProfile((previous) => (updatedProfile ? normalizeProfile(user, updatedProfile) : previous ? { ...previous, ...safeUpdates } : null))
       return { error: null }
     } catch (error) {
       return { error: error instanceof Error ? error.message : 'Unable to save your profile changes.' }
