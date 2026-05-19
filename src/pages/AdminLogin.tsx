@@ -1,39 +1,31 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient'; // Assuming you have this client
+import { useAuth } from '../hooks/useAuth';
 
 export const AdminLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const { signIn } = useAuth();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        try {
-            const { data: user, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        
+        // Mock admin credentials
+        const isAdmin = email === 'admin@example.com' && password === 'password';
 
-            if (signInError) throw signInError;
-
-            // Check if user is in AdminUsers collection
-            const { data: adminUser, error: adminError } = await supabase
-                .from('adminUsers')
-                .select('email')
-                .eq('email', email)
-                .single();
-
-            if (adminError || !adminUser) {
-                await supabase.auth.signOut();
-                setError('Unauthorized: You do not have admin access.');
-                return;
+        if (isAdmin) {
+            // Using the mock signIn from useAuth
+            const { error } = await signIn(email, password);
+            if (error) {
+                setError(error);
+            } else {
+                navigate('/admin/dashboard');
             }
-            
-            navigate('/admin/dashboard');
-
-        } catch (err: any) {
-            setError(err.message);
+        } else {
+            setError('Unauthorized: You do not have admin access.');
         }
     };
 

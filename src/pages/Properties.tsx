@@ -1,4 +1,5 @@
 import PublicNav from '../components/PublicNav';
+import Footer from '../components/Footer';
 import { Link } from 'react-router-dom';
 import { MapPin, BedDouble, Bath, Car, Search } from 'lucide-react';
 
@@ -94,13 +95,7 @@ export default function PropertiesPage() {
                     </div>
                 </div>
             </main>
-            <footer className="bg-gray-900" aria-labelledby="footer-heading">
-                <div className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8 lg:pt-32">
-                    <div className="mt-16 border-t border-white/10 pt-8 sm:mt-20 lg:mt-24">
-                        <p className="text-xs leading-5 text-gray-400">&copy; 2024 BookPro Inc. All rights reserved.</p>
-                    </div>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 }

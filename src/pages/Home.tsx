@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import PublicNav from '../components/PublicNav';
+import Footer from '../components/Footer';
 import { ShieldCheck, Clock, Calendar, CheckCircle } from 'lucide-react';
 
 export default function Home() {
@@ -117,19 +118,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-gray-900 border-t border-gray-800 w-full py-8">
-        <div className="flex flex-col md:flex-row justify-between items-center px-10 gap-6 w-full max-w-7xl mx-auto">
-          <div className="flex flex-col gap-1">
-            <span className="text-xl font-semibold text-white">BookPro</span>
-            <p className="text-sm text-gray-400">&copy; 2024 BookPro Inc. All rights reserved.</p>
-          </div>
-          <div className="flex gap-8">
-            <Link to="/about" className="text-sm text-gray-400 hover:text-primary transition-colors">About</Link>
-            <Link to="/pricing" className="text-sm text-gray-400 hover:text-primary transition-colors">Pricing</Link>
-            <Link to="/EngageUs" className="text-sm text-gray-400 hover:text-primary transition-colors">Contact</Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

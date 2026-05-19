@@ -1,13 +1,39 @@
-'''
+
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
 import { Room, RentalType } from '../types/property';
+
+// Mock Data
+const mockProperties = [
+    { id: '1', title: '123 Ocean View Drive', description: 'A beautiful villa by the sea.', address: '123 Ocean View Drive, Sunnydale', details: { rooms: 4, bathrooms: 3, carSpaces: 2 }, rentalType: 'whole_property', rooms: [], propertyLevelRent: 4500, propertyLevelBond: 18000, images: [], features: [], availability: true, isFeatured: true, updatedAt: new Date().toISOString(), createdAt: new Date().toISOString() },
+    { id: '2', title: '789 Central Square', description: 'A modern loft in the heart of the city.', address: '789 Central Square, Metro City', details: { rooms: 2, bathrooms: 2, carSpaces: 1 }, rentalType: 'room_by_room', rooms: [{id: 'r1', name:'Master', photo:'', rent:1200, bond:4800}], propertyLevelRent: 0, propertyLevelBond: 0, images: [], features: [], availability: true, isFeatured: false, updatedAt: new Date().toISOString(), createdAt: new Date().toISOString() }
+];
+
+const mockApplications = [
+    { id: 'app1', applicantDetails: { name: 'John Doe', email: 'john.doe@example.com' }, propertyId: '1', status: 'Pending' },
+    { id: 'app2', applicantDetails: { name: 'Jane Smith', email: 'jane.smith@example.com' }, propertyId: '2', status: 'Approved' }
+];
+
+const mockInspectionSlots = [
+    { id: 'slot1', propertyId: '1', dateTime: new Date(Date.now() + 24 * 3600 * 1000).toISOString() },
+    { id: 'slot2', propertyId: '1', dateTime: new Date(Date.now() + 48 * 3600 * 1000).toISOString() }
+];
+
+const mockLandlordSubmissions = [
+    { id: 'sub1', landlord: { fullName: 'Peter Pan' }, property: { streetAddress: '10 Neverland Ave' }, status: 'new' }
+];
+
+const mockInspections = [
+    { id: 'insp1', propertyTitle: '123 Ocean View Drive', startDateTime: new Date().toISOString(), registeredCount: 5, attendeeCap: 10, status: 'Scheduled' }
+];
+
 
 export const AdminDashboard = () => {
     const [properties, setProperties] = useState<any[]>([]);
     const [applications, setApplications] = useState<any[]>([]);
     const [slots, setSlots] = useState<any[]>([]);
     const [submissions, setSubmissions] = useState<any[]>([]);
+    const [inspections, setInspections] = useState<any[]>([]);
+
     const [editingId, setEditingId] = useState<string | null>(null);
     const [address, setAddress] = useState('');
     const [description, setDescription] = useState('');
@@ -25,7 +51,6 @@ export const AdminDashboard = () => {
     const [selectedPropertySlot, setSelectedPropertySlot] = useState('');
     const [inspectionDateTime, setInspectionDateTime] = useState('');
     const [activeTab, setActiveTab] = useState<'dashboard' | 'properties' | 'add-edit-property' | 'applications' | 'inspections' | 'open-inspections' | 'landlord-submissions'>('dashboard');
-    const [inspections, setInspections] = useState<any[]>([]);
 
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard' },
@@ -37,21 +62,12 @@ export const AdminDashboard = () => {
         { id: 'landlord-submissions', label: 'Landlord Submissions' },
     ] as const;
 
-    async function fetchAllData() {
-        const { data: propertiesData } = await supabase.from('properties').select('*');
-        setProperties(propertiesData || []);
-
-        const { data: applicationsData } = await supabase.from('applications').select('*');
-        setApplications(applicationsData || []);
-
-        const { data: slotsData } = await supabase.from('inspectionSlots').select('*');
-        setSlots(slotsData || []);
-
-        const { data: submissionsData } = await supabase.from('landlordSubmissions').select('*');
-        setSubmissions(submissionsData || []);
-
-        const { data: inspectionsData } = await supabase.from('inspections').select('*');
-        setInspections(inspectionsData || []);
+    function fetchAllData() {
+        setProperties(mockProperties);
+        setApplications(mockApplications);
+        setSlots(mockInspectionSlots);
+        setSubmissions(mockLandlordSubmissions);
+        setInspections(mockInspections);
     }
 
     useEffect(() => {
@@ -61,43 +77,37 @@ export const AdminDashboard = () => {
     const resetForm = () => {
         setEditingId(null);
         setDescription(''); setAddress(''); setImages(['']); setAvailability(true); setIsFeatured(false); setFeatures(['', '', '']);
+        setRooms(0); setBathrooms(0); setCarSpaces(0); setRentalType('whole_property'); setWholeRent(0); setWholeBond(0); setRoomsForRent([]);
     };
-
-    const handleSubmit = async (e: React.FormEvent) => {
+    
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const propertyData = {
-            title: address,
-            description, address,
-            details: { rooms, bathrooms, carSpaces },
-            rentalType,
+            title: address, description, address, details: { rooms, bathrooms, carSpaces }, rentalType,
             rooms: rentalType === 'room_by_room' ? roomsForRent : [],
             propertyLevelRent: rentalType === 'whole_property' ? wholeRent : undefined,
             propertyLevelBond: rentalType === 'whole_property' ? wholeBond : undefined,
             images: images.filter(img => img.trim() !== ''),
             features: features.filter(f => f.trim() !== ''),
-            availability,
-            isFeatured,
-            updatedAt: new Date().toISOString()
+            availability, isFeatured, updatedAt: new Date().toISOString()
         };
-        try {
-            if (editingId) {
-                await supabase.from('properties').update(propertyData).eq('id', editingId)
-                alert('Property updated!');
-            } else {
-                await supabase.from('properties').insert([{ ...propertyData, createdAt: new Date().toISOString() }])
-                alert('Property added!');
-            }
-            resetForm();
-            fetchAllData();
-        } catch (error) {
-            console.error('Error saving property: ', error);
+
+        if (editingId) {
+            setProperties(properties.map(p => p.id === editingId ? { ...p, ...propertyData } : p));
+            alert('Property updated!');
+        } else {
+            const newProperty = { ...propertyData, id: String(Date.now()), createdAt: new Date().toISOString() };
+            setProperties([...properties, newProperty]);
+            alert('Property added!');
         }
+        resetForm();
+        setActiveTab('properties');
     };
 
     const startEdit = (property: any) => {
         setEditingId(property.id);
-        setDescription(property.description);
-        setAddress(property.address);
+        setDescription(property.description || '');
+        setAddress(property.address || '');
         setImages(property.images && property.images.length > 0 ? property.images : ['']);
         setFeatures(property.features && property.features.length > 0 ? property.features : ['', '', '']);
         setAvailability(property.availability);
@@ -105,45 +115,37 @@ export const AdminDashboard = () => {
         setRooms(property.details?.rooms || 0);
         setBathrooms(property.details?.bathrooms || 0);
         setCarSpaces(property.details?.carSpaces || 0);
-        setRentalType(property.rentalType || 'whole');
-        if (property.rentalType === 'whole') {
-            setWholeRent(property.wholeRent || 0);
-            setWholeBond(property.wholeBond || 0);
-        } else {
-            setRoomsForRent(property.roomsForRent || []);
-        }
+        setRentalType(property.rentalType || 'whole_property');
+        setWholeRent(property.propertyLevelRent || 0);
+        setWholeBond(property.propertyLevelBond || 0);
+        setRoomsForRent(property.rooms || []);
         setActiveTab('add-edit-property');
     };
 
-    const deleteInspectionSlot = async (slotId: string) => {
-        try {
-            await supabase.from('inspectionSlots').delete().eq('id', slotId);
-            alert('Slot deleted!');
-            fetchAllData();
-        } catch (error) {
-            console.error('Error deleting slot: ', error);
-        }
+    const deleteInspectionSlot = (slotId: string) => {
+        setSlots(slots.filter(slot => slot.id !== slotId));
+        alert('Slot deleted!');
     };
 
-    const addInspectionSlot = async () => {
+    const addInspectionSlot = () => {
         if (!selectedPropertySlot || !inspectionDateTime) {
-            alert('Please select a property and date/time');
-            return;
+            alert('Please select a property and date/time'); return;
         }
-        try {
-            await supabase.from('inspectionSlots').insert([{
-                propertyId: selectedPropertySlot,
-                dateTime: inspectionDateTime,
-            }]);
-            alert('Slot added!');
-            setSelectedPropertySlot('');
-            setInspectionDateTime('');
-            fetchAllData();
-        } catch (error) {
-            console.error('Error adding slot: ', error);
-        }
+        const newSlot = { id: String(Date.now()), propertyId: selectedPropertySlot, dateTime: inspectionDateTime };
+        setSlots([...slots, newSlot]);
+        alert('Slot added!');
+        setSelectedPropertySlot('');
+        setInspectionDateTime('');
     };
-    
+
+    const updateApplicationStatus = (appId: string, status: string) => {
+        setApplications(applications.map(app => app.id === appId ? { ...app, status } : app));
+    };
+
+    const updateSubmissionStatus = (subId: string, status: string) => {
+        setSubmissions(submissions.map(sub => sub.id === subId ? { ...sub, status } : sub));
+    };
+
     return (
         <div className="flex min-h-screen bg-slate-50">
             {/* Sidebar */}
@@ -168,7 +170,7 @@ export const AdminDashboard = () => {
                     <div className="space-y-8">
                         <h2 className="text-3xl font-extrabold text-slate-900">Dashboard</h2>
                         <div className="grid grid-cols-2 gap-6">
-                            {menuItems.filter(i => i.id !== 'dashboard').map(item => (
+                            {menuItems.filter(i => i.id !== 'dashboard' && i.id !== 'add-edit-property').map(item => (
                                 <button key={item.id} onClick={() => setActiveTab(item.id)} className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition text-left space-y-2">
                                     <h3 className="text-xl font-bold text-slate-900">{item.label}</h3>
                                     <p className="text-slate-500">Manage {item.label.toLowerCase()}</p>
@@ -180,7 +182,10 @@ export const AdminDashboard = () => {
 
                 {activeTab === 'properties' && (
                     <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
-                        <h2 className="text-3xl font-extrabold text-slate-900 mb-8">Properties</h2>
+                        <div className="flex justify-between items-center mb-8">
+                            <h2 className="text-3xl font-extrabold text-slate-900">Properties</h2>
+                            <button onClick={() => { resetForm(); setActiveTab('add-edit-property'); }} className="bg-violet-600 text-white font-bold px-5 py-3 rounded-xl">+ Add New</button>
+                        </div>
                         <div className="space-y-4">
                             {properties.map(p => (
                                 <div key={p.id} className="bg-white border border-slate-100 p-6 rounded-xl flex justify-between items-center shadow-sm">
@@ -196,7 +201,6 @@ export const AdminDashboard = () => {
                     <div className="max-w-4xl mx-auto space-y-8">
                         <h2 className="text-3xl font-extrabold text-slate-900">{editingId ? 'Edit Property' : 'Add Property'}</h2>
                         <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
-                             {/* Form contents here */}
                              <form onSubmit={handleSubmit} className="space-y-4">
                                 <input type="text" placeholder="Address (used as title)" value={address} onChange={(e) => setAddress(e.target.value)} className="w-full border border-slate-200 p-4 rounded-xl" required />
                                 <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full border border-slate-200 p-4 rounded-xl h-32" required />
@@ -269,7 +273,7 @@ export const AdminDashboard = () => {
                                     <button type="submit" className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700">{editingId ? 'Update Property' : 'Add Property'}</button>
                                     {editingId && <button type="button" onClick={resetForm} className="bg-slate-100 text-slate-700 px-8 py-3 rounded-xl font-bold hover:bg-slate-200">Cancel</button>}
                                 </div>
-                                                             <label className="flex items-center space-x-3 cursor-pointer">
+                                <label className="flex items-center space-x-3 cursor-pointer">
                                      <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} className="h-5 w-5 rounded text-blue-600" />
                                      <span className="font-semibold text-slate-700">Feature this property</span>
                                  </label>
@@ -298,8 +302,8 @@ export const AdminDashboard = () => {
                                             <td className="py-4">{properties.find(p=>p.id===app.propertyId)?.title}</td>
                                             <td className="py-4 font-semibold">{app.status || 'Pending'}</td>
                                             <td className="py-4">
-                                                <button onClick={async () => {await supabase.from('applications').update({ status: 'Approved' }).eq('id', app.id); fetchAllData()}} className="text-violet-600 font-bold mr-2 text-sm">Approve</button>
-                                                <button onClick={async () => {await supabase.from('applications').update({ status: 'Rejected' }).eq('id', app.id); fetchAllData()}} className="text-red-600 font-bold text-sm">Reject</button>
+                                                <button onClick={() => updateApplicationStatus(app.id, 'Approved')} className="text-violet-600 font-bold mr-2 text-sm">Approve</button>
+                                                <button onClick={() => updateApplicationStatus(app.id, 'Rejected')} className="text-red-600 font-bold text-sm">Reject</button>
                                             </td>
                                         </tr>
                                     ))}
@@ -369,9 +373,9 @@ export const AdminDashboard = () => {
                                     <div>
                                         <p className="font-bold">{sub.landlord?.fullName}</p>
                                         <p className="text-sm">{sub.property?.streetAddress}</p>
-                                        <p className="text-xs font-semibold text-violet-600">Status: {sub.status}</p>
+                                        <p className={`text-xs font-semibold ${sub.status === 'new' ? 'text-red-600' : 'text-violet-600'}`}>Status: {sub.status}</p>
                                     </div>
-                                    <button onClick={async () => {await supabase.from('landlordSubmissions').update({ status: 'contacted' }).eq('id', sub.id); fetchAllData()}} className="text-sm bg-slate-100 px-4 py-2 rounded">Mark Contacted</button>
+                                    <button onClick={() => updateSubmissionStatus(sub.id, 'contacted')} className="text-sm bg-slate-100 px-4 py-2 rounded">Mark Contacted</button>
                                 </div>
                             ))}
                         </div>
@@ -381,4 +385,3 @@ export const AdminDashboard = () => {
         </div>
     );
 };
-''

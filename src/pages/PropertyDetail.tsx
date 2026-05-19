@@ -1,23 +1,56 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
 import { BedDouble, Bath, Car, MapPin } from 'lucide-react';
+import Footer from '../components/Footer';
+
+const mockProperties = [
+    {
+        id: '1',
+        title: 'Spacious Beachfront Villa',
+        address: '123 Ocean View Drive, Sunnydale',
+        images: [
+            'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+            'https://images.pexels.com/photos/259588/pexels-photo-259588.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
+        ],
+        details: {
+            rooms: 3,
+            bathrooms: 2,
+            carSpaces: 2,
+        },
+        rentalType: 'whole_property',
+        rooms: [],
+    },
+    {
+        id: '2',
+        title: 'Modern Downtown Loft',
+        address: '789 Central Square, Metro City',
+        images: [
+          'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
+        ],
+        details: {
+            rooms: 4,
+            bathrooms: 3,
+            carSpaces: 2,
+        },
+        rentalType: 'room_by_room',
+        rooms: [
+            { id: 'room1', roomLabel: 'Master Bedroom', weeklyRent: 300, furnishedStatus: 'Furnished' },
+            { id: 'room2', roomLabel: 'Sunny Guest Room', weeklyRent: 250, furnishedStatus: 'Unfurnished' },
+        ],
+    },
+];
 
 export const PropertyDetail = () => {
     const { id } = useParams<{ id: string }>();
     const [property, setProperty] = useState<any>(null);
 
     useEffect(() => {
-        if (!id) return;
-        const fetchProperty = async () => {
-            const { data, error } = await supabase
-                .from('properties')
-                .select('*')
-                .eq('id', id)
-                .single();
-            if (!error) setProperty(data);
+        if (!id) {
+            setProperty(mockProperties[0]);
+            return;
         };
-        fetchProperty();
+        const foundProperty = mockProperties.find(p => p.id === id);
+        setProperty(foundProperty || mockProperties[0]);
     }, [id]);
 
     if (!property) return <div className="py-12 text-center text-slate-500">Loading...</div>;
@@ -26,6 +59,7 @@ export const PropertyDetail = () => {
     const showRooms = property.rentalType === 'room_by_room' || property.rentalType === 'mixed';
 
     return (
+      <>
         <div className="max-w-6xl mx-auto py-12 px-6 space-y-8">
             {/* Header */}
             <div>
@@ -89,5 +123,7 @@ export const PropertyDetail = () => {
                 </div>
             </div>
         </div>
+        <Footer />
+      </>
     );
 };
