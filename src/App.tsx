@@ -9,6 +9,7 @@ import Pricing from './pages/Pricing'
 import About from './pages/About'
 import Dashboard from './pages/Dashboard'
 import Bookings from './pages/Bookings'
+import BookingDetail from './pages/BookingDetail'
 import Settings from './pages/Settings'
 import BookService from './pages/BookService'
 import DashboardLayout from './components/DashboardNav'
@@ -19,6 +20,8 @@ import { AdminLogin } from './pages/AdminLogin'
 import { AdminDashboard } from './pages/AdminDashboard'
 import { PropertyDetail } from './pages/PropertyDetail'
 import { InspectionBooking } from './pages/InspectionBooking'
+import Terms from './pages/Terms'
+import Privacy from './pages/Privacy'
 
 const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
   ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
@@ -86,6 +89,14 @@ const router = createBrowserRouter([
     element: <InspectionBooking />,
   },
   {
+    path: '/terms',
+    element: <Terms />,
+  },
+  {
+    path: '/privacy',
+    element: <Privacy />,
+  },
+  {
     path: '/login',
     element: <Login />,
   },
@@ -116,6 +127,10 @@ const router = createBrowserRouter([
       {
         path: 'bookings',
         element: <Bookings />,
+      },
+      {
+        path: 'bookings/:bookingId',
+        element: <BookingDetail />,
       },
       {
         path: 'settings',
