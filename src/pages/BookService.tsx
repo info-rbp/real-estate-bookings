@@ -1,10 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import type { Service } from '../types/database'
 import ProgressBar from '../components/ProgressBar'
 import { CircleCheck as CheckCircle, CircleAlert as AlertCircle } from 'lucide-react'
+
+// Mock data to replace Supabase calls
+const mockServices: Service[] = [
+  { id: '1', name: 'Standard Inspection', description: 'A comprehensive inspection of the property.', price: 250, price_type: 'fixed', duration_minutes: 120, is_active: true, icon_name: 'assignment', category: 'Inspections', created_at: '2024-01-01T00:00:00.000Z' },
+  { id: '2', name: 'Pest & Termite Inspection', description: 'Specialized inspection for pests and termites.', price: 150, price_type: 'fixed', duration_minutes: 90, is_active: true, icon_name: 'shield_with_house', category: 'Inspections', created_at: '2024-01-01T00:00:00.000Z' },
+  { id: '3', name: 'Pool & Spa Inspection', description: 'Inspection of the pool and spa equipment.', price: 100, price_type: 'fixed', duration_minutes: 60, is_active: true, icon_name: 'build', category: 'Inspections', created_at: '2024-01-01T00:00:00.000Z' },
+  { id: '4', name: 'Handover Report', description: 'A detailed report for property handover.', price: 300, price_type: 'fixed', duration_minutes: 180, is_active: true, icon_name: 'event_repeat', category: 'Reports', created_at: '2024-01-01T00:00:00.000Z' },
+];
+
+const mockCalendarEvents = [
+  { id: '1', title: 'Booked Slot', start: '2024-08-01T10:30:00', end: '2024-08-01T12:30:00', isAllDay: false },
+  { id: '2', title: 'Booked Slot', start: '2024-08-01T14:30:00', end: '2024-08-01T16:00:00', isAllDay: false },
+];
 
 const steps = [
   { label: 'Services' },
@@ -42,8 +54,8 @@ export default function BookService() {
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
 
   useEffect(() => {
-    supabase.from('services').select('*').eq('is_active', true).order('name')
-      .then(({ data }) => { if (data) setServices(data as Service[]) })
+    // Replace Supabase call with mock data
+    setServices(mockServices);
   }, [])
 
   useEffect(() => {
@@ -57,22 +69,10 @@ export default function BookService() {
   }, [bookingDate, selectedService, calendarEvents])
 
   async function fetchCalendarEvents() {
-    setLoadingCalendar(true)
-    try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-calendar-events`, {
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      })
-      const data = await response.json()
-      if (data.events) {
-        setCalendarEvents(data.events)
-      }
-    } catch (error) {
-      console.error('Failed to fetch calendar events:', error)
-    }
-    setLoadingCalendar(false)
+    setLoadingCalendar(true);
+    // Replace Supabase function call with mock data
+    setCalendarEvents(mockCalendarEvents);
+    setLoadingCalendar(false);
   }
 
   function calculateAvailableSlots() {
@@ -109,7 +109,8 @@ export default function BookService() {
   async function handleConfirm() {
     if (!profile || !selectedService) return
     setSubmitting(true)
-    const { error } = await supabase.from('bookings').insert({
+    // Mock booking creation
+    console.log('Creating booking:', {
       user_id: profile.id,
       service_id: selectedService.id,
       property_address: propertyAddress,
@@ -125,9 +126,9 @@ export default function BookService() {
       base_price: basePrice,
       travel_surcharge: travelSurcharge,
       total_price: totalPrice,
-    })
+    });
     setSubmitting(false)
-    if (!error) setConfirmed(true)
+    setConfirmed(true)
   }
 
   if (confirmed) {

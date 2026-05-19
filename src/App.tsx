@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import Home from './pages/Home'
 import Services from './pages/Services'
@@ -18,41 +18,73 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-function AppRoutes() {
-  return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/services" element={<Services />} />
-      <Route path="/pricing" element={<Pricing />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/dashboard" element={
-        <ProtectedRoute>
-          <DashboardLayout />
-        </ProtectedRoute>
-      }>
-        <Route index element={<Dashboard />} />
-        <Route path="bookings" element={<Bookings />} />
-        <Route path="settings" element={<Settings />} />
-      </Route>
-      <Route path="/book/service" element={
-        <ProtectedRoute>
-          <DashboardLayout />
-        </ProtectedRoute>
-      }>
-        <Route index element={<BookService />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  )
-}
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <Home />,
+    },
+    {
+        path: "/services",
+        element: <Services />,
+    },
+    {
+        path: "/pricing",
+        element: <Pricing />,
+    },
+    {
+        path: "/about",
+        element: <About />,
+    },
+    {
+        path: "/login",
+        element: <Login />,
+    },
+    {
+        path: "/dashboard",
+        element: (
+            <ProtectedRoute>
+                <DashboardLayout />
+            </ProtectedRoute>
+        ),
+        children: [
+            {
+                index: true,
+                element: <Dashboard />,
+            },
+            {
+                path: "bookings",
+                element: <Bookings />,
+            },
+            {
+                path: "settings",
+                element: <Settings />,
+            },
+        ],
+    },
+    {
+        path: "/book/service",
+        element: (
+            <ProtectedRoute>
+                <DashboardLayout />
+            </ProtectedRoute>
+        ),
+        children: [
+            {
+                index: true,
+                element: <BookService />,
+            }
+        ]
+    },
+    {
+        path: "*",
+        element: <Navigate to="/" replace />,
+    },
+]);
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
+    <AuthProvider>
+        <RouterProvider router={router} />
+    </AuthProvider>
   )
 }

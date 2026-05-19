@@ -1,10 +1,59 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { supabase } from '../lib/supabase'
-import type { Booking, BookingStatus } from '../types/database'
+import type { Booking, BookingStatus, Service } from '../types/database'
 import StatusBadge from '../components/StatusBadge'
 import { Plus, Search, Download, Eye, CalendarSync, MoveVertical as MoreVertical, CalendarCheck, ClockAlert, CircleCheck as CheckCircle, Circle as XCircle, Trash2, X } from 'lucide-react'
+
+// Mock data to replace Supabase calls
+const mockBookings: Booking[] = [
+  {
+    id: '1',
+    user_id: 'mock-user-id',
+    service_id: '1',
+    service: { id: '1', name: 'Standard Inspection', description: '...', price: 250, price_type: 'fixed', duration_minutes: 120, is_active: true, icon_name: 'assignment', category: 'Inspections', created_at: '2024-01-01T00:00:00.000Z' },
+    property_address: '123 Main St',
+    property_city: 'New York',
+    property_postal_code: '10001',
+    property_type: 'apartment',
+    access_method: 'lockbox',
+    access_instructions: 'Code is 1234',
+    booking_date: '2024-08-15',
+    booking_time: '10:00',
+    duration_minutes: 120,
+    status: 'confirmed',
+    base_price: 250,
+    travel_surcharge: 50,
+    total_price: 300,
+    notes: 'Please check the HVAC system.',
+    created_at: '2024-07-28T10:00:00Z',
+    updated_at: '2024-07-28T10:00:00Z',
+    assigned_professional_id: null,
+  },
+  {
+    id: '2',
+    user_id: 'mock-user-id',
+    service_id: '2',
+    service: { id: '2', name: 'Pest & Termite Inspection', description: '...', price: 150, price_type: 'fixed', duration_minutes: 90, is_active: true, icon_name: 'shield_with_house', category: 'Inspections', created_at: '2024-01-01T00:00:00.000Z' },
+    property_address: '456 Oak Ave',
+    property_city: 'Brooklyn',
+    property_postal_code: '11201',
+    property_type: 'house',
+    access_method: 'tenant',
+    access_instructions: 'Tenant will be home.',
+    booking_date: '2024-08-20',
+    booking_time: '14:00',
+    duration_minutes: 90,
+    status: 'pending',
+    base_price: 150,
+    travel_surcharge: 50,
+    total_price: 200,
+    notes: 'Possible termite activity in the basement.',
+    created_at: '2024-07-28T10:00:00Z',
+    updated_at: '2024-07-28T10:00:00Z',
+    assigned_professional_id: null,
+  },
+];
 
 const statusFilters = ['All', 'Upcoming', 'Pending', 'Completed', 'Cancelled'] as const
 
@@ -19,9 +68,9 @@ export default function Bookings() {
   const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
-    if (!profile) return
-    supabase.from('bookings').select('*, service:services(*)').eq('user_id', profile.id).order('booking_date', { ascending: false })
-      .then(({ data }) => { if (data) setBookings(data as unknown as Booking[]) })
+    if (!profile) return;
+    // Replace Supabase call with mock data
+    setBookings(mockBookings);
   }, [profile])
 
   const filtered = bookings.filter(b => {
@@ -44,12 +93,10 @@ export default function Bookings() {
 
   async function handleDelete(bookingId: string) {
     setDeleting(true)
-    const { error } = await supabase.from('bookings').delete().eq('id', bookingId)
+    // Mock booking deletion
+    setBookings(bookings.filter(b => b.id !== bookingId));
     setDeleting(false)
-    if (!error) {
-      setBookings(bookings.filter(b => b.id !== bookingId))
-      setShowMenu(null)
-    }
+    setShowMenu(null)
   }
 
   return (

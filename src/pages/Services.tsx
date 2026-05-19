@@ -1,9 +1,18 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
 import type { Service } from '../types/database'
 import PublicNav from '../components/PublicNav'
 import { Search, Clock, Info } from 'lucide-react'
+
+// Mock data to replace Supabase calls
+const mockServices: Service[] = [
+  { id: '1', name: 'Standard Inspection', description: 'A comprehensive inspection of the property.', price: 250, price_type: 'fixed', duration_minutes: 120, is_active: true, category: 'Inspections', icon_name: 'assignment', created_at: '2024-01-01T00:00:00.000Z' },
+  { id: '2', name: 'Pest & Termite Inspection', description: 'Specialized inspection for pests and termites.', price: 150, price_type: 'fixed', duration_minutes: 90, is_active: true, category: 'Inspections', icon_name: 'shield_with_house', created_at: '2024-01-01T00:00:00.000Z' },
+  { id: '3', name: 'Pool & Spa Inspection', description: 'Inspection of the pool and spa equipment.', price: 100, price_type: 'fixed', duration_minutes: 60, is_active: true, category: 'Inspections', icon_name: 'build', created_at: '2024-01-01T00:00:00.000Z' },
+  { id: '4', name: 'Handover Report', description: 'A detailed report for property handover.', price: 300, price_type: 'fixed', duration_minutes: 180, is_active: true, category: 'Reports', icon_name: 'event_repeat', created_at: '2024-01-01T00:00:00.000Z' },
+  { id: '5', name: 'Routine Maintenance', description: 'Scheduled maintenance to keep the property in top condition.', price: 75, price_type: 'hourly', duration_minutes: 60, is_active: true, category: 'Maintenance', icon_name: 'door_open', created_at: '2024-01-01T00:00:00.000Z' },
+  { id: '6', name: 'Safety Compliance Check', description: 'Ensure the property meets all safety regulations.', price: 200, price_type: 'fixed', duration_minutes: 90, is_active: true, category: 'Compliance', icon_name: 'exit_to_app', created_at: '2024-01-01T00:00:00.000Z' },
+];
 
 const categories = ['All', 'Inspections', 'Maintenance', 'Compliance', 'Reports']
 
@@ -13,8 +22,8 @@ export default function Services() {
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    supabase.from('services').select('*').eq('is_active', true).order('name')
-      .then(({ data }) => { if (data) setServices(data as Service[]) })
+    // Replace Supabase call with mock data
+    setServices(mockServices);
   }, [])
 
   const filtered = services.filter(s => {
