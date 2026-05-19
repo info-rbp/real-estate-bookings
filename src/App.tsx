@@ -15,6 +15,10 @@ import EngageUs from './pages/EngageUs'
 import Properties from './pages/Properties'
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import { AdminLogin } from './pages/AdminLogin';
+import { AdminDashboard } from './pages/AdminDashboard';
+import { PropertyDetail } from './pages/PropertyDetail';
+import { InspectionBooking } from './pages/InspectionBooking';
 
 const stripePromise = loadStripe('pk_test_51T2OhgS9Az4EAUom3ZVILSDU99OoiPdP0qSozhHsz9TuPIAXUXRsyoqqlR2NQi0xrvbZR7R328Dvjn2itRZOfsvL00tPQYHlLZ');
 
@@ -55,8 +59,28 @@ const router = createBrowserRouter([
         element: <Properties />,
     },
     {
+        path: "/properties/:id",
+        element: <PropertyDetail />,
+    },
+    {
+        path: "/book/inspection/:propertyId",
+        element: <InspectionBooking />,
+    },
+    {
         path: "/login",
         element: <Login />,
+    },
+    {
+        path: "/admin/login",
+        element: <AdminLogin />,
+    },
+    {
+        path: "/admin/dashboard",
+        element: (
+            <ProtectedRoute>
+                <AdminDashboard />
+            </ProtectedRoute>
+        ),
     },
     {
         path: "/dashboard",
