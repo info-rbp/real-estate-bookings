@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import type { Booking, BookingStatus } from '../types/database'
 import StatusBadge from '../components/StatusBadge'
-import { Plus, Search, Download, Eye, CalendarSync, MoveVertical as MoreVertical, CalendarCheck, ClockAlert, CircleCheck as CheckCircle, Circle as XCircle } from 'lucide-react'
+import { Plus, Search, Download, Eye, CalendarSync, MoveVertical as MoreVertical, CalendarCheck, ClockAlert, CircleCheck as CheckCircle, Circle as XCircle, Trash2, X } from 'lucide-react'
 
 const statusFilters = ['All', 'Upcoming', 'Pending', 'Completed', 'Cancelled'] as const
 
@@ -13,6 +13,10 @@ export default function Bookings() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [activeFilter, setActiveFilter] = useState<string>('All')
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
+  const [showModal, setShowModal] = useState(false)
+  const [showMenu, setShowMenu] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (!profile) return
@@ -36,6 +40,16 @@ export default function Bookings() {
     pending: bookings.filter(b => b.status === 'pending').length,
     completed: bookings.filter(b => b.status === 'completed').length,
     cancelled: bookings.filter(b => b.status === 'cancelled').length,
+  }
+
+  async function handleDelete(bookingId: string) {
+    setDeleting(true)
+    const { error } = await supabase.from('bookings').delete().eq('id', bookingId)
+    setDeleting(false)
+    if (!error) {
+      setBookings(bookings.filter(b => b.id !== bookingId))
+      setShowMenu(null)
+    }
   }
 
   return (
@@ -137,9 +151,19 @@ export default function Bookings() {
                       <StatusBadge status={booking.status as BookingStatus} />
                     </td>
                     <td className="px-6 py-5 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button className="p-1 text-on-surface-variant hover:text-primary transition-colors"><Eye size={18} /></button>
-                        <button className="p-1 text-on-surface-variant hover:text-primary transition-colors"><MoreVertical size={18} /></button>
+                      <div className="flex items-center justify-end gap-2 relative">
+                        <button onClick={() => { setSelectedBooking(booking); setShowModal(true) }} className="p-1 text-on-surface-variant hover:text-primary transition-colors" title="View details"><Eye size={18} /></button>
+                        <div className="relative">
+                          <button onClick={() => setShowMenu(showMenu === booking.id ? null : booking.id)} className="p-1 text-on-surface-variant hover:text-primary transition-colors"><MoreVertical size={18} /></button>
+                          {showMenu === booking.id && (
+                            <div className="absolute right-0 top-full mt-1 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg z-10">
+                              <button onClick={() => { handleDelete(booking.id); }} disabled={deleting} className="w-full text-left px-4 py-2 text-sm hover:bg-surface-container-high disabled:opacity-50 flex items-center gap-2 text-error">
+                                <Trash2 size={16} />
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -154,6 +178,109 @@ export default function Bookings() {
           </div>
         )}
       </div>
+
+      {showModal && selectedBooking && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-surface-container-lowest rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-outline-variant/30">
+            <div className="sticky top-0 bg-surface-container-lowest flex justify-between items-center px-6 py-4 border-b border-outline-variant">
+              <h3 className="text-xl font-bold text-on-surface">Booking Details</h3>
+              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-surface-container-high rounded-lg transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <p className="text-xs font-semibold text-on-surface-variant uppercase mb-1">Service</p>
+                  <p className="text-base font-bold text-on-surface">{selectedBooking.service?.name || 'Service'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-on-surface-variant uppercase mb-1">Status</p>
+                  <StatusBadge status={selectedBooking.status as BookingStatus} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <p className="text-xs font-semibold text-on-surface-variant uppercase mb-1">Booking Date</p>
+                  <p className="text-base font-bold text-on-surface">{new Date(selectedBooking.booking_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-on-surface-variant uppercase mb-1">Booking Time</p>
+                  <p className="text-base font-bold text-on-surface">{selectedBooking.booking_time?.substring(0, 5)} ({selectedBooking.duration_minutes} mins)</p>
+                </div>
+              </div>
+
+              <div className="border-t border-outline-variant pt-6">
+                <h4 className="text-sm font-bold text-on-surface uppercase mb-4">Property Details</h4>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs text-on-surface-variant">Address</p>
+                    <p className="text-sm font-semibold text-on-surface">{selectedBooking.property_address}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-on-surface-variant">City</p>
+                      <p className="text-sm font-semibold text-on-surface">{selectedBooking.property_city}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-on-surface-variant">Postal Code</p>
+                      <p className="text-sm font-semibold text-on-surface">{selectedBooking.property_postal_code}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-on-surface-variant">Property Type</p>
+                      <p className="text-sm font-semibold text-on-surface capitalize">{selectedBooking.property_type}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-on-surface-variant">Access Method</p>
+                      <p className="text-sm font-semibold text-on-surface capitalize">{selectedBooking.access_method}</p>
+                    </div>
+                  </div>
+                  {selectedBooking.access_instructions && (
+                    <div>
+                      <p className="text-xs text-on-surface-variant">Access Instructions</p>
+                      <p className="text-sm text-on-surface-variant">{selectedBooking.access_instructions}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="border-t border-outline-variant pt-6">
+                <h4 className="text-sm font-bold text-on-surface uppercase mb-4">Pricing</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-on-surface-variant">Base Service Fee</span>
+                    <span className="font-semibold text-on-surface">${selectedBooking.base_price.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-on-surface-variant">Travel Surcharge</span>
+                    <span className="font-semibold text-on-surface">${selectedBooking.travel_surcharge.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-base font-bold pt-2 border-t border-dashed border-outline-variant">
+                    <span>Total Price</span>
+                    <span className="text-primary">${selectedBooking.total_price.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {selectedBooking.notes && (
+                <div className="border-t border-outline-variant pt-6">
+                  <p className="text-xs font-bold text-on-surface uppercase mb-2">Notes</p>
+                  <p className="text-sm text-on-surface-variant">{selectedBooking.notes}</p>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <button onClick={() => setShowModal(false)} className="flex-1 border border-outline-variant text-on-surface-variant py-2 rounded-lg font-semibold hover:bg-surface-container-high transition-colors">
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
