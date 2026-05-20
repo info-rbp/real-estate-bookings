@@ -45,11 +45,13 @@ function ProtectedRoute({
   }
 
   if (allowedRoles && (!profile || !allowedRoles.includes(profile.role))) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to="/" replace />
   }
 
   return <>{children}</>
 }
+
+const clientPortalRoles: AppUserRole[] = ['client_admin', 'client_user', 'staff', 'admin']
 
 const router = createBrowserRouter([
   {
@@ -115,7 +117,7 @@ const router = createBrowserRouter([
   {
     path: '/dashboard',
     element: (
-      <ProtectedRoute allowedRoles={['client', 'client_admin', 'client_user', 'staff', 'admin']}>
+      <ProtectedRoute allowedRoles={clientPortalRoles}>
         <DashboardLayout />
       </ProtectedRoute>
     ),
@@ -141,7 +143,7 @@ const router = createBrowserRouter([
   {
     path: '/book/service',
     element: (
-      <ProtectedRoute allowedRoles={['client', 'client_admin', 'client_user', 'staff', 'admin']}>
+      <ProtectedRoute allowedRoles={clientPortalRoles}>
         <DashboardLayout />
       </ProtectedRoute>
     ),
