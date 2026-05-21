@@ -1,55 +1,69 @@
-# Real Estate Bookings
+# Rent On Time Work Order Platform
 
-This repository currently contains a static prototype package for a real estate service booking portal. It is best understood as a UI reference and planning handoff for a future application build rather than a fully wired product.
+A contract-compliant real-estate Work Order booking platform for Rent On Time, built with Vite, React, TypeScript, and Appwrite.
 
-The project shows how the customer journey is meant to work across marketing pages, authentication, registration, booking, and client account management. Each screen lives in its own folder as a standalone HTML export, with a matching screenshot for quick review.
+## Overview
 
-## What is in this repository
+This application has been upgraded from a generic booking portal to a professional Work Order management system. It supports multi-step Work Order creation, service-area classification, rate card pricing, regional batching, open-for-inspection planning, and automated invoice line generation.
 
-- `bookpro_home/`: landing page for the BookPro brand and primary public entry point
-- `services/` and `real_estate_services/`: service catalogue and service-marketing variations
-- `login_register/`: shared sign-in and registration gateway
-- `sign_up_step_1_account_basics/`, `sign_up_step_2_professional_profile/`, `sign_up_step_3_security_preferences/`: the onboarding flow
-- `book_a_service_step_1_service_selection/` through `book_a_service_step_4_review_confirm/`: the booking journey
-- `client_dashboard/`, `client_dashboard_bookings/`, `client_dashboard_settings/`, `client_dashboard_booking_integrated/`: logged-in client experience
-- `professional_saas_interface/DESIGN.md`: design system guidance
-- `bookpro_project_readme.md`: product and architecture notes for the prototype
-- `booking_portal_project_specification.md`: higher-level application brief
+## Technical Stack
 
-Most folders contain:
+- **Frontend:** React, Vite, TypeScript, Tailwind CSS
+- **Backend:** Appwrite (Databases, Auth, Functions, Storage, Teams)
+- **State Management:** React Hooks
+- **Routing:** React Router v6
 
-- `code.html`: the exported screen markup
-- `screen.png`: a visual reference of that screen
+## Core Domain Model
 
-Some folders contain only `screen.png` because they were exported as image references rather than HTML pages.
+- **Work Order:** A formal request for service. Replaces "Booking" terminology.
+- **Service Area:** WA regions (Perth and Peel, Gascoyne, etc.) classified by Suburb + Postcode.
+- **Rate Card:** Client-specific pricing for Rent On Time services.
+- **Regional Batch:** Grouping of Work Orders for "Other Regions" to meet attendance thresholds.
+- **Access Issue:** Formal record of attendance failure with automated fee calculation (20%).
+- **Open Inspection Plan:** Weekly planning for recurring property viewings.
 
-## Current state
+## Local Setup
 
-This repository is not yet a production application. Right now it is:
+1. **Install Dependencies:**
+   ```bash
+   npm install
+   ```
 
-- a collection of standalone HTML prototype screens
-- a design and product reference for the intended booking platform
-- a useful starting point for turning the flows into a real frontend app
+2. **Environment Variables:**
+   Copy `.env.example` to `.env.local` and fill in your Appwrite credentials.
+   ```bash
+   cp .env.example .env.local
+   ```
 
-This repository does not currently include:
+3. **Provision Appwrite:**
+   Run the staging provisioning script to set up collections and indexes.
+   ```bash
+   npm run appwrite:provision:staging
+   ```
 
-- a package manifest such as `package.json`
-- a React, Next.js, or other application scaffold
-- a backend API
-- persistent data storage
-- authentication wiring
-- calendar, email, or SMS integrations
+4. **Run Development Server:**
+   ```bash
+   npm run dev
+   ```
 
-## Local setup
+5. **Typecheck and Build:**
+   ```bash
+   npm run typecheck
+   npm run build
+   ```
 
-Because the project is currently static HTML, setup is simple.
+## Work Order Lifecycle
 
-### Option 1: Open files directly
+Work Orders move through a strict status machine:
+`draft` -> `submitted` -> `pending_acceptance` -> `accepted` -> `scheduled` -> `in_progress` -> `completed` -> `report_delivered` -> `invoiced` -> `paid`
 
-You can open any `code.html` file in a browser and review that screen on its own.
+Other statuses include `declined`, `requires_information`, `quote_required`, `awaiting_batch`, `cancelled`, `access_issue`, `reattendance_required`, and `failed`.
 
-Examples:
+## Documentation
 
+- [Appwrite Schema and Permissions](docs/appwrite/schema-and-permissions.md)
+- [Original Product Specification](booking_portal_project_specification.md)
+- [Original Project README](bookpro_project_readme.md)
 - `bookpro_home/code.html`
 - `login_register/code.html`
 - `book_a_service_step_1_service_selection/code.html`

@@ -1,5 +1,5 @@
-import { Client, Databases, Query } from 'node-appwrite'
-import { pickSafeProfileUpdates, validateSafeProfileUpdates } from './safe-fields.js'
+const { Client, Databases, Query } = require('node-appwrite');
+const { pickSafeProfileUpdates, validateSafeProfileUpdates } = require('./safe-fields.js');
 
 function header(req, name) {
   return req.headers?.[name] || req.headers?.[name.toLowerCase()] || req.headers?.[name.toUpperCase()]
@@ -14,7 +14,11 @@ function requiredEnv(name) {
 function parseJsonBody(req) {
   if (!req.body) return {}
   if (typeof req.body === 'object') return req.body
-  return JSON.parse(req.body)
+  try {
+    return JSON.parse(req.body)
+  } catch (e) {
+    return {}
+  }
 }
 
 async function getProfileDocument(databases, databaseId, usersCollectionId, appwriteUserId) {
@@ -49,7 +53,7 @@ async function writeAuditLog(databases, databaseId, auditLogsCollectionId, actor
   }
 }
 
-export default async function main({ req, res, log, error }) {
+module.exports = async function ({ req, res, log, error }) {
   try {
     const appwriteUserId = header(req, 'x-appwrite-user-id')
     if (!appwriteUserId) return res.json({ error: 'Authentication required.' }, 401)

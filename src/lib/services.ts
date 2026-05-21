@@ -39,11 +39,11 @@ function mapService(document: Record<string, unknown>): Service {
 export async function listActiveServices() {
   requireServicesCollection()
 
-  const response = await databases.listDocuments({
-    databaseId: appwriteConfig.databaseId,
-    collectionId: appwriteConfig.servicesCollectionId,
-    queries: [Query.equal('active', true), Query.orderAsc('category'), Query.orderAsc('name')],
-  })
+  const response = await databases.listDocuments(
+    appwriteConfig.databaseId,
+    appwriteConfig.servicesCollectionId,
+    [Query.equal('active', true), Query.orderAsc('category'), Query.orderAsc('name')]
+  )
 
   return response.documents.map((document) => mapService(document as unknown as Record<string, unknown>))
 }

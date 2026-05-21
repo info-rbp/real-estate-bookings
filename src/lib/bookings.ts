@@ -32,11 +32,11 @@ export async function createBooking(input: BookingInput) {
   const scheduledStart = new Date(`${input.bookingDate}T${input.bookingTime}:00`)
   const scheduledEnd = new Date(scheduledStart.getTime() + input.durationMinutes * 60 * 1000)
 
-  return databases.createDocument({
-    databaseId: appwriteConfig.databaseId,
-    collectionId: appwriteConfig.bookingsCollectionId,
-    documentId: ID.unique(),
-    data: {
+  return databases.createDocument(
+    appwriteConfig.databaseId,
+    appwriteConfig.bookingsCollectionId,
+    ID.unique(),
+    {
       appwriteUserId: input.profile.appwriteUserId,
       clientId: input.profile.clientId,
       serviceId: input.service.id,
@@ -57,6 +57,6 @@ export async function createBooking(input: BookingInput) {
       totalPriceExGst: input.totalPrice,
       notes: null,
       createdAt: new Date().toISOString(),
-    },
-  })
+    }
+  )
 }

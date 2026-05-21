@@ -20,11 +20,11 @@ function requireLeadsCollection() {
 export async function createLead(input: LeadInput) {
   requireLeadsCollection()
 
-  return databases.createDocument({
-    databaseId: appwriteConfig.databaseId,
-    collectionId: appwriteConfig.leadsCollectionId,
-    documentId: ID.unique(),
-    data: {
+  return databases.createDocument(
+    appwriteConfig.databaseId,
+    appwriteConfig.leadsCollectionId,
+    ID.unique(),
+    {
       firstName: input.firstName.trim(),
       lastName: input.lastName.trim(),
       agencyName: input.agencyName.trim(),
@@ -35,6 +35,6 @@ export async function createLead(input: LeadInput) {
       status: 'new',
       notificationStatus: 'pending',
       createdAt: new Date().toISOString(),
-    },
-  })
+    }
+  )
 }

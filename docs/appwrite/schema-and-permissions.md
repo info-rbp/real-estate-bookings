@@ -1,6 +1,6 @@
-# BookPro Appwrite schema and permissions plan
+# Rent On Time Work Order Appwrite schema and permissions plan
 
-Status: P0 planning baseline for auth, permissions, leads, services, and booking persistence.
+Status: Upgraded for Work Order platform compliance.
 
 This document intentionally stops before Stripe and SEO work. Those are blocked until auth, permissions, leads, and booking persistence pass typecheck, build, and manual staging verification.
 
@@ -132,30 +132,36 @@ Permissions:
 
 Indexes: compound `clientId/serviceId`, `status`, `activeFrom`, `activeUntil`.
 
-### bookings
+### bookings / workOrders
 
-Purpose: Persistent service booking requests and operational booking lifecycle.
+Purpose: Persistent Work Order requests and operational lifecycle. Using `bookings` collection name for compatibility.
 
 Key fields:
 
+- `workOrderNumber` string
 - `appwriteUserId`, `clientId`, `serviceId`, `propertyId`
-- `propertyAddress`, `propertyCity`, `propertyPostcode`, `propertyType`
-- `accessMethod`, `accessInstructions`
+- `propertyAddress`, `propertySuburb`, `propertyPostcode`, `propertyState`, `propertyType`
+- `region`, `pricingClassification`, `serviceAreaMatched`
+- `accessMethod`, `accessInstructions`, `lockboxCode`, `alarmDetails`, `gateAccess`, `parkingDetails`
+- `hasLegalAuthority` boolean, `authorityConfirmedBy`, `authorityConfirmedAt`
+- `knownSafetyRisks`, `animalsAtProperty`, `hazards`, `accessLimitations`, `sensitiveCircumstances`
+- `requiredTemplate`, `requiredSystem`, `uploadDestination`, `specificPhotosRequired`
 - `scheduledStart`, `scheduledEnd`, `durationMinutes`
-- `status` enum: `pending`, `confirmed`, `scheduled`, `in_progress`, `completed`, `cancelled`, `failed`, `invoiced`
-- `paymentStatus` enum: `not_required`, `unpaid`, `pending`, `paid`, `failed`, `refunded`
-- `basePriceExGst`, `travelSurchargeExGst`, `totalPriceExGst`
+- `status` (WorkOrderStatus), `acceptanceStatus`, `acceptedAt`, `acceptedBy`
+- `requiresQuote`, `urgentFlag`, `regionalBatchId`
+- `basePriceExGst`, `travelSurchargeExGst`, `accessIssueFeeExGst`, `gstAmount`, `totalPriceIncGst`
+- `paymentStatus`, `invoiceStatus`, `invoiceBatchId`
 - `assignedStaffId`, `notes`, `createdAt`, `updatedAt`
 
 Permissions:
 
 - No public access.
 - Client team can read bookings for its own `clientId`.
-- Client users can create bookings only after the backend permissions are configured. Production should move booking creation to a `create-booking` function so `clientId`, price, status, and payment fields are derived server-side instead of trusting client payloads.
-- Staff can read assigned bookings and update limited operational fields through a function.
+- Client users create through `create-work-order` function.
+- Staff can read assigned bookings and update through `update-work-order-status` function.
 - Platform admin full access.
 
-Indexes: `clientId`, `appwriteUserId`, `serviceId`, `scheduledStart`, `status`, `paymentStatus`, `assignedStaffId`.
+Indexes: `workOrderNumber`, `clientId`, `appwriteUserId`, `status`, `regionalBatchId`, `invoiceBatchId`.
 
 ### properties
 
@@ -292,9 +298,33 @@ Permissions:
 - No public access.
 - No client writes.
 - Platform admin read/write.
-- Functions write audit entries for profile update, role/client assignment, booking creation, status changes, lead handling, check-ins, and future Stripe webhooks.
+- Every Appwrite Function must write audit logs for sensitive actions.
 
 Indexes: `actorId`, `clientId`, `entityType`, `entityId`, `action`, `createdAt`.
+
+### serviceAreas
+
+Fields: `region`, `suburb`, `postcode`, `pricingClassification`, `active`.
+
+### workOrderStatusHistory
+
+Fields: `workOrderId`, `fromStatus`, `toStatus`, `actorId`, `reason`, `createdAt`.
+
+### accessIssues
+
+Fields: `workOrderId`, `issueType`, `description`, `feeExGst`, `reattendanceRequired`, `reattendanceWorkOrderId`.
+
+### regionalBatches
+
+Fields: `batchNumber`, `region`, `status`, `workOrderIds`, `targetAttendanceStart`.
+
+### openInspectionPlans
+
+Fields: `planNumber`, `weekCommencing`, `status`, `workOrderIds`.
+
+### invoiceLines
+
+Fields: `clientId`, `workOrderId`, `description`, `subtotalExGst`, `gstAmount`, `totalIncGst`, `paymentCycleDate`.
 
 ## Function/process plan
 

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { ID, Models, Query } from 'appwrite'
+import { ID, Models, Query, ExecutionMethod } from 'appwrite'
 import { account, appwriteConfig, databases, functions, isAppwriteConfigured } from '../lib/appwrite'
 
 export type AppUserRole = 'admin' | 'staff' | 'client_admin' | 'client_user' | 'pending'
@@ -118,20 +118,20 @@ async function fetchProfile(user: Models.User<Models.Preferences>): Promise<AppP
   }
 
   try {
-    const document = await databases.getDocument({
-      databaseId: appwriteConfig.databaseId,
-      collectionId: appwriteConfig.usersCollectionId,
-      documentId: user.$id,
-    })
+    const document = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      user.$id
+    )
 
     return normalizeProfile(user, document as unknown as Partial<AppProfile>)
   } catch {
     try {
-      const response = await databases.listDocuments({
-        databaseId: appwriteConfig.databaseId,
-        collectionId: appwriteConfig.usersCollectionId,
-        queries: [Query.equal('appwriteUserId', user.$id), Query.limit(1)],
-      })
+      const response = await databases.listDocuments(
+        appwriteConfig.databaseId,
+        appwriteConfig.usersCollectionId,
+        [Query.equal('appwriteUserId', user.$id), Query.limit(1)]
+      )
 
       return response.documents[0] ? normalizeProfile(user, response.documents[0] as unknown as Partial<AppProfile>) : null
     } catch {
@@ -204,14 +204,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      await account.create({
-        userId: ID.unique(),
+      await account.create(
+        ID.unique(),
         email,
         password,
-        name: fullName,
-      })
+        fullName
+      )
 
-      await account.createEmailPasswordSession({ email, password })
+      await account.createEmailPasswordSession(email, password)
 
       const currentUser = await account.get()
       const nextProfile = (await fetchProfile(currentUser)) || getProfileDefaults(currentUser)
@@ -231,7 +231,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      await account.createEmailPasswordSession({ email, password })
+      await account.createEmailPasswordSession(email, password)
       const currentUser = await account.get()
       const currentProfile = (await fetchProfile(currentUser)) || getProfileDefaults(currentUser)
 
@@ -247,7 +247,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signOut() {
     if (isAppwriteConfigured) {
       try {
-        await account.deleteSession({ sessionId: 'current' })
+        await account.deleteSession('current')
       } catch {
         // Ignore logout cleanup failures and clear local state anyway.
       }
@@ -263,10 +263,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      await account.createRecovery({
+      await account.createRecovery(
         email,
-        url: `${window.location.origin}/login`,
-      })
+        `${window.location.origin}/login`
+      )
       return { error: null }
     } catch (error) {
       return { error: error instanceof Error ? error.message : 'Unable to send password reset instructions.' }
@@ -279,9 +279,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      await account.createVerification({
-        url: `${window.location.origin}/login`,
-      })
+      await account.createVerification(`${window.location.origin}/login`)
       return { error: null }
     } catch (error) {
       return { error: error instanceof Error ? error.message : 'Unable to send verification email.' }
@@ -304,12 +302,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const execution = (await functions.createExecution({
-        functionId: appwriteConfig.profileUpdateFunctionId,
-        body: JSON.stringify(safeUpdates),
-        async: false,
-        method: 'POST',
-      })) as unknown as { responseBody?: string; responseStatusCode?: number }
+      const execution = (await (functions as any).createExecution(
+        appwriteConfig.profileUpdateFunctionId,
+        JSON.stringify(safeUpdates),
+        false,
+        '/',
+        ExecutionMethod.POST
+      )) as unknown as { responseBody?: string; responseStatusCode?: number }
 
       if (execution.responseStatusCode && execution.responseStatusCode >= 400) {
         return { error: 'Unable to save your profile changes.' }

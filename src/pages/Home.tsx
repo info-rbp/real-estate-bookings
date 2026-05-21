@@ -3,58 +3,41 @@ import PublicNav from '../components/PublicNav';
 import Footer from '../components/Footer';
 import { ShieldCheck, Clock, Calendar, CheckCircle } from 'lucide-react';
 
+import { MarketingHero } from '../components/shared/MarketingHero';
+
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-surface">
       <PublicNav />
 
       <main className="flex-1 pt-0">
         {/* Hero */}
-        <section className="relative overflow-hidden bg-gray-50 py-24 sm:py-32">
-          <div className="max-w-7xl mx-auto px-6 md:px-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="flex flex-col gap-6 text-left">
-              <h1 className="text-5xl font-bold text-gray-900 leading-tight tracking-tight">Reliable Field Support for Real Estate Agencies</h1>
-              <p className="text-lg text-gray-600 max-w-xl leading-relaxed">
-                BookPro provides on-demand property inspection and field services to help your agency save time, reduce workload, and enhance client satisfaction. Focus on what you do best—we’ll handle the rest.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                <Link to="/engage-us" className="bg-primary text-white text-sm font-semibold px-8 py-3 rounded-xl shadow-md hover:bg-primary/80 transition-all text-center">
-                  Book a Consultation
-                </Link>
-                <Link to="/pricing" className="border border-outline text-primary text-sm font-semibold px-8 py-3 rounded-xl transition-all hover:bg-primary/5">
-                  View Pricing
-                </Link>
-              </div>
-            </div>
-            <div className="bg-surface-container rounded-2xl overflow-hidden shadow-lg aspect-video border border-outline-variant flex items-center justify-center">
-              <img
-                src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                alt="Professional Team Collaboration"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-        </section>
+        <MarketingHero
+          title="Reliable Field Support for Real Estate Agencies"
+          subtitle="Rent On Time provides on-demand property inspection and work order management to help your agency save time and enhance client satisfaction."
+          ctaText="Book a Work Order"
+          ctaLink="/login"
+        />
 
         {/* How it Works */}
         <section className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-6 md:px-10">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Streamline Your Workflow in 3 Simple Steps</h2>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto">Our process is designed for maximum efficiency, giving you back valuable time to focus on your clients.</p>
+              <h2 className="text-4xl font-display font-medium text-on-surface mb-4">Streamline Your Workflow in 3 Simple Steps</h2>
+              <p className="text-lg text-on-surface-variant max-w-3xl mx-auto">Our process is designed for maximum efficiency, giving you back valuable time to focus on your clients.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
               {[
-                { icon: Calendar, title: '1. Place Your Booking', desc: 'Select the service you need—from condition reports to routine inspections—via our simple online portal.' },
-                { icon: Clock, title: '2. We Complete the Work', desc: 'Our experienced field professionals complete the task to the highest standard, keeping you informed along the way.' },
-                { icon: CheckCircle, title: '3. Receive Your Report', desc: 'Get detailed, timely reports delivered directly to your inbox, ready to be shared with your clients.' },
+                { icon: Calendar, title: '1. Issue a Work Order', desc: 'Submit a detailed service request via our portal—from condition reports to routine inspections.' },
+                { icon: Clock, title: '2. Professional Attendance', desc: 'Our field professionals complete the work to the highest standard, with full access and safety compliance.' },
+                { icon: CheckCircle, title: '3. Digital Reporting', desc: 'Receive professional reports directly in your preferred system, ready for tenant or landlord review.' },
               ].map((step, i) => (
-                <div key={i} className="flex flex-col items-center text-center p-8 bg-gray-50 rounded-2xl border border-transparent hover:border-primary/50 transition-all hover:shadow-lg">
-                  <div className="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                <div key={i} className="flex flex-col items-center text-center p-8 terris-card border-none bg-surface-variant">
+                  <div className="bg-primary text-on-primary w-16 h-16 rounded-full flex items-center justify-center mb-6">
                     <step.icon size={32} />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">{step.title}</h3>
-                  <p className="text-base text-gray-600">{step.desc}</p>
+                  <h3 className="text-2xl font-display font-medium text-on-surface mb-3">{step.title}</h3>
+                  <p className="text-base text-on-surface-variant">{step.desc}</p>
                 </div>
               ))}
             </div>
@@ -104,13 +87,13 @@ export default function Home() {
         {/* CTA */}
         <section className="py-24 bg-primary">
           <div className="max-w-7xl mx-auto px-6 md:px-10 text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">Ready to Enhance Your Agency's Efficiency?</h2>
-            <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">Let BookPro handle the fieldwork so you can focus on building client relationships and growing your business.</p>
+            <h2 className="text-4xl font-display font-medium text-on-primary mb-4">Ready to Enhance Your Agency's Efficiency?</h2>
+            <p className="text-lg text-on-primary/80 mb-8 max-w-2xl mx-auto">Let Rent On Time handle the fieldwork so you can focus on building client relationships and growing your business.</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/engage-us" className="bg-white text-primary text-sm font-semibold px-8 py-3 rounded-xl hover:bg-gray-100 transition-all">
-                Book a Free Consultation
+              <Link to="/login" className="terris-btn-primary bg-white text-primary hover:bg-surface-variant">
+                Get Started
               </Link>
-              <Link to="/about" className="border border-white/50 text-white text-sm font-semibold px-8 py-3 rounded-xl transition-all hover:bg-white/10">
+              <Link to="/about" className="terris-btn-outline border-white text-white hover:bg-white/10">
                 About Us
               </Link>
             </div>

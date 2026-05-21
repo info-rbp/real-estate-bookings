@@ -1,0 +1,9 @@
+{
+  "name": "fetch-calendar-availability",
+  "version": "1.0.0",
+  "description": "Fetch available slots from staff calendars.",
+  "main": "src/main.js",
+  "dependencies": {
+    "node-appwrite": "^11.0.0"
+  }
+}

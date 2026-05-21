@@ -1,0 +1,9 @@
+{
+  "name": "generate-invoice-lines",
+  "version": "1.0.0",
+  "description": "Appwrite function to generate invoice lines for completed work orders.",
+  "main": "src/main.js",
+  "dependencies": {
+    "node-appwrite": "^11.0.0"
+  }
+}

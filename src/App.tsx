@@ -17,7 +17,7 @@ import Subscription from './pages/Subscription'
 import EngageUs from './pages/EngageUs'
 import Properties from './pages/Properties'
 import { AdminLogin } from './pages/AdminLogin'
-import { AdminDashboard } from './pages/AdminDashboard'
+import AdminDashboard from './pages/AdminDashboard'
 import { PropertyDetail } from './pages/PropertyDetail'
 import { InspectionBooking } from './pages/InspectionBooking'
 import Terms from './pages/Terms'
@@ -107,9 +107,9 @@ const router = createBrowserRouter([
     element: <AdminLogin />,
   },
   {
-    path: '/admin/dashboard',
+    path: '/admin/dashboard/*',
     element: (
-      <ProtectedRoute allowedRoles={['admin']}>
+      <ProtectedRoute allowedRoles={['admin', 'staff']}>
         <AdminDashboard />
       </ProtectedRoute>
     ),

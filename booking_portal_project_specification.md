@@ -1,80 +1,49 @@
-# Generic Booking Portal Web Application Build Instructions
+# Rent On Time Work Order Platform Specification
 
 ## 1. Product Goal
-Build a generic web application where clients can:
-- Visit public-facing service pages.
-- Create an account or log in.
-- Access a private dashboard.
-- View upcoming, pending, completed, and cancelled bookings.
-- Create new bookings.
-- Select available time slots based on Google Calendar availability.
-- Receive confirmation notifications.
-- Track booking status from request to completion.
-- Allow admins to manage bookings, services, pricing, users, and calendar settings.
+Build a contract-compliant Work Order platform where Rent On Time and its clients can:
+- Submit detailed Work Orders for property services.
+- Classify properties by Service Area (Perth/Peel vs Other Regions).
+- Apply regional pricing and batching rules.
+- Manage access issues and re-attendance workflows.
+- Coordinate weekly Open for Inspection plans.
+- Generate and export invoice lines with GST.
+- Maintain a full audit trail of all operational changes.
 
 ## 2. Core User Types
-### Client User
-- Register and log in.
-- Create bookings.
-- View their own bookings.
-- Edit or cancel bookings if rules allow.
-- Upload files or notes.
-- Receive booking confirmations and reminders.
+### Client User (Rent On Time / Agency)
+- Create Work Orders.
+- Confirm legal authority for attendance.
+- View real-time status and reports.
 
-### Admin User
-- View all clients and bookings.
-- Approve, reject, edit, or cancel bookings.
-- Manage services.
-- Configure pricing.
-- Manage availability rules.
-- Connect Google Calendar.
-- Export booking and invoice data.
+### Admin User (Service Provider)
+- Manage the full platform operations.
+- Accept/decline Work Orders.
+- Manage regional batches and OFI plans.
+- Assign staff and schedule attendance.
+- Export invoices.
 
-### Staff / Operator User
-- View assigned bookings.
-- Update booking status.
-- Add completion notes.
-- Upload supporting files.
-- Flag access or attendance issues.
+### Staff User (Field Professional)
+- View assigned Work Orders.
+- Capture attendance notes and access issues.
+- Submit reports.
 
-## 3. Main Application Modules
-### A. Public Website
-Build front-facing pages for:
-- Home
-- Services
-- Pricing
-- About
-- Contact
-- Login
-- Register
-- Booking information page
+## 3. Service Area Rules (Schedule 1)
+- **Perth and Peel Region:** Standard rates, 7 days' notice preferred.
+- **Other Regions:** Regional rates, requires batching (min 10-15 bookings).
+- **Outside Service Area:** Requires quote and admin review.
 
-### B. Authentication
-- Email/password, Google login, Role-based permissions.
+## 4. Rate Card (GST-Exclusive)
+- Property Condition Report: $120 (Perth/Peel) / $150 (Other)
+- Routine/Exit/OFI: $40 / $60
+- Key Installation: $70 / $100
+- GST Rate: 10%
 
-### C. Client Dashboard
-- Upcoming bookings, Pending requests, Completed bookings, Cancelled bookings, Booking status summary, Quick “New Booking” button, Notifications, Profile details.
+## 5. Access Issues
+- Fee: 20% of relevant booking fee + GST.
+- Triggered by missing keys, tenant refusal, unsafe conditions, etc.
+- Re-attendance is treated as a new Work Order.
 
-### D. Booking Form (Step-by-Step)
-- Step 1: Service Selection
-- Step 2: Location Details
-- Step 3: Access Details
-- Step 4: Availability Selection (Google Calendar Sync)
-- Step 5: Pricing / Summary
-- Step 6: Confirmation
-
-## 4. Google Calendar Integration
-- Connect admin account, read availability, create/update/cancel events, sync status.
-
-## 5. Booking Status Flow
-- Draft, Pending confirmation, Confirmed, Scheduled, In progress, Completed, Cancelled, Failed / no access, Invoiced.
-
-## 6. MVP Build Order
-1. Public website pages
-2. Login/register system
-3. Client dashboard
-4. Admin dashboard
-5. Service management
-6. New booking form
-7. Google Calendar integration
-8. Booking history & reporting
+## 6. Invoice Rules
+- Invoices before Thursday 12:00pm -> Paid Friday same week.
+- Invoices after Thursday 12:00pm -> Paid following Friday.

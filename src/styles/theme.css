@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #1a3a3a; /* Deep Teal/Green inspired by Terris */
+  --color-on-primary: #ffffff;
+
+  --color-secondary: #c5a358; /* Muted Gold/Bronze accent */
+  --color-on-secondary: #ffffff;
+
+  --color-surface: #fcfaf7; /* Warm neutral background */
+  --color-on-surface: #1a1a1a;
+
+  --color-surface-variant: #f2ede4; /* Muted stone/cream */
+  --color-on-surface-variant: #4a4a4a;
+
+  --color-outline: #d1ccc0;
+  --color-outline-variant: #e5e1d7;
+
+  --font-display: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-on-surface font-body;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-medium tracking-tight;
+  }
+}
+
+@layer components {
+  .terris-card {
+    @apply bg-white rounded-2xl border border-outline-variant shadow-sm transition-all hover:shadow-md;
+  }
+
+  .terris-btn-primary {
+    @apply bg-primary text-on-primary px-8 py-3 rounded-full font-semibold transition-all hover:opacity-90 active:scale-95;
+  }
+
+  .terris-btn-outline {
+    @apply border-2 border-primary text-primary px-8 py-3 rounded-full font-semibold transition-all hover:bg-primary/5 active:scale-95;
+  }
+
+  .terris-input {
+    @apply w-full px-4 py-3 rounded-xl border border-outline bg-white focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all text-sm;
+  }
+}
