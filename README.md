@@ -186,4 +186,4 @@ The existing prototype already provides the screen-level reference for the first
 
 ## Next step
 
-The cleanest next move is to convert this repository from a prototype archive into a real app scaffold while preserving these flows and visual references.
+The cleanest next move is to convert this repository from a prototype archive into a real app scaffold while preserving these flows and visual references. Which we wll eventually do.
