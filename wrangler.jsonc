@@ -1,6 +1,7 @@
 {
   "name": "rbp-real-estate",
-  "compatibility_date": "2026-05-21",
+  "compatibility_date": "2024-05-21",
+  "main": "index.js",
   "assets": {
     "directory": "./dist"
   }
