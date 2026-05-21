@@ -28,12 +28,10 @@ export default function Settings() {
     setSaving(true)
     await updateProfile({
       full_name: fullName,
-      email,
       phone,
       timezone,
       email_notifications: emailNotif,
       sms_notifications: smsNotif,
-      two_factor_enabled: twoFactor,
     })
     setSaving(false)
     setSaved(true)
@@ -95,7 +93,7 @@ export default function Settings() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-semibold text-on-surface">Email Address</label>
-                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="border border-outline-variant rounded-lg p-4 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm" />
+                    <input type="email" value={email} readOnly className="border border-outline-variant rounded-lg p-4 bg-surface-container-low text-on-surface-variant outline-none text-sm cursor-not-allowed" />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-semibold text-on-surface">Phone Number</label>

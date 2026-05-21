@@ -1,0 +1,9 @@
+{
+  "name": "create-calendar-event",
+  "version": "1.0.0",
+  "description": "Create a Google Calendar event for a scheduled Work Order.",
+  "main": "src/main.js",
+  "dependencies": {
+    "node-appwrite": "^11.0.0"
+  }
+}

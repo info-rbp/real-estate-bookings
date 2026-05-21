@@ -1,0 +1,12 @@
+[
+  { "region": "Perth and Peel", "suburb": "ASHBY", "postcode": "6065", "pricingClassification": "perth_peel" },
+  { "region": "Perth and Peel", "suburb": "PERTH", "postcode": "6000", "pricingClassification": "perth_peel" },
+  { "region": "Gascoyne", "suburb": "CARNARVON", "postcode": "6701", "pricingClassification": "other_region" },
+  { "region": "Goldfields-Esperance", "suburb": "KALGOORLIE", "postcode": "6430", "pricingClassification": "other_region" },
+  { "region": "Great Southern", "suburb": "ALBANY", "postcode": "6330", "pricingClassification": "other_region" },
+  { "region": "Kimberley", "suburb": "BROOME", "postcode": "6725", "pricingClassification": "other_region" },
+  { "region": "Mid West", "suburb": "GERALDTON", "postcode": "6530", "pricingClassification": "other_region" },
+  { "region": "Pilbara", "suburb": "PORT HEDLAND", "postcode": "6721", "pricingClassification": "other_region" },
+  { "region": "South West", "suburb": "BUNBURY", "postcode": "6230", "pricingClassification": "other_region" },
+  { "region": "Wheatbelt", "suburb": "NORTHAM", "postcode": "6401", "pricingClassification": "other_region" }
+]

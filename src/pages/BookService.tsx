@@ -2,25 +2,34 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import type { Service } from '../types/database'
-import ProgressBar from '../components/ProgressBar'
-import { CircleCheck as CheckCircle, CircleAlert as AlertCircle } from 'lucide-react'
+import {
+  CircleCheck as CheckCircle,
+  CircleAlert as AlertCircle,
+  ClipboardList,
+  MapPin,
+  Users,
+  Key,
+  FileText,
+  Calendar as CalendarIcon,
+  Search
+} from 'lucide-react'
 import { listActiveServices } from '../lib/services'
-import { createBooking } from '../lib/bookings'
+import { classifyServiceArea } from '../lib/serviceAreas'
+import { calculateWorkOrderPricing } from '../lib/rateCard'
+import { functions, appwriteConfig } from '../lib/appwrite'
+import { ExecutionMethod } from 'appwrite'
+import { StatusBadge } from '../components/shared/StatusBadge'
+import type { RentOnTimeServiceType, WorkOrderContact } from '../types/workOrders'
 
 const steps = [
-  { label: 'Services' },
-  { label: 'Details' },
-  { label: 'Schedule' },
-  { label: 'Confirm' },
+  { label: 'Service', icon: ClipboardList },
+  { label: 'Property', icon: MapPin },
+  { label: 'Contacts', icon: Users },
+  { label: 'Access', icon: Key },
+  { label: 'Reporting', icon: FileText },
+  { label: 'Scheduling', icon: CalendarIcon },
+  { label: 'Review', icon: CheckCircle },
 ]
-
-interface CalendarEvent {
-  id: string
-  title: string
-  start: string
-  end: string
-  isAllDay: boolean
-}
 
 export default function BookService() {
   const { profile } = useAuth()
@@ -28,142 +37,202 @@ export default function BookService() {
   const [currentStep, setCurrentStep] = useState(1)
   const [services, setServices] = useState<Service[]>([])
   const [selectedService, setSelectedService] = useState<Service | null>(null)
+
+  // Form State
   const [propertyAddress, setPropertyAddress] = useState('')
-  const [propertyCity, setPropertyCity] = useState('')
-  const [propertyPostalCode, setPropertyPostalCode] = useState('')
-  const [propertyType, setPropertyType] = useState<'apartment' | 'house' | 'townhouse'>('apartment')
-  const [accessMethod, setAccessMethod] = useState<'lockbox' | 'tenant' | 'agency'>('lockbox')
+  const [propertySuburb, setPropertySuburb] = useState('')
+  const [propertyPostcode, setPropertyPostcode] = useState('')
+  const [propertyType, setPropertyType] = useState<'apartment' | 'house' | 'townhouse' | 'commercial' | 'other'>('house')
+
+  const [region, setRegion] = useState<string | null>(null)
+  const [pricingClassification, setPricingClassification] = useState<any>('perth_peel')
+  const [serviceAreaMatched, setServiceAreaMatched] = useState(false)
+
+  const [contacts, setContacts] = useState<WorkOrderContact[]>([])
+
+  const [accessMethod, setAccessMethod] = useState('lockbox')
   const [accessInstructions, setAccessInstructions] = useState('')
-  const [bookingDate, setBookingDate] = useState('')
-  const [bookingTime, setBookingTime] = useState('09:00')
+  const [lockboxCode, setLockboxCode] = useState('')
+  const [alarmDetails, setAlarmDetails] = useState('')
+  const [gateAccess, setGateAccess] = useState('')
+  const [parkingDetails, setParkingDetails] = useState('')
+  const [keyCollectionDetails, setKeyCollectionDetails] = useState('')
+  const [authorityConfirmedBy, setAuthorityConfirmedBy] = useState('')
+
+  const [knownSafetyRisks, setKnownSafetyRisks] = useState('')
+  const [animalsAtProperty, setAnimalsAtProperty] = useState(false)
+  const [hazards, setHazards] = useState('')
+  const [accessLimitations, setAccessLimitations] = useState('')
+  const [sensitiveCircumstances, setSensitiveCircumstances] = useState('')
+
+  const [requiredTemplate, setRequiredTemplate] = useState('Standard')
+  const [requiredSystem, setRequiredSystem] = useState('PropertyMe')
+  const [uploadDestination, setUploadDestination] = useState('')
+  const [specificPhotosRequired, setSpecificPhotosRequired] = useState('')
+  const [specificNotesRequired, setSpecificNotesRequired] = useState('')
+  const [specificQuestionsRequired, setSpecificQuestionsRequired] = useState('')
+  const [reportingRequirements, setReportingRequirements] = useState('')
+
+  const [requestedDate, setRequestedDate] = useState('')
+  const [timingRestrictions, setTimingRestrictions] = useState('')
+  const [requestedWindowStart, setRequestedWindowStart] = useState('09:00')
+  const [requestedWindowEnd, setRequestedWindowEnd] = useState('17:00')
+  const [availableSlots, setAvailableSlots] = useState<any[]>([])
+  const [fetchingSlots, setFetchingSlots] = useState(false)
+  const [hasLegalAuthority, setHasLegalAuthority] = useState(false)
+
+  const [pricing, setPricing] = useState<any>(null)
   const [submitting, setSubmitting] = useState(false)
-  const [confirmed, setConfirmed] = useState(false)
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([])
-  const [loadingCalendar, setLoadingCalendar] = useState(false)
-  const [availableSlots, setAvailableSlots] = useState<string[]>([])
-  const [loadingServices, setLoadingServices] = useState(true)
-  const [serviceError, setServiceError] = useState('')
-  const [bookingError, setBookingError] = useState('')
+  const [confirmedWO, setConfirmedWO] = useState<any>(null)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    let mounted = true
-
-    async function loadServices() {
-      setLoadingServices(true)
-      setServiceError('')
-
-      try {
-        const nextServices = await listActiveServices()
-        if (!mounted) return
-        setServices(nextServices)
-      } catch (error) {
-        if (!mounted) return
-        setServiceError(error instanceof Error ? error.message : 'Unable to load services right now.')
-      } finally {
-        if (mounted) {
-          setLoadingServices(false)
-        }
-      }
-    }
-
-    loadServices()
-
-    return () => {
-      mounted = false
-    }
+    listActiveServices().then(setServices).catch(err => setError(err.message))
   }, [])
 
   useEffect(() => {
-    fetchCalendarEvents()
-  }, [])
-
-  useEffect(() => {
-    if (bookingDate && selectedService) {
-      calculateAvailableSlots()
-    }
-  }, [bookingDate, selectedService, calendarEvents])
-
-  async function fetchCalendarEvents() {
-    setLoadingCalendar(true)
-    setCalendarEvents([])
-    setLoadingCalendar(false)
-  }
-
-  function calculateAvailableSlots() {
-    if (!bookingDate || !selectedService) return
-
-    const allSlots = ['09:00', '10:30', '13:00', '14:30', '16:00']
-    const duration = selectedService.duration_minutes
-
-    const available = allSlots.filter(time => {
-      const slotStart = new Date(`${bookingDate}T${time}:00`)
-      const slotEnd = new Date(slotStart.getTime() + duration * 60 * 1000)
-
-      const isConflict = calendarEvents.some(event => {
-        if (event.isAllDay) return false
-        const eventStart = new Date(event.start)
-        const eventEnd = new Date(event.end)
-        return (slotStart < eventEnd && slotEnd > eventStart)
+    if (propertySuburb && propertyPostcode.length >= 4) {
+      classifyServiceArea({ suburb: propertySuburb, postcode: propertyPostcode }).then(res => {
+        setRegion(res.region)
+        setPricingClassification(res.pricingClassification)
+        setServiceAreaMatched(res.matched)
       })
+    }
+  }, [propertySuburb, propertyPostcode])
 
-      return !isConflict
-    })
+  useEffect(() => {
+    if (selectedService && profile?.clientId) {
+      calculateWorkOrderPricing({
+        clientId: profile.clientId,
+        serviceType: selectedService.id as RentOnTimeServiceType,
+        pricingClassification: pricingClassification,
+        urgentFlag: isUrgent()
+      }).then(setPricing)
+    }
+  }, [selectedService, pricingClassification, requestedDate])
 
-    setAvailableSlots(available)
-    if (available.length > 0 && !available.includes(bookingTime)) {
-      setBookingTime(available[0])
+  useEffect(() => {
+    if (currentStep === 6 && requestedDate) {
+      fetchAvailability()
+    }
+  }, [currentStep, requestedDate])
+
+  async function fetchAvailability() {
+    setFetchingSlots(true)
+    try {
+      const res = await functions.createExecution(
+        'fetch-calendar-availability',
+        JSON.stringify({ dateFrom: requestedDate, dateTo: requestedDate }),
+        false,
+        '/',
+        ExecutionMethod.POST
+      )
+      const data = JSON.parse((res as any).responseBody)
+      setAvailableSlots(data.slots || [])
+    } catch (err) {
+      console.error('Failed to fetch availability', err)
+    } finally {
+      setFetchingSlots(false)
     }
   }
 
-  const travelSurcharge = 50
-  const basePrice = selectedService?.price_type === 'quote' ? 0 : (selectedService?.price || 0)
-  const totalPrice = basePrice + travelSurcharge
+  function isUrgent() {
+    if (!requestedDate) return false
+    const date = new Date(requestedDate)
+    const now = new Date()
+    const diff = date.getTime() - now.getTime()
+    return diff < 24 * 60 * 60 * 1000
+  }
 
-  async function handleConfirm() {
-    if (!profile || !selectedService) return
+  async function handleSubmit() {
+    if (!profile || !selectedService || !pricing) return
     setSubmitting(true)
-    setBookingError('')
+    setError('')
 
     try {
-      await createBooking({
-        profile,
-        service: selectedService,
-        propertyAddress,
-        propertyCity,
-        propertyPostalCode,
-        propertyType,
-        accessMethod,
-        accessInstructions,
-        bookingDate,
-        bookingTime,
-        durationMinutes: selectedService.duration_minutes,
-        basePrice,
-        travelSurcharge,
-        totalPrice,
-      })
-      setConfirmed(true)
-    } catch (error) {
-      setBookingError(error instanceof Error ? error.message : 'Unable to create your booking right now.')
+      const res = await functions.createExecution(
+        'create-work-order',
+        JSON.stringify({
+          serviceId: selectedService.id,
+          serviceType: selectedService.id,
+          propertyAddress,
+          propertySuburb,
+          propertyPostcode,
+          propertyType,
+          region,
+          pricingClassification,
+          serviceAreaMatched,
+          outsideServiceArea: pricingClassification === 'outside_service_area',
+          requestedAttendanceDate: requestedDate,
+          requestedAttendanceWindowStart: requestedWindowStart,
+          requestedAttendanceWindowEnd: requestedWindowEnd,
+          accessMethod,
+          accessInstructions,
+          lockboxCode,
+          alarmDetails,
+          gateAccess,
+          parkingDetails,
+          keyCollectionDetails,
+          knownSafetyRisks,
+          animalsAtProperty,
+          authorityConfirmedBy,
+          hazards,
+          accessLimitations,
+          sensitiveCircumstances,
+          requiredTemplate,
+          requiredSystem,
+          uploadDestination,
+          specificPhotosRequired,
+          specificNotesRequired,
+          specificQuestionsRequired,
+          reportingRequirements,
+          timingRestrictions,
+          hasLegalAuthority,
+          contacts,
+          basePriceExGst: pricing.basePriceExGst,
+          totalPriceExGst: pricing.totalPriceExGst,
+          totalPriceIncGst: pricing.totalPriceIncGst,
+          gstAmount: pricing.gstAmount
+        }),
+        false,
+        '/',
+        ExecutionMethod.POST
+      )
+
+      const execution = res as any
+      if (execution.responseStatusCode >= 400) {
+        throw new Error('Failed to create Work Order')
+      }
+
+      setConfirmedWO(JSON.parse(execution.responseBody))
+    } catch (err: any) {
+      setError(err.message)
     } finally {
       setSubmitting(false)
     }
   }
 
-  if (confirmed) {
+  if (confirmedWO) {
     return (
-      <div className="max-w-3xl mx-auto text-center py-16">
-        <div className="bg-surface-container-lowest rounded-2xl soft-saas-shadow border border-outline-variant/30 p-12">
-          <div className="w-20 h-20 rounded-full bg-success-light flex items-center justify-center mx-auto mb-6">
-            <CheckCircle size={40} className="text-success" />
+      <div className="max-w-3xl mx-auto py-16 text-center">
+        <div className="terris-card p-12 bg-white">
+          <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6 text-green-600">
+            <CheckCircle size={40} />
           </div>
-          <h2 className="text-3xl font-bold text-on-surface mb-3">Booking Created</h2>
-          <p className="text-base text-on-surface-variant mb-8">Your {selectedService?.name} request has been saved and is pending confirmation.</p>
+          <h2 className="text-3xl font-display font-medium text-on-surface mb-3">Work Order Submitted</h2>
+          <p className="text-lg text-on-surface-variant mb-2">Work Order Number: <span className="font-bold text-primary">{confirmedWO.workOrderNumber}</span></p>
+          <div className="mb-8">
+             <StatusBadge status={confirmedWO.status} />
+          </div>
+          <p className="text-on-surface-variant mb-8 max-w-md mx-auto">
+            Your request has been received. {confirmedWO.status === 'quote_required' ? 'An admin will review the details and provide a quote shortly.' : 'We will confirm acceptance and schedule attendance soon.'}
+          </p>
           <div className="flex gap-4 justify-center">
-            <button onClick={() => navigate('/dashboard/bookings')} className="bg-primary text-on-primary text-sm font-semibold px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
-              View My Bookings
+            <button onClick={() => navigate('/dashboard/bookings')} className="terris-btn-primary">
+              View My Work Orders
             </button>
-            <button onClick={() => navigate('/dashboard')} className="border border-outline-variant text-on-surface-variant text-sm font-semibold px-6 py-3 rounded-lg hover:bg-surface-container-high transition-colors">
-              Back to Dashboard
+            <button onClick={() => navigate('/dashboard')} className="terris-btn-outline">
+              Dashboard
             </button>
           </div>
         </div>
@@ -172,342 +241,502 @@ export default function BookService() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <ProgressBar steps={steps} currentStep={currentStep} />
+    <div className="max-w-7xl mx-auto px-6 py-10">
+      {/* Progress Bar */}
+      <div className="mb-12">
+        <div className="flex justify-between items-center max-w-4xl mx-auto overflow-x-auto pb-4 gap-4">
+          {steps.map((step, i) => (
+            <div key={i} className={`flex flex-col items-center min-w-[80px] transition-all ${currentStep === i + 1 ? 'text-primary' : 'text-on-surface-variant opacity-50'}`}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 border-2 ${currentStep === i + 1 ? 'border-primary bg-primary/5' : 'border-outline'}`}>
+                <step.icon size={20} />
+              </div>
+              <span className="text-xs font-semibold uppercase tracking-wider whitespace-nowrap">{step.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
 
-      {currentStep === 1 && (
-        <div>
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-on-surface mb-2">Select a Service</h1>
-            <p className="text-base text-on-surface-variant">Choose the inspection or management service required for your property.</p>
-          </div>
-          {serviceError && <div className="mb-6 rounded-lg border border-error/30 bg-error/10 p-4 text-sm font-medium text-error">{serviceError}</div>}
-          {loadingServices ? (
-            <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-8 text-center text-on-surface-variant">Loading services...</div>
-          ) : services.length === 0 ? (
-            <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-8 text-center text-on-surface-variant">No active services are available yet.</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-              {services.map(service => (
-                <div
-                  key={service.id}
-                  onClick={() => setSelectedService(service)}
-                  className={`md:col-span-6 cursor-pointer bg-surface-container-lowest border rounded-xl p-6 soft-saas-shadow transition-all hover:border-primary active:scale-[0.98] ${
-                    selectedService?.id === service.id ? 'border-primary bg-surface-container' : 'border-outline-variant'
-                  }`}
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-lg font-semibold text-on-surface">{service.name}</h3>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      selectedService?.id === service.id ? 'bg-primary text-on-primary' : 'bg-secondary-container text-on-secondary-container'
-                    }`}>
-                      {service.price_type === 'quote' ? 'Quote Based' : service.price_type === 'hourly' ? `$${service.price}/hr` : `$${service.price}`}
-                    </span>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="lg:col-span-8">
+          {currentStep === 1 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="mb-8">
+                <h1 className="text-4xl font-display font-medium text-on-surface mb-2">Select a Service</h1>
+                <p className="text-on-surface-variant">Choose the property service you wish to request.</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {services.map(service => (
+                  <div
+                    key={service.id}
+                    onClick={() => setSelectedService(service)}
+                    className={`terris-card p-6 cursor-pointer group relative ${selectedService?.id === service.id ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/50'}`}
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-xl font-display font-medium text-on-surface">{service.name}</h3>
+                      {selectedService?.id === service.id && <CheckCircle size={20} className="text-primary" />}
+                    </div>
+                    <p className="text-sm text-on-surface-variant mb-6">{service.description}</p>
+                    <div className="text-sm font-bold text-primary">
+                      {service.price_type === 'quote' ? 'Quote Required' : `$${service.price} ex GST`}
+                    </div>
                   </div>
-                  <p className="text-sm text-on-surface-variant mb-4">{service.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-primary">Select Service</span>
-                    {selectedService?.id === service.id && <CheckCircle size={20} className="text-primary" />}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
-        </div>
-      )}
 
-      {currentStep === 2 && (
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          <div className="md:col-span-7">
-            <div className="bg-surface-container-lowest soft-saas-shadow rounded-xl p-6 border border-outline-variant/30">
-              <div className="flex items-center gap-3 mb-5 pb-4 border-b border-outline-variant">
-                <h2 className="text-lg font-semibold text-on-surface">Property Location</h2>
+          {currentStep === 2 && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="mb-8">
+                <h2 className="text-4xl font-display font-medium text-on-surface mb-2">Property Details</h2>
+                <p className="text-on-surface-variant">Where should we attend?</p>
               </div>
-              <div className="space-y-5">
-                <div>
-                  <label className="text-sm font-semibold text-on-surface-variant mb-1 block">Street Address</label>
-                  <input type="text" value={propertyAddress} onChange={e => setPropertyAddress(e.target.value)} placeholder="123 Real Estate Ave"
-                    className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-surface-bright text-sm" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+              <div className="terris-card p-8 space-y-6">
+                <div className="grid grid-cols-1 gap-6">
                   <div>
-                    <label className="text-sm font-semibold text-on-surface-variant mb-1 block">Suburb / City</label>
-                    <input type="text" value={propertyCity} onChange={e => setPropertyCity(e.target.value)} placeholder="Perth"
-                      className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-surface-bright text-sm" />
+                    <label className="block text-sm font-bold text-on-surface mb-2">Street Address</label>
+                    <input type="text" value={propertyAddress} onChange={e => setPropertyAddress(e.target.value)} placeholder="123 Example Street" className="terris-input" />
                   </div>
-                  <div>
-                    <label className="text-sm font-semibold text-on-surface-variant mb-1 block">Postcode</label>
-                    <input type="text" value={propertyPostalCode} onChange={e => setPropertyPostalCode(e.target.value)} placeholder="6000"
-                      className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-surface-bright text-sm" />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-on-surface-variant mb-2 block">Property Type</label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {(['apartment', 'house', 'townhouse'] as const).map(type => (
-                      <button
-                        key={type}
-                        onClick={() => setPropertyType(type)}
-                        className={`flex flex-col items-center justify-center p-4 border rounded-xl transition-all text-sm font-medium ${
-                          propertyType === type ? 'border-primary bg-surface-container-low text-primary' : 'border-outline-variant hover:bg-surface-container-lowest'
-                        }`}
-                      >
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                      </button>
-                    ))}
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-bold text-on-surface mb-2">Suburb</label>
+                      <input type="text" value={propertySuburb} onChange={e => setPropertySuburb(e.target.value)} placeholder="Perth" className="terris-input" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-on-surface mb-2">Postcode</label>
+                      <input type="text" value={propertyPostcode} onChange={e => setPropertyPostcode(e.target.value)} placeholder="6000" className="terris-input" />
+                    </div>
                   </div>
                 </div>
+
+                {region && (
+                  <div className={`p-4 rounded-xl border flex items-center gap-4 ${pricingClassification === 'perth_peel' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-amber-50 border-amber-200 text-amber-800'}`}>
+                    <MapPin size={20} />
+                    <div>
+                      <p className="text-sm font-bold">Region: {region}</p>
+                      <p className="text-xs">{pricingClassification === 'perth_peel' ? 'Perth and Peel rates apply.' : 'Other Region rates apply.'}</p>
+                    </div>
+                  </div>
+                )}
+                {!serviceAreaMatched && propertySuburb && propertyPostcode.length >= 4 && (
+                   <div className="p-4 rounded-xl border bg-red-50 border-red-200 text-red-800 flex items-center gap-4">
+                     <AlertCircle size={20} />
+                     <div>
+                       <p className="text-sm font-bold">Outside Service Area</p>
+                       <p className="text-xs">A custom quote will be required for this location.</p>
+                     </div>
+                   </div>
+                )}
               </div>
             </div>
-          </div>
-          <div className="md:col-span-5">
-            <div className="bg-surface-container-lowest soft-saas-shadow rounded-xl p-6 border border-outline-variant/30 h-full">
-              <div className="flex items-center gap-3 mb-5 pb-4 border-b border-outline-variant">
-                <h2 className="text-lg font-semibold text-on-surface">Access Method</h2>
+          )}
+
+          {currentStep === 3 && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="mb-8">
+                <h2 className="text-4xl font-display font-medium text-on-surface mb-2">Contacts</h2>
+                <p className="text-on-surface-variant">Who should we coordinate with?</p>
               </div>
-              <div className="space-y-5">
-                <div>
-                  <label className="text-sm font-semibold text-on-surface-variant mb-2 block">How will the agent enter?</label>
-                  <div className="space-y-2">
-                    {[
-                      { value: 'lockbox' as const, label: 'Lockbox / Key Safe', desc: 'Code required for entry' },
-                      { value: 'tenant' as const, label: 'Meet Tenant / Owner', desc: 'Contact details required' },
-                      { value: 'agency' as const, label: 'Collect Keys at Agency', desc: 'Pick up from office' },
-                    ].map(method => (
-                      <div
-                        key={method.value}
-                        onClick={() => setAccessMethod(method.value)}
-                        className={`flex items-center gap-4 p-4 rounded-lg border cursor-pointer transition-colors ${
-                          accessMethod === method.value ? 'border-primary bg-surface-container-low' : 'border-outline-variant bg-surface-bright hover:border-primary'
-                        }`}
-                      >
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          accessMethod === method.value ? 'border-primary' : 'border-outline-variant'
-                        }`}>
-                          {accessMethod === method.value && <div className="w-3 h-3 rounded-full bg-primary" />}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-semibold text-on-surface">{method.label}</p>
-                          <p className="text-xs text-on-surface-variant">{method.desc}</p>
-                        </div>
+              <div className="space-y-6">
+                {contacts.map((contact, index) => (
+                  <div key={index} className="terris-card p-6 bg-white relative">
+                    <button
+                      onClick={() => setContacts(contacts.filter((_, i) => i !== index))}
+                      className="absolute top-4 right-4 text-on-surface-variant hover:text-red-600"
+                    >
+                      Remove
+                    </button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-on-surface-variant uppercase mb-1">Type</label>
+                        <select
+                          value={contact.contactType}
+                          onChange={e => {
+                            const newContacts = [...contacts]
+                            newContacts[index].contactType = e.target.value as any
+                            setContacts(newContacts)
+                          }}
+                          className="terris-input"
+                        >
+                          <option value="tenant">Tenant</option>
+                          <option value="occupant">Occupant</option>
+                          <option value="landlord">Landlord</option>
+                          <option value="strata">Strata</option>
+                          <option value="contractor">Contractor</option>
+                          <option value="property_manager">Property Manager</option>
+                          <option value="other">Other</option>
+                        </select>
                       </div>
-                    ))}
+                      <div>
+                        <label className="block text-xs font-bold text-on-surface-variant uppercase mb-1">Full Name</label>
+                        <input
+                          type="text"
+                          value={contact.name}
+                          onChange={e => {
+                            const newContacts = [...contacts]
+                            newContacts[index].name = e.target.value
+                            setContacts(newContacts)
+                          }}
+                          className="terris-input"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-on-surface-variant uppercase mb-1">Phone</label>
+                        <input
+                          type="tel"
+                          value={contact.phone}
+                          onChange={e => {
+                            const newContacts = [...contacts]
+                            newContacts[index].phone = e.target.value
+                            setContacts(newContacts)
+                          }}
+                          className="terris-input"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-on-surface-variant uppercase mb-1">Email</label>
+                        <input
+                          type="email"
+                          value={contact.email}
+                          onChange={e => {
+                            const newContacts = [...contacts]
+                            newContacts[index].email = e.target.value
+                            setContacts(newContacts)
+                          }}
+                          className="terris-input"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  onClick={() => setContacts([...contacts, { contactType: 'tenant', name: '', phone: '', email: '' }])}
+                  className="w-full py-4 border-2 border-dashed border-outline rounded-2xl text-on-surface-variant hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2"
+                >
+                  <Users size={20} />
+                  Add Contact
+                </button>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 4 && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="mb-8">
+                <h2 className="text-4xl font-display font-medium text-on-surface mb-2">Access & Safety</h2>
+                <p className="text-on-surface-variant">How do we enter the property safely?</p>
+              </div>
+              <div className="terris-card p-8 space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-bold text-on-surface mb-2">Access Method</label>
+                    <select value={accessMethod} onChange={e => setAccessMethod(e.target.value)} className="terris-input">
+                      <option value="lockbox">Lockbox</option>
+                      <option value="keys_office">Keys at Office</option>
+                      <option value="tenant_meet">Meet Tenant</option>
+                      <option value="occupant_meet">Meet Occupant</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  {accessMethod === 'lockbox' && (
+                    <div>
+                      <label className="block text-sm font-bold text-on-surface mb-2">Lockbox Code</label>
+                      <input type="text" value={lockboxCode} onChange={e => setLockboxCode(e.target.value)} className="terris-input" />
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <label className="block text-sm font-bold text-on-surface mb-2">Access Instructions</label>
+                    <textarea value={accessInstructions} onChange={e => setAccessInstructions(e.target.value)} className="terris-input min-h-[100px]" placeholder="Specific instructions for entry..." />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-on-surface mb-2">Alarm Details</label>
+                    <input type="text" value={alarmDetails} onChange={e => setAlarmDetails(e.target.value)} className="terris-input" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-on-surface mb-2">Gate Access</label>
+                    <input type="text" value={gateAccess} onChange={e => setGateAccess(e.target.value)} className="terris-input" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-on-surface mb-2">Parking Details</label>
+                    <input type="text" value={parkingDetails} onChange={e => setParkingDetails(e.target.value)} className="terris-input" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-sm font-bold text-on-surface mb-2">Key Collection Details</label>
+                    <input type="text" value={keyCollectionDetails} onChange={e => setKeyCollectionDetails(e.target.value)} className="terris-input" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-sm font-bold text-on-surface mb-2">Authority Confirmed By</label>
+                    <input type="text" value={authorityConfirmedBy} onChange={e => setAuthorityConfirmedBy(e.target.value)} className="terris-input" placeholder="Name of person providing authority..." />
                   </div>
                 </div>
+
+                <div className="pt-8 border-t border-outline">
+                  <h3 className="text-lg font-bold mb-4">Safety & Hazards</h3>
+                  <div className="space-y-4">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input type="checkbox" checked={animalsAtProperty} onChange={e => setAnimalsAtProperty(e.target.checked)} className="w-5 h-5 rounded border-outline" />
+                      <span className="text-sm font-medium">Animals at property</span>
+                    </label>
+                    <div>
+                      <label className="block text-sm font-bold text-on-surface mb-2">Known Safety Risks / Hazards</label>
+                      <textarea value={knownSafetyRisks} onChange={e => setKnownSafetyRisks(e.target.value)} className="terris-input min-h-[80px]" placeholder="Dogs, construction, uneven floors..." />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 5 && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="mb-8">
+                <h2 className="text-4xl font-display font-medium text-on-surface mb-2">Reporting Requirements</h2>
+                <p className="text-on-surface-variant">What deliverables are required?</p>
+              </div>
+              <div className="terris-card p-8 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-bold text-on-surface mb-2">Required System</label>
+                    <select value={requiredSystem} onChange={e => setRequiredSystem(e.target.value)} className="terris-input">
+                      <option value="PropertyMe">PropertyMe</option>
+                      <option value="Inspect Express">Inspect Express</option>
+                      <option value="Email">Email</option>
+                      <option value="Google Drive">Google Drive</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-on-surface mb-2">Required Template</label>
+                    <input type="text" value={requiredTemplate} onChange={e => setRequiredTemplate(e.target.value)} className="terris-input" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-on-surface mb-2">Upload Destination</label>
+                    <input type="text" value={uploadDestination} onChange={e => setUploadDestination(e.target.value)} className="terris-input" placeholder="e.g. PropertyMe Portal" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-on-surface mb-2">Specific Photos Required</label>
+                    <input type="text" value={specificPhotosRequired} onChange={e => setSpecificPhotosRequired(e.target.value)} className="terris-input" placeholder="Front, Back, Kitchen..." />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-on-surface mb-2">Specific Notes Required</label>
+                    <input type="text" value={specificNotesRequired} onChange={e => setSpecificNotesRequired(e.target.value)} className="terris-input" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-on-surface mb-2">Specific Questions Required</label>
+                    <input type="text" value={specificQuestionsRequired} onChange={e => setSpecificQuestionsRequired(e.target.value)} className="terris-input" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-sm font-bold text-on-surface mb-2">Specific Reporting Requirements</label>
+                    <textarea value={reportingRequirements} onChange={e => setReportingRequirements(e.target.value)} className="terris-input min-h-[120px]" placeholder="Include specific requirements..." />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-sm font-bold text-on-surface mb-2">Supporting Files</label>
+                    <div className="p-8 border-2 border-dashed border-outline rounded-xl text-center text-on-surface-variant">
+                      <FileText size={40} className="mx-auto mb-2 opacity-20" />
+                      <p>File upload integration pending</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 6 && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="mb-8">
+                <h2 className="text-4xl font-display font-medium text-on-surface mb-2">Scheduling</h2>
+                <p className="text-on-surface-variant">When should we attend?</p>
+              </div>
+              <div className="terris-card p-8 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-1">
+                    <label className="block text-sm font-bold text-on-surface mb-2">Requested Date</label>
+                    <input type="date" value={requestedDate} onChange={e => setRequestedDate(e.target.value)} className="terris-input" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-on-surface mb-2">Window Start</label>
+                    <input type="time" value={requestedWindowStart} onChange={e => setRequestedWindowStart(e.target.value)} className="terris-input" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-on-surface mb-2">Window End</label>
+                    <input type="time" value={requestedWindowEnd} onChange={e => setRequestedWindowEnd(e.target.value)} className="terris-input" />
+                  </div>
+                </div>
+
+                {requestedDate && (
+                  <div className="pt-6 border-t border-outline">
+                    <h4 className="text-sm font-bold mb-4 flex items-center gap-2">
+                      <CalendarIcon size={16} className="text-primary" />
+                      Available Slots (Google Calendar)
+                    </h4>
+                    {fetchingSlots ? (
+                      <div className="py-4 text-center text-sm text-on-surface-variant italic">Checking availability...</div>
+                    ) : availableSlots.length > 0 ? (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {availableSlots.map((slot, i) => (
+                          <button
+                            key={i}
+                            onClick={() => {
+                              const start = slot.start.split('T')[1].substring(0, 5)
+                              const end = slot.end.split('T')[1].substring(0, 5)
+                              setRequestedWindowStart(start)
+                              setRequestedWindowEnd(end)
+                            }}
+                            className={`p-3 text-xs font-bold rounded-xl border transition-all ${
+                              requestedWindowStart === slot.start.split('T')[1].substring(0, 5)
+                                ? 'bg-primary border-primary text-on-primary'
+                                : 'border-outline hover:border-primary text-on-surface'
+                            }`}
+                          >
+                            {slot.start.split('T')[1].substring(0, 5)} - {slot.end.split('T')[1].substring(0, 5)}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-surface-variant/50 rounded-xl text-center text-xs text-on-surface-variant">
+                        No real-time availability found. Falling back to manual window.
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div>
-                  <label className="text-sm font-semibold text-on-surface-variant mb-1 block">Instructions &amp; Codes</label>
-                  <textarea
-                    value={accessInstructions}
-                    onChange={e => setAccessInstructions(e.target.value)}
-                    placeholder="e.g. Lockbox code is 1234. Please leave keys on the kitchen counter when finished."
-                    rows={4}
-                    className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-surface-bright resize-none text-sm"
-                  />
+                  <label className="block text-sm font-bold text-on-surface mb-2">Timing Restrictions</label>
+                  <textarea value={timingRestrictions} onChange={e => setTimingRestrictions(e.target.value)} className="terris-input min-h-[80px]" placeholder="Only available after 2pm..." />
                 </div>
-                <div className="bg-surface-container p-4 rounded-lg flex items-start gap-3 border border-primary/10">
-                  <p className="text-xs text-on-surface-variant leading-tight">These details are shared only with the assigned professional 2 hours before the booking.</p>
-                </div>
+
+                {isUrgent() && (
+                  <div className="p-4 rounded-xl border bg-amber-50 border-amber-200 text-amber-800 flex items-center gap-4">
+                    <AlertCircle size={20} />
+                    <div>
+                      <p className="text-sm font-bold">Urgent Request</p>
+                      <p className="text-xs">Requests with less than 24 hours notice may require admin review.</p>
+                    </div>
+                  </div>
+                )}
+                {pricingClassification === 'other_region' && (
+                  <div className="p-4 rounded-xl border bg-blue-50 border-blue-200 text-blue-800 flex items-center gap-4">
+                    <AlertCircle size={20} />
+                    <div>
+                      <p className="text-sm font-bold">Regional Batching Required</p>
+                      <p className="text-xs">Other region requests require batch coordination (minimum 10-15 bookings).</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
-      {currentStep === 3 && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-7">
-            <div className="bg-surface-container-lowest p-6 rounded-xl soft-saas-shadow border border-outline-variant">
-              <h2 className="text-lg font-semibold text-on-surface mb-4">Select a Date</h2>
-              <input
-                type="date"
-                value={bookingDate}
-                onChange={e => setBookingDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-surface-bright text-sm"
-              />
-            </div>
-          </div>
-          <div className="lg:col-span-5 space-y-6">
-            <div className="bg-surface-container-lowest p-6 rounded-xl soft-saas-shadow border border-outline-variant">
-              <h3 className="text-sm font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Available Slots</h3>
-              {bookingDate && <p className="text-sm text-on-surface-variant mb-4">{new Date(bookingDate + 'T12:00:00').toLocaleDateString('en-AU', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>}
-
-              {loadingCalendar ? (
-                <div className="text-center py-4 text-on-surface-variant">Loading calendar...</div>
-              ) : availableSlots.length === 0 && bookingDate ? (
-                <div className="bg-warning-light border border-warning rounded-lg p-4 flex gap-3">
-                  <AlertCircle size={18} className="text-warning shrink-0" />
-                  <div className="text-sm text-warning">No available slots for this date. Please select another date.</div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  {['09:00', '10:30', '13:00', '14:30', '16:00'].map(time => {
-                    const isAvailable = availableSlots.includes(time)
-                    return (
-                      <button
-                        key={time}
-                        onClick={() => isAvailable && setBookingTime(time)}
-                        disabled={!isAvailable}
-                        className={`py-3 px-4 rounded-lg text-sm font-semibold transition-all text-center ${
-                          bookingTime === time
-                            ? 'bg-primary text-on-primary shadow-md'
-                            : isAvailable
-                            ? 'border border-outline-variant hover:border-primary hover:text-primary'
-                            : 'border border-outline-variant bg-surface-container-high text-on-surface-variant cursor-not-allowed opacity-50'
-                        }`}
-                      >
-                        {formatTime(time)}
-                        {!isAvailable && <span className="text-xs block">Booked</span>}
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-            {selectedService && (
-              <div className="bg-primary-container p-6 rounded-xl border border-primary/20">
-                <h4 className="text-sm font-semibold text-on-primary-container mb-3">Appointment Summary</h4>
-                <div className="space-y-2">
-                  {bookingDate && (
-                    <p className="text-sm text-on-primary-container">{new Date(bookingDate + 'T12:00:00').toLocaleDateString('en-AU', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                  )}
-                  <p className="text-sm text-on-primary-container">{formatTime(bookingTime)} - {formatTime(addHours(bookingTime, selectedService.duration_minutes / 60))} ({selectedService.duration_minutes}m)</p>
-                  <p className="text-sm text-on-primary-container">{selectedService.name}</p>
-                </div>
+          {currentStep === 7 && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="mb-8">
+                <h2 className="text-4xl font-display font-medium text-on-surface mb-2">Review & Submit</h2>
+                <p className="text-on-surface-variant">Please confirm the details below.</p>
               </div>
+
+              <div className="terris-card p-8 space-y-8">
+                <section>
+                  <h3 className="text-lg font-bold border-b border-outline-variant pb-2 mb-4">Service & Property</h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div><span className="text-on-surface-variant">Service:</span> {selectedService?.name}</div>
+                    <div><span className="text-on-surface-variant">Region:</span> {region || 'Unknown'}</div>
+                    <div className="col-span-2"><span className="text-on-surface-variant">Address:</span> {propertyAddress}, {propertySuburb} {propertyPostcode}</div>
+                  </div>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-bold border-b border-outline-variant pb-2 mb-4">Legal Confirmation</h3>
+                  <label className="flex items-start gap-3 p-4 bg-surface-variant/50 rounded-xl cursor-pointer hover:bg-surface-variant transition-colors">
+                    <input type="checkbox" checked={hasLegalAuthority} onChange={e => setHasLegalAuthority(e.target.checked)} className="mt-1 w-5 h-5 rounded border-outline text-primary focus:ring-primary" />
+                    <span className="text-sm text-on-surface leading-snug">
+                      I confirm Rent On Time has the legal right and authority to request attendance and provide access instructions for this property.
+                    </span>
+                  </label>
+                </section>
+
+                {error && <div className="p-4 bg-red-50 border border-red-200 text-red-800 text-sm rounded-xl">{error}</div>}
+              </div>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div className="mt-10 flex justify-between items-center">
+            {currentStep > 1 ? (
+              <button onClick={() => setCurrentStep(currentStep - 1)} className="terris-btn-outline px-10">Back</button>
+            ) : <div />}
+
+            {currentStep < 7 ? (
+              <button
+                onClick={() => {
+                  if (currentStep === 1 && !selectedService) return
+                  if (currentStep === 2 && !propertyAddress) return
+                  setCurrentStep(currentStep + 1)
+                }}
+                disabled={(currentStep === 1 && !selectedService) || (currentStep === 2 && !propertyAddress)}
+                className="terris-btn-primary px-10 disabled:opacity-50"
+              >
+                Next Step
+              </button>
+            ) : (
+              <button onClick={handleSubmit} disabled={submitting || !hasLegalAuthority} className="terris-btn-primary px-10 disabled:opacity-50">
+                {submitting ? 'Submitting...' : 'Submit Work Order'}
+              </button>
             )}
           </div>
         </div>
-      )}
 
-      {currentStep === 4 && selectedService && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-8 space-y-6">
-            <section className="bg-surface-container-lowest soft-saas-shadow rounded-xl p-6 border border-outline-variant/30">
-              <div className="flex items-center gap-3 mb-5 pb-4 border-b border-outline-variant">
-                <h2 className="text-lg font-semibold text-on-surface">Service Details</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <p className="text-xs font-medium text-on-surface-variant uppercase tracking-wider mb-1">Selected Service</p>
-                  <p className="text-base font-bold text-on-surface">{selectedService.name}</p>
-                  <p className="text-sm text-on-surface-variant mt-1">{selectedService.description.substring(0, 100)}...</p>
-                </div>
-              </div>
-            </section>
-            <section className="bg-surface-container-lowest soft-saas-shadow rounded-xl p-6 border border-outline-variant/30">
-              <div className="flex items-center gap-3 mb-5 pb-4 border-b border-outline-variant">
-                <h2 className="text-lg font-semibold text-on-surface">Property &amp; Schedule</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">Property Address</p>
-                  <p className="text-base font-bold text-on-surface">{propertyAddress}</p>
-                  <p className="text-sm text-on-surface-variant">{propertyCity}, {propertyPostalCode}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">Scheduled Time</p>
-                  {bookingDate && (
-                    <p className="text-base font-bold text-on-surface">
-                      {new Date(bookingDate + 'T12:00:00').toLocaleDateString('en-AU', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-                    </p>
+        {/* Sidebar / Summary */}
+        <div className="lg:col-span-4">
+          <div className="sticky top-10 space-y-6">
+            <div className="terris-card p-6 bg-white overflow-hidden relative">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-secondary" />
+              <h3 className="text-xl font-display font-medium text-on-surface mb-6">Pricing Summary</h3>
+              {pricing ? (
+                <div className="space-y-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-on-surface-variant">Base Service Fee</span>
+                    <span className="font-bold">${pricing.basePriceExGst.toFixed(2)}</span>
+                  </div>
+                  {pricing.accessIssueFeeExGst > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-on-surface-variant">Access Issue Fee</span>
+                      <span className="font-bold">${pricing.accessIssueFeeExGst.toFixed(2)}</span>
+                    </div>
                   )}
-                  <p className="text-sm font-bold text-on-surface">{formatTime(bookingTime)} - {formatTime(addHours(bookingTime, selectedService.duration_minutes / 60))}</p>
-                </div>
-              </div>
-            </section>
-          </div>
-          <aside className="lg:col-span-4">
-            <div className="sticky top-24 space-y-6">
-              <section className="bg-surface-container-lowest soft-saas-shadow rounded-xl p-6 border border-outline-variant/30 overflow-hidden relative">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
-                <h2 className="text-lg font-semibold text-on-surface mb-5">Order Summary</h2>
-                {bookingError && <div className="mb-4 rounded-lg border border-error/30 bg-error/10 p-3 text-sm font-medium text-error">{bookingError}</div>}
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between items-center text-on-surface-variant">
-                    <span className="text-sm">Base Service Fee</span>
-                    <span className="text-sm font-bold text-on-surface">${basePrice.toFixed(2)}</span>
+                  <div className="pt-4 border-t border-dashed border-outline flex justify-between items-center text-on-surface-variant text-sm">
+                    <span>GST (10%)</span>
+                    <span>${pricing.gstAmount.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between items-center text-on-surface-variant">
-                    <span className="text-sm">Travel Surcharge</span>
-                    <span className="text-sm font-bold text-on-surface">${travelSurcharge.toFixed(2)}</span>
+                  <div className="pt-2 flex justify-between items-center text-primary">
+                    <span className="text-lg font-bold">Total (Inc GST)</span>
+                    <span className="text-2xl font-display font-medium">${pricing.totalPriceIncGst.toFixed(2)}</span>
                   </div>
-                  <div className="pt-3 border-t border-dashed border-outline-variant flex justify-between items-center">
-                    <span className="text-lg font-semibold">Total Price</span>
-                    <span className="text-lg font-semibold text-primary">${totalPrice.toFixed(2)}</span>
-                  </div>
+                  {pricing.requiresQuote && (
+                    <div className="mt-4 p-3 bg-amber-50 rounded-lg flex gap-2 text-xs text-amber-800 border border-amber-200">
+                      <AlertCircle size={14} className="shrink-0" />
+                      <div>
+                        {pricing.pricingNotes.map((note: string, i: number) => <p key={i}>{note}</p>)}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-3">
-                  <button
-                    onClick={handleConfirm}
-                    disabled={submitting}
-                    className="w-full bg-primary text-on-primary text-sm font-bold py-3 px-4 rounded-lg hover:opacity-90 active:scale-95 transition-all flex justify-center items-center gap-2 shadow-lg disabled:opacity-50"
-                  >
-                    {submitting ? 'Saving...' : 'Confirm Booking'}
-                  </button>
-                </div>
-                <p className="mt-4 text-center text-xs text-on-surface-variant italic">
-                  By confirming, you agree to our <a href="/terms" className="text-primary underline">Terms of Service</a>.
-                </p>
-              </section>
-              <div className="bg-surface-container-high rounded-xl p-4 flex items-start gap-3">
-                <p className="text-sm font-semibold text-on-surface">Secure Booking</p>
-                <p className="text-xs text-on-surface-variant">Your booking is protected by our professional service guarantee.</p>
-              </div>
+              ) : (
+                <div className="text-sm text-on-surface-variant italic">Select a service to see pricing.</div>
+              )}
             </div>
-          </aside>
-        </div>
-      )}
 
-      <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-4">
-        {currentStep > 1 ? (
-          <button
-            onClick={() => setCurrentStep(currentStep - 1)}
-            className="flex items-center gap-2 px-6 py-3 border border-outline-variant text-on-surface-variant text-sm font-semibold rounded-lg hover:bg-surface-container-high transition-colors"
-          >
-            Back
-          </button>
-        ) : <div />}
-
-        {currentStep < 4 && (
-          <div className="flex gap-4">
-            <button className="px-6 py-3 border border-primary text-primary text-sm font-semibold rounded-lg hover:bg-primary/5 transition-all">
-              Save Draft
-            </button>
-            <button
-              onClick={() => {
-                if (currentStep === 1 && !selectedService) return
-                if (currentStep === 2 && !propertyAddress) return
-                if (currentStep === 3 && !bookingDate) return
-                setCurrentStep(currentStep + 1)
-              }}
-              disabled={
-                (currentStep === 1 && !selectedService) ||
-                (currentStep === 2 && !propertyAddress) ||
-                (currentStep === 3 && !bookingDate)
-              }
-              className="px-8 py-3 bg-primary text-on-primary text-sm font-semibold rounded-lg shadow-md hover:opacity-90 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50"
-            >
-              Next Step
-            </button>
+            <div className="bg-primary p-6 rounded-2xl text-on-primary">
+              <div className="flex items-center gap-3 mb-4">
+                <CheckCircle size={24} className="text-secondary" />
+                <h4 className="font-bold">Service Guarantee</h4>
+              </div>
+              <p className="text-xs opacity-80 leading-relaxed">
+                Rent On Time ensures all Work Orders are completed by verified professionals in compliance with state regulations.
+              </p>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )
-}
-
-function formatTime(time: string): string {
-  if (!time) return ''
-  const [h, m] = time.split(':').map(Number)
-  const period = h >= 12 ? 'PM' : 'AM'
-  const hour = h > 12 ? h - 12 : h === 0 ? 12 : h
-  return `${hour}:${String(m).padStart(2, '0')} ${period}`
-}
-
-function addHours(time: string, hours: number): string {
-  if (!time) return ''
-  const [h, m] = time.split(':').map(Number)
-  const newH = h + Math.floor(hours)
-  return `${String(newH).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }

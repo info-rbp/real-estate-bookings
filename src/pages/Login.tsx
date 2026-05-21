@@ -74,10 +74,10 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-surface border-b border-outline-variant shadow-sm">
+    <div className="min-h-screen flex flex-col bg-surface">
+      <header className="bg-white border-b border-outline-variant shadow-sm">
         <nav className="flex justify-between items-center px-10 h-20 max-w-7xl mx-auto">
-          <Link to="/" className="text-2xl font-bold text-primary">BookPro</Link>
+          <Link to="/" className="text-2xl font-display font-medium text-primary">Rent On Time</Link>
           <div className="hidden md:flex items-center gap-8">
             <Link to="/services" className="text-base text-on-surface-variant hover:text-primary transition-colors">Services</Link>
             <Link to="/about" className="text-base text-on-surface-variant hover:text-primary transition-colors">About</Link>
@@ -85,26 +85,26 @@ export default function Login() {
         </nav>
       </header>
 
-      <main className="flex-grow flex items-center justify-center px-6 py-16 bg-surface-container-lowest relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-30 pointer-events-none">
-          <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary-container/10 rounded-full blur-[100px]" />
-          <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-secondary-container/20 rounded-full blur-[80px]" />
+      <main className="flex-grow flex items-center justify-center px-6 py-16 relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-30 pointer-events-none bg-surface-variant">
+          <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[100px]" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-primary/10 rounded-full blur-[80px]" />
         </div>
 
-        <div className="w-full max-w-[480px] bg-white rounded-xl soft-saas-shadow border border-outline-variant/30 relative z-10 flex flex-col">
-          <div className="p-8 text-center">
-            <div className="text-2xl font-extrabold text-primary mb-1">BookPro</div>
-            <p className="text-sm text-on-surface-variant">Manage your world with ease.</p>
+        <div className="w-full max-w-[480px] bg-white rounded-2xl terris-card relative z-10 flex flex-col overflow-hidden">
+          <div className="p-8 text-center bg-surface-variant/30">
+            <div className="text-3xl font-display font-medium text-primary mb-1">Rent On Time</div>
+            <p className="text-sm text-on-surface-variant">Work Order Platform</p>
           </div>
 
-          <div className="flex px-8 border-b border-outline-variant">
+          <div className="flex border-b border-outline-variant">
             <button
               onClick={() => {
                 setIsLogin(true)
                 setError('')
                 setNotice('')
               }}
-              className={`flex-1 py-3 text-sm font-semibold transition-all ${isLogin ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:text-primary'}`}
+              className={`flex-1 py-4 text-sm font-semibold transition-all ${isLogin ? 'text-primary bg-white border-b-2 border-primary' : 'text-on-surface-variant bg-surface-variant/20 hover:text-primary'}`}
             >
               Login
             </button>
@@ -114,7 +114,7 @@ export default function Login() {
                 setError('')
                 setNotice('')
               }}
-              className={`flex-1 py-3 text-sm font-semibold transition-all ${!isLogin ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:text-primary'}`}
+              className={`flex-1 py-4 text-sm font-semibold transition-all ${!isLogin ? 'text-primary bg-white border-b-2 border-primary' : 'text-on-surface-variant bg-surface-variant/20 hover:text-primary'}`}
             >
               Sign Up
             </button>
@@ -122,11 +122,11 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="p-8 space-y-5">
             {error && (
-              <div className="bg-error-container text-on-error-container px-4 py-3 rounded-lg text-sm">{error}</div>
+              <div className="bg-red-50 text-red-800 border border-red-100 px-4 py-3 rounded-xl text-sm">{error}</div>
             )}
 
             {notice && (
-              <div className="bg-primary-container text-on-primary-container px-4 py-3 rounded-lg text-sm">{notice}</div>
+              <div className="bg-green-50 text-green-800 border border-green-100 px-4 py-3 rounded-xl text-sm">{notice}</div>
             )}
 
             {!isLogin && (
@@ -137,7 +137,7 @@ export default function Login() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="John Doe"
-                  className="w-full px-4 py-2.5 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm bg-white"
+                  className="terris-input"
                 />
               </div>
             )}
@@ -150,7 +150,7 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="alex.rivers@example.com"
                 required
-                className="w-full px-4 py-2.5 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm bg-white"
+                className="terris-input"
               />
             </div>
 
@@ -158,7 +158,7 @@ export default function Login() {
               <div className="flex justify-between items-center mb-1">
                 <label className="text-sm font-semibold text-on-surface-variant">Password</label>
                 {isLogin && (
-                  <button type="button" onClick={handlePasswordReset} className="text-xs text-primary hover:underline">
+                  <button type="button" onClick={handlePasswordReset} className="text-xs text-secondary font-semibold hover:underline">
                     Forgot Password?
                   </button>
                 )}
@@ -170,27 +170,27 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min. 8 characters"
                   required
-                  className="w-full px-4 py-2.5 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm bg-white pr-10"
+                  className="terris-input pr-12"
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary">
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
             {isLogin && (
-              <label className="flex items-center gap-2 text-sm text-on-surface-variant">
-                <input type="checkbox" className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary" />
-                Remember Me
+              <label className="flex items-center gap-2 text-sm text-on-surface-variant cursor-pointer">
+                <input type="checkbox" className="w-4 h-4 rounded border-outline text-primary focus:ring-primary" />
+                <span>Remember Me</span>
               </label>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-white py-3 rounded-lg text-sm font-semibold shadow-sm hover:shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
+              className="terris-btn-primary w-full mt-2"
             >
-              {loading ? 'Please wait...' : isLogin ? 'Login to Account' : 'Create Account'}
+              {loading ? 'Please wait...' : isLogin ? 'Login to Portal' : 'Create Account'}
             </button>
           </form>
 
@@ -203,7 +203,7 @@ export default function Login() {
                   setError('')
                   setNotice('')
                 }}
-                className="text-primary text-sm font-semibold hover:underline ml-1"
+                className="text-secondary text-sm font-bold hover:underline ml-1"
               >
                 {isLogin ? 'Register now' : 'Sign In'}
               </button>

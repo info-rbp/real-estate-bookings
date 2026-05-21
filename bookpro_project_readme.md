@@ -1,57 +1,53 @@
-# BookPro: Real Estate Service Booking Portal - Technical README
+# Rent On Time Work Order platform upgrade - Technical README
 
 ## Project Overview
-BookPro is a high-fidelity real estate service management platform designed for agents, property managers, and individual clients. The application facilitates the discovery, scheduling, and management of specialized property services like condition reports, inspections, and maintenance.
+This application is a contract-compliant Work Order platform for Rent On Time. It handles the full lifecycle of real estate service requests, from submission to regional batching, attendance, and invoicing.
 
 ## 1. Information Architecture & Page Flows
 
 ### A. Public-Facing & Onboarding Flow
-1.  **Home Page (`{{DATA:SCREEN:SCREEN_21}}`):** Brand landing page with value proposition and entry points for services and registration.
-2.  **Services Catalog (`{{DATA:SCREEN:SCREEN_24}}`):** Detailed view of available real estate services with professional photography and descriptions.
-3.  **Authentication (`{{DATA:SCREEN:SCREEN_9}}`):** Unified login/register gateway.
-4.  **Registration Workflow:**
-    *   **Step 1: Account Basics (`{{DATA:SCREEN:SCREEN_16}}`):** Email, password, and Google OAuth integration.
-    *   **Step 2: Professional Profile (`{{DATA:SCREEN:SCREEN_7}}`):** Role selection (Agent, Manager, Client) to tailor the dashboard experience.
-    *   **Step 3: Security & Preferences (`{{DATA:SCREEN:SCREEN_11}}`):** 2FA enablement and communication opt-ins.
+1.  **Home Page:** Terris-inspired premium landing page.
+2.  **Services Catalog:** Detailed view of Rent On Time services with pricing classification.
+3.  **Authentication:** Unified login/register gateway.
+4.  **Registration Workflow:** Account basics, professional profile, and security preferences.
 
 ### B. Client Dashboard Experience
-*   **Dashboard Home (`{{DATA:SCREEN:SCREEN_26}}`):** High-level summary of upcoming activities and quick-access booking triggers.
-*   **My Bookings (`{{DATA:SCREEN:SCREEN_13}}`):** Management hub with status filtering (Upcoming, Pending, Completed, Cancelled) and detailed professional tracking.
-*   **Account Settings (`{{DATA:SCREEN:SCREEN_2}}`):** Profile management, Google Calendar sync control, and notification matrix (Email/SMS).
+*   **Dashboard Home:** Summary of Work Order activity.
+*   **Work Orders (`/dashboard/bookings`):** Hub for tracking service requests.
+*   **Account Settings:** Profile and sync management.
 
-### C. Multi-Step Booking Workflow
-The booking engine is a 4-step progressive disclosure form:
-1.  **Service Selection (`{{DATA:SCREEN:SCREEN_15}}`):** Choosing the specific property service.
-2.  **Property & Access (`{{DATA:SCREEN:SCREEN_17}}`):** Capturing location and entry instructions (Lockbox, Tenant meet, etc.).
-3.  **Scheduling (`{{DATA:SCREEN:SCREEN_4}}`):** Date and time slot selection powered by real-time availability.
-4.  **Review & Confirm (`{{DATA:SCREEN:SCREEN_23}}`):** Final price breakdown (Base + Surcharges) and confirmation.
+### C. Multi-Step Work Order Workflow
+The booking engine is a 7-step progressive disclosure form:
+1.  **Service Selection:** Choose Rent On Time service.
+2.  **Property & Service Area:** Capture location and classify region (Perth/Peel vs Other).
+3.  **Contacts:** Tenant, landlord, and contractor details.
+4.  **Access & Safety:** Entry instructions and hazard reporting.
+5.  **Reporting Requirements:** Template and system requirements (e.g., PropertyMe).
+6.  **Scheduling:** Requested attendance window with notice period validation.
+7.  **Review & Confirm:** Pricing preview including GST.
 
 ## 2. Integration Requirements
 
 ### Google Calendar Sync
-*   **Bi-directional Sync:** Required for reading professional availability and writing confirmed appointments.
-*   **OAuth 2.0:** Secure authorization flow for users to connect their calendars.
-*   **Conflict Resolution:** Real-time checking to prevent double-booking during the Scheduling step.
+*   **Availability:** Fetch real-time availability for scheduling.
+*   **Events:** Write confirmed Work Orders to the calendar.
 
-### Notification Engine
-*   **Triggers:** New booking, status update (Pending -> Confirmed), 24h reminder, and report completion.
-*   **Channels:** SMTP for email notifications and a third-party SMS gateway (e.g., Twilio) for urgent property access updates.
+### Appwrite Functions
+*   **`create-work-order`:** Validates and persists new requests.
+*   **`update-work-order-status`:** Centralized state transitions with audit logging.
+*   **`generate-invoice-lines`:** Automated fee calculation and export preparation.
 
 ## 3. Build & Technical Requirements
 
 ### Frontend Stack
-*   **Framework:** React or Next.js for state management across multi-step forms.
-*   **Styling:** Tailwind CSS using the established Design System (`{{DATA:DESIGN_SYSTEM:DESIGN_SYSTEM_1}}`).
-*   **Icons:** Material Symbols for consistent UI iconography.
+*   **Framework:** React, Vite.
+*   **Styling:** Tailwind CSS (Terris-inspired Design System).
+*   **Type Safety:** Strict TypeScript.
 
 ### Backend & Data
-*   **User Roles:** RBAC (Role-Based Access Control) to differentiate between Clients, Agents, and Admins.
-*   **Storage:** Secure storage for property reports (PDFs) and high-res photography.
-*   **Encryption:** Bank-level encryption for user data and professional profiles.
+*   **Backend:** Appwrite.
+*   **Audit Logging:** Every sensitive action is recorded in `auditLogs`.
+*   **Region Logic:** Suburb + Postcode matching against Schedule 1.
 
-## 4. MVP Implementation Order
-1.  Onboarding & Identity Management.
-2.  Core Dashboard Layout & Navigation.
-3.  Multi-step Booking Form logic.
-4.  Google Calendar API Integration.
-5.  Booking Status Workflow (Backend state machine).
+## 4. Work Order Definition
+A Work Order is a written request for Services. It is accepted when confirmed in writing or performance commences. Minimum info includes property address, service type, attendance date, and legal authority confirmation.

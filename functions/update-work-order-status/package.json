@@ -1,0 +1,9 @@
+{
+  "name": "update-work-order-status",
+  "version": "1.0.0",
+  "description": "Appwrite Function to update Work Order status",
+  "main": "src/main.js",
+  "dependencies": {
+    "node-appwrite": "^11.1.0"
+  }
+}

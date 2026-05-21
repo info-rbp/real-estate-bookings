@@ -1,0 +1,11 @@
+[
+  { "serviceType": "property_condition_report", "perthPeel": 120, "otherRegion": 150 },
+  { "serviceType": "exit_inspection", "perthPeel": 40, "otherRegion": 60 },
+  { "serviceType": "routine_inspection", "perthPeel": 40, "otherRegion": 60 },
+  { "serviceType": "open_for_inspection", "perthPeel": 40, "otherRegion": 60 },
+  { "serviceType": "key_installation", "perthPeel": 70, "otherRegion": 100 },
+  { "serviceType": "insurance_claims_management", "perthPeel": 50, "otherRegion": 50 },
+  { "serviceType": "maintenance_requests", "perthPeel": 50, "otherRegion": 50 },
+  { "serviceType": "tenant_dispute_management", "perthPeel": 100, "otherRegion": 100 },
+  { "serviceType": "referral", "perthPeel": 0, "otherRegion": 0 }
+]
