@@ -1,4 +1,4 @@
-export const SAFE_PROFILE_FIELDS = [
+const SAFE_PROFILE_FIELDS = [
   'full_name',
   'phone',
   'timezone',
@@ -7,7 +7,7 @@ export const SAFE_PROFILE_FIELDS = [
   'avatar_url',
 ]
 
-export const DENIED_PROFILE_FIELDS = [
+const DENIED_PROFILE_FIELDS = [
   'role',
   'clientId',
   'appwriteUserId',
@@ -16,7 +16,7 @@ export const DENIED_PROFILE_FIELDS = [
   'two_factor_enabled',
 ]
 
-export function pickSafeProfileUpdates(input) {
+function pickSafeProfileUpdates(input) {
   const safe = {}
   const denied = []
 
@@ -39,7 +39,7 @@ export function pickSafeProfileUpdates(input) {
   return { safe, denied }
 }
 
-export function validateSafeProfileUpdates(updates) {
+function validateSafeProfileUpdates(updates) {
   if (updates.full_name !== undefined && (typeof updates.full_name !== 'string' || updates.full_name.length < 2)) {
     return 'full_name must be at least 2 characters.'
   }
@@ -66,3 +66,10 @@ export function validateSafeProfileUpdates(updates) {
 
   return null
 }
+
+module.exports = {
+  SAFE_PROFILE_FIELDS,
+  DENIED_PROFILE_FIELDS,
+  pickSafeProfileUpdates,
+  validateSafeProfileUpdates,
+};
