@@ -302,7 +302,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const execution = (await functions.createExecution(
+      const execution = (await (functions as any).createExecution(
         appwriteConfig.profileUpdateFunctionId,
         JSON.stringify(safeUpdates),
         false,

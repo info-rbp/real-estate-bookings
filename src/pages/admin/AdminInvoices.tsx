@@ -36,7 +36,7 @@ export default function AdminInvoices() {
     try {
       // For this demo/MVP, we'll trigger generation for all clients
       // In production, this would be triggered per client or in a batch.
-      const res = await functions.createExecution(
+      const res = await (functions as any).createExecution(
         'generate-invoice-lines', // Replace with real ID
         JSON.stringify({ clientId: 'ROT-CLIENT-001' }), // Mock client ID
         false,

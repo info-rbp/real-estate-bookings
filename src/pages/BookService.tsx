@@ -120,7 +120,7 @@ export default function BookService() {
   async function fetchAvailability() {
     setFetchingSlots(true)
     try {
-      const res = await functions.createExecution(
+      const res = await (functions as any).createExecution(
         'fetch-calendar-availability',
         JSON.stringify({ dateFrom: requestedDate, dateTo: requestedDate }),
         false,
@@ -150,7 +150,7 @@ export default function BookService() {
     setError('')
 
     try {
-      const res = await functions.createExecution(
+      const res = await (functions as any).createExecution(
         'create-work-order',
         JSON.stringify({
           serviceId: selectedService.id,
