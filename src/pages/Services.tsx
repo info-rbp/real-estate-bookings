@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect } from 'react';
 import PublicNav from '../components/PublicNav';
 import { ArrowRight, ClipboardList, ClipboardCheck, CheckSquare, Home, Key, Wrench, FileText, Users, Award, Settings2 } from 'lucide-react';
@@ -7,12 +8,12 @@ const services = [
   { icon: ClipboardCheck, title: 'Routine Inspections', description: 'We assist with scheduled routine inspections by attending the property, taking photos and notes, and preparing a clear routine inspection report for your agency.' },
   { icon: CheckSquare, title: 'Exit Inspections', description: 'We support end-of-tenancy inspections by attending the property, documenting its condition, capturing photographs and preparing exit inspection notes or reports as required.' },
   { icon: Home, title: 'Open for Inspection Attendance', description: 'We attend scheduled rental viewings and open homes on behalf of your agency, helping maintain leasing momentum when your internal team is unavailable or managing multiple vacancies.' },
-  { icon: Key, title: 'Key Safe & Lockbox Installation', description: 'We assist with key collection, key safe placement, lockbox installation and access setup, with photo confirmation provided where practical.' },
+  { icon: Key, title: 'Key Safe and Lockbox Installation', description: 'We assist with key collection, key safe placement, lockbox installation and access setup, with photo confirmation provided where practical.' },
   { icon: Wrench, title: 'Maintenance Request Support', description: 'We provide on-site support for maintenance matters by attending properties, capturing photographic evidence, making observations and assisting with contractor coordination where approved.' },
-  { icon: FileText, title: 'Insurance Claim Support', description: 'We assist with property attendance for insurance-related matters by capturing photographs, recording observations and providing practical claim support information where required.' },
-  { icon: Users, title: 'Tenant Dispute Support', description: 'We can assist agencies with inspection attendance, photographic evidence and property condition information where tenant disputes or property condition issues require additional support.' },
-  { icon: Award, title: 'Landlord Referral Support', description: 'Through our agency relationships and property attendance work, we can help identify and refer landlords who may require professional property management services.' },
-  { icon: Settings2, title: 'Custom Property Support', description: 'Need support outside a standard inspection? BookPro can work with your agency to design practical solutions based on your landlords, tenants, properties and operational needs.' },
+  { icon: FileText, title: 'Insurance Claim Support', description: 'We assist with property attendance for insurance-related matters by capturing photographs, recording observations and providing practical, factual claim support information.' },
+  { icon: Users, title: 'Dispute Evidence Support', description: 'Capture inspection notes, photographs and property condition information to support factual review of disputes, claims or condition-related issues. No legal or tenancy advice provided.' },
+  { icon: Award, title: 'Landlord and Agency Referral Support', description: 'Through our agency relationships and property attendance work, we help identify and refer property owners who require professional management services.' },
+  { icon: Settings2, title: 'Custom Property Support', description: 'Need support outside a standard inspection? BookPro can work with your team to design practical solutions based on your portfolio and operational needs.' },
 ];
 
 const benefits = [
@@ -55,7 +56,7 @@ export default function ServicesPage() {
                 <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Property Inspection & Field Support for Real Estate Agencies</h1>
                 <p className="mt-6 text-lg leading-8 text-gray-600">BookPro helps real estate agencies manage inspections, open homes, key access, maintenance coordination and on-site property tasks with reliable field support across their managed portfolio.</p>
                 <div className="mt-10 flex items-center justify-center gap-x-6">
-                  <a href="#" className="rounded-md bg-primary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">Book a Consultation</a>
+                  <Link to="/login" className="rounded-md bg-primary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">Get Started</Link>
                   <a href="#services" className="text-sm font-semibold leading-6 text-gray-900">View Our Services <span aria-hidden="true">→</span></a>
                 </div>
                 <p className="mt-6 text-xs leading-5 text-gray-500">Designed for property managers, leasing teams and growing rent rolls that need dependable support on the ground.</p>
@@ -71,10 +72,10 @@ export default function ServicesPage() {
                     <div className="lg:pr-8 lg:pt-4">
                         <div className="lg:max-w-lg">
                             <h2 className="text-base font-semibold leading-7 text-primary">Practical Support</h2>
-                            <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Practical Support for Busy Property Management Teams</p>
-                            <p className="mt-6 text-lg leading-8 text-gray-600">Managing a rent roll takes more than office-based administration. Properties need to be inspected, photographed, opened for viewings, checked at lease transitions and supported when maintenance issues arise.</p>
-                            <p className="mt-8 text-lg leading-8 text-gray-600">BookPro provides outsourced property inspection and field support services for real estate agencies that need extra capacity without adding pressure to their internal team.</p>
-                             <p className="mt-8 text-lg leading-8 text-gray-600">We work alongside your agency to complete agreed on-site tasks, capture clear information and provide practical reporting support so your team can stay focused on owners, tenants and portfolio growth.</p>
+                            <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Practical Support for Property Professionals</p>
+                            <p className="mt-6 text-lg leading-8 text-gray-600">Managing properties takes more than office-based administration. Properties need to be inspected, photographed, opened for viewings, checked at lease transitions and supported when maintenance issues arise.</p>
+                            <p className="mt-8 text-lg leading-8 text-gray-600">BookPro provides outsourced property inspection and field support services for property managers, real estate agencies and private landlords that need extra capacity.</p>
+                             <p className="mt-8 text-lg leading-8 text-gray-600">We work alongside your workflow to complete agreed on-site tasks, capture clear information and provide practical reporting support so you can stay focused on your portfolio growth.</p>
                         </div>
                     </div>
                     <img src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Professional team working in an office" className="w-[48rem] max-w-none rounded-xl shadow-xl ring-1 ring-gray-400/10 sm:w-[57rem] md:-ml-4 lg:-ml-0" width={2432} height={1442} />
@@ -111,8 +112,8 @@ export default function ServicesPage() {
         <div className="bg-white py-24 sm:py-32">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl lg:text-center">
-                    <h2 className="text-base font-semibold leading-7 text-primary">Why Agencies Choose BookPro</h2>
-                    <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">BookPro is built for agencies that need dependable inspection capacity, better field coverage and less pressure on internal property management teams.</p>
+                    <h2 className="text-base font-semibold leading-7 text-primary">Why Professionals Choose BookPro</h2>
+                    <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">BookPro is built for property professionals that need dependable inspection capacity, better field coverage and less pressure on internal workflows.</p>
                 </div>
                 <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-6 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-4 lg:gap-8">
                     {benefits.map((benefit) => (
@@ -151,9 +152,9 @@ export default function ServicesPage() {
         {/* Service Boundaries Section */}
         <div className="bg-white px-6 py-24 sm:py-32 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
-                <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Built to Support Your Agency, Not Replace It</h2>
-                <p className="mt-6 text-lg leading-8 text-gray-600">BookPro provides inspection and field support services for real estate agencies. Your agency remains responsible for property management decisions, owner instructions, tenant communication, statutory notices, approvals and final decision-making.</p>
-                <p className="mt-6 text-lg leading-8 text-gray-600">Our role is to provide reliable on-site support, clear property information and practical assistance that helps your team manage properties more efficiently.</p>
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Factual Support for Property Decisions</h2>
+                <p className="mt-6 text-lg leading-8 text-gray-600">BookPro provides property service coordination, field attendance and factual reporting support. Property management decisions remain with the agency, property manager or landlord.</p>
+                <p className="mt-6 text-lg leading-8 text-gray-600">Our role is to provide reliable on-site support, photographic evidence and property condition information. We do not provide legal, tenancy or insurance advice, nor do we represent clients at tribunals or prepare statutory notices.</p>
             </div>
         </div>
 
@@ -165,24 +166,16 @@ export default function ServicesPage() {
             </div>
             <div className="relative mx-auto max-w-md px-6 py-12 sm:py-20 md:py-28 lg:px-8 lg:py-32 lg:max-w-7xl lg:pl-1/2">
                 <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Need Reliable Property Inspection Support?</h2>
-                <p className="mt-6 text-lg leading-8 text-gray-100">BookPro helps real estate agencies complete inspection work, open homes, key access tasks and property attendance requirements without overloading the internal team.</p>
+                <p className="mt-6 text-lg leading-8 text-gray-100">BookPro helps property managers, real estate agencies and private landlords complete inspection work, open homes, and property attendance requirements.</p>
                 <div className="mt-10 flex items-center gap-x-6">
-                  <a href="#" className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-primary shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Book a Consultation</a>
-                  <a href="#" className="text-sm font-semibold leading-6 text-white">Contact BookPro <span aria-hidden="true">→</span></a>
+                  <Link to="/login" className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-primary shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Get Started</Link>
+                  <Link to="/engage-us" className="text-sm font-semibold leading-6 text-white">Enquire Now <span aria-hidden="true">→</span></Link>
                 </div>
             </div>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900" aria-labelledby="footer-heading">
-        <h2 id="footer-heading" className="sr-only">Footer</h2>
-        <div className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8 lg:pt-32">
-          <div className="mt-16 border-t border-white/10 pt-8 sm:mt-20 lg:mt-24">
-            <p className="text-xs leading-5 text-gray-400">&copy; 2024 BookPro Inc. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
     </div>
   );

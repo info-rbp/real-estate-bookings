@@ -18,7 +18,7 @@ export type WorkOrderStatus =
   | 'reattendance_required'
   | 'failed';
 
-export type RentOnTimeServiceType =
+export type BookProServiceType =
   | 'property_condition_report'
   | 'exit_inspection'
   | 'routine_inspection'
@@ -88,7 +88,7 @@ export interface WorkOrder {
   appwriteUserId: string;
   clientId: string;
   serviceId: string;
-  serviceType: RentOnTimeServiceType;
+  serviceType: BookProServiceType;
   propertyAddress: string;
   propertySuburb: string;
   propertyPostcode: string;

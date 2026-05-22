@@ -77,7 +77,7 @@ export default function Login() {
     <div className="min-h-screen flex flex-col bg-surface">
       <header className="bg-white border-b border-outline-variant shadow-sm">
         <nav className="flex justify-between items-center px-10 h-20 max-w-7xl mx-auto">
-          <Link to="/" className="text-2xl font-display font-medium text-primary">Rent On Time</Link>
+          <Link to="/" className="text-2xl font-display font-medium text-primary">BookPro</Link>
           <div className="hidden md:flex items-center gap-8">
             <Link to="/services" className="text-base text-on-surface-variant hover:text-primary transition-colors">Services</Link>
             <Link to="/about" className="text-base text-on-surface-variant hover:text-primary transition-colors">About</Link>
@@ -93,8 +93,8 @@ export default function Login() {
 
         <div className="w-full max-w-[480px] bg-white rounded-2xl terris-card relative z-10 flex flex-col overflow-hidden">
           <div className="p-8 text-center bg-surface-variant/30">
-            <div className="text-3xl font-display font-medium text-primary mb-1">Rent On Time</div>
-            <p className="text-sm text-on-surface-variant">Work Order Platform</p>
+            <div className="text-3xl font-display font-medium text-primary mb-1">BookPro</div>
+            <p className="text-sm text-on-surface-variant">BookPro Client Portal</p>
           </div>
 
           <div className="flex border-b border-outline-variant">

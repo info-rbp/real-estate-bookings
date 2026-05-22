@@ -1,4 +1,4 @@
-# Rent On Time Work Order Appwrite schema and permissions plan
+# BookPro Work Order Appwrite schema and permissions plan
 
 Status: Upgraded for Work Order platform compliance.
 

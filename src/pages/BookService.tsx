@@ -19,7 +19,7 @@ import { calculateWorkOrderPricing } from '../lib/rateCard'
 import { functions, appwriteConfig } from '../lib/appwrite'
 import { ExecutionMethod } from 'appwrite'
 import { StatusBadge } from '../components/shared/StatusBadge'
-import type { RentOnTimeServiceType, WorkOrderContact } from '../types/workOrders'
+import type { BookProServiceType, WorkOrderContact } from '../types/workOrders'
 
 const steps = [
   { label: 'Service', icon: ClipboardList },
@@ -104,7 +104,7 @@ export default function BookService() {
     if (selectedService && profile?.clientId) {
       calculateWorkOrderPricing({
         clientId: profile.clientId,
-        serviceType: selectedService.id as RentOnTimeServiceType,
+        serviceType: selectedService.id as BookProServiceType,
         pricingClassification: pricingClassification,
         urgentFlag: isUrgent()
       }).then(setPricing)
@@ -649,7 +649,7 @@ export default function BookService() {
                   <label className="flex items-start gap-3 p-4 bg-surface-variant/50 rounded-xl cursor-pointer hover:bg-surface-variant transition-colors">
                     <input type="checkbox" checked={hasLegalAuthority} onChange={e => setHasLegalAuthority(e.target.checked)} className="mt-1 w-5 h-5 rounded border-outline text-primary focus:ring-primary" />
                     <span className="text-sm text-on-surface leading-snug">
-                      I confirm Rent On Time has the legal right and authority to request attendance and provide access instructions for this property.
+                      I confirm BookPro has the legal right and authority to request attendance and provide access instructions for this property.
                     </span>
                   </label>
                 </section>
@@ -731,7 +731,7 @@ export default function BookService() {
                 <h4 className="font-bold">Service Guarantee</h4>
               </div>
               <p className="text-xs opacity-80 leading-relaxed">
-                Rent On Time ensures all Work Orders are completed by verified professionals in compliance with state regulations.
+                BookPro ensures all Work Orders are completed by verified professionals in compliance with state regulations.
               </p>
             </div>
           </div>

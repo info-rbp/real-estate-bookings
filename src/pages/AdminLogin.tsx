@@ -38,7 +38,7 @@ export const AdminLogin = () => {
     <div className="max-w-md mx-auto py-12">
       <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
         <h2 className="text-2xl font-bold">Admin Login</h2>
-        <p className="text-sm text-slate-500">Use a real Appwrite account with an admin profile role.</p>
+        <p className="text-sm text-slate-500">Login with your BookPro admin credentials.</p>
         {error && <p className="text-red-500 text-sm">{error}</p>}
         <form onSubmit={handleLogin} className="space-y-4">
           <input

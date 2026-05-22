@@ -39,7 +39,7 @@ export default function SubscriptionPage() {
                                 <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Subscription-Based Property Inspection Support</h1>
                                 <p className="mt-6 text-lg leading-8 text-gray-600">Predictable weekly pricing for your managed properties. Get consistent support for routine inspections, maintenance coordination, and more, without the variable costs.</p>
                                 <div className="mt-10 flex items-center justify-center gap-x-6">
-                                    <Link to="/pricing" className="rounded-md bg-primary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/80">Book a Consultation</Link>
+                                    <Link to="/pricing" className="rounded-md bg-primary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/80">Get Started</Link>
                                 </div>
                             </div>
                         </div>
@@ -142,7 +142,7 @@ export default function SubscriptionPage() {
             <footer className="bg-gray-900" aria-labelledby="footer-heading">
                 <div className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8 lg:pt-32">
                     <div className="mt-16 border-t border-white/10 pt-8 sm:mt-20 lg:mt-24">
-                        <p className="text-xs leading-5 text-gray-400">&copy; 2024 BookPro Inc. All rights reserved.</p>
+                        <p className="text-xs leading-5 text-gray-400">&copy; 2026 BookPro. All rights reserved.</p>
                     </div>
                 </div>
             </footer>

@@ -37,7 +37,7 @@ export default function EngageUsPage() {
 
             await createLead({ ...form, source: 'engage-us' })
             setForm(initialForm)
-            setSuccessMessage('Thanks. Your consultation request has been saved and our team will follow up shortly.')
+            setSuccessMessage('Thanks. Your enquiry has been received. If you already want to start using BookPro, you can create an account and begin submitting booking requests immediately.')
         } catch (error) {
             setErrorMessage(error instanceof Error ? error.message : 'Unable to save your request right now.')
         } finally {
@@ -56,8 +56,11 @@ export default function EngageUsPage() {
                     <div className="py-24 sm:py-32">
                         <div className="mx-auto max-w-7xl px-6 lg:px-8">
                             <div className="mx-auto max-w-2xl text-center">
-                                <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Engage Our Services</h1>
-                                <p className="mt-6 text-lg leading-8 text-gray-600">Ready to reduce your workload and improve your field service capacity? Let's talk. Contact us to discuss your agency's needs or book a consultation to get started.</p>
+                                <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Start Using BookPro</h1>
+                                <p className="mt-6 text-lg leading-8 text-gray-600">Create an account to request property services immediately, or send an enquiry if you want to discuss BookPro for your agency, portfolio or landlord workflow.</p>
+                                <div className="mt-10 flex items-center justify-center">
+                                    <Link to="/login" className="terris-btn-primary px-8 py-4 text-lg">Create Your BookPro Account</Link>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -66,8 +69,8 @@ export default function EngageUsPage() {
                 <div className="relative px-6 pb-20 lg:px-8">
                     <div className="mx-auto max-w-lg lg:max-w-7xl lg:grid lg:grid-cols-2 lg:gap-24">
                         <div className="lg:col-start-1">
-                            <h2 className="text-3xl font-bold tracking-tight text-gray-900">Book a Consultation</h2>
-                            <p className="mt-4 text-lg leading-8 text-gray-600">Complete the form below, and our agency support team will be in touch to schedule a consultation and discuss a tailored solution for your business.</p>
+                            <h2 className="text-3xl font-bold tracking-tight text-gray-900">Send an Enquiry</h2>
+                            <p className="mt-4 text-lg leading-8 text-gray-600">Complete the form below and our team will be in touch to discuss a tailored solution for your property management workflow.</p>
                             <form onSubmit={handleSubmit} className="mt-10 space-y-6">
                                 {successMessage && <div className="rounded-md bg-green-50 p-4 text-sm font-medium text-green-800">{successMessage}</div>}
                                 {errorMessage && <div className="rounded-md bg-red-50 p-4 text-sm font-medium text-red-800">{errorMessage}</div>}
@@ -86,7 +89,7 @@ export default function EngageUsPage() {
                                     </div>
                                 </div>
                                 <div className="sm:col-span-2">
-                                    <label htmlFor="agency" className="block text-sm font-semibold leading-6 text-gray-900">Agency Name</label>
+                                    <label htmlFor="agency" className="block text-sm font-semibold leading-6 text-gray-900">Agency or Company Name</label>
                                     <div className="mt-2.5">
                                         <input type="text" name="agency" id="agency" autoComplete="organization" value={form.agencyName} onChange={(event) => updateField('agencyName', event.target.value)} className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6" />
                                     </div>
@@ -115,29 +118,17 @@ export default function EngageUsPage() {
                             </form>
                         </div>
                         <div className="lg:col-start-2 lg:pt-16">
-                             <div className="flex flex-col h-full justify-around">
-                                <div className="rounded-2xl bg-gray-50 p-10">
-                                    <h3 className="text-xl font-semibold text-gray-900">Other Ways to Reach Us</h3>
-                                    <p className="mt-3 text-base text-gray-600">If you prefer, you can contact us directly using the details below.</p>
-                                    <dl className="mt-8 space-y-6">
-                                        <dt><span className="sr-only">Phone number</span></dt>
-                                        <dd className="flex gap-3">
-                                            <Phone className="h-6 w-6 flex-shrink-0 text-primary" aria-hidden="true" />
-                                            <span className="text-base text-gray-600">+61 8 0000 0000</span>
-                                        </dd>
-                                        <dt><span className="sr-only">Email</span></dt>
-                                        <dd className="flex gap-3">
-                                            <Mail className="h-6 w-6 flex-shrink-0 text-primary" aria-hidden="true" />
-                                            <span className="text-base text-gray-600">hello@bookpro.com.au</span>
-                                        </dd>
-                                        <dt><span className="sr-only">Address</span></dt>
-                                        <dd className="flex gap-3">
-                                            <Building className="h-6 w-6 flex-shrink-0 text-primary" aria-hidden="true" />
-                                            <span className="text-base text-gray-600">Perth, Western Australia</span>
-                                        </dd>
-                                    </dl>
+                             <div className="flex flex-col h-full justify-start space-y-10">
+                                <div className="rounded-2xl bg-primary text-white p-10 shadow-xl">
+                                    <h3 className="text-2xl font-bold mb-4">Account Creation</h3>
+                                    <p className="text-lg opacity-90 mb-8">
+                                        You don't need to wait for a consultation. Create an account now to begin submitting Work Orders and property bookings immediately.
+                                    </p>
+                                    <Link to="/login" className="terris-btn-primary bg-white text-primary hover:bg-gray-100 w-full text-center block">
+                                        Create Account Instead
+                                    </Link>
                                 </div>
-                                <div className="mt-10 lg:mt-0">
+                                <div className="mt-10">
                                     <Link to="/services" className="block w-full rounded-md border border-primary bg-primary/5 px-3.5 py-2.5 text-center text-sm font-semibold text-primary shadow-sm hover:bg-primary/10">View Our Services</Link>
                                 </div>
                             </div>

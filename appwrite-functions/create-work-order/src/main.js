@@ -93,7 +93,7 @@ module.exports = async ({ req, res, log, error }) => {
   const date = new Date();
   const yearMonth = date.getFullYear().toString() + (date.getMonth() + 1).toString().padStart(2, '0');
   const shortId = ID.unique().substring(0, 8).toUpperCase();
-  const workOrderNumber = `ROT-WO-${yearMonth}-${shortId}`;
+  const workOrderNumber = `BP-WO-${yearMonth}-${shortId}`;
 
   // 6. Create Work Order
   let workOrder;

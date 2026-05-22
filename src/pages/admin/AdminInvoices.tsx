@@ -38,7 +38,7 @@ export default function AdminInvoices() {
       // In production, this would be triggered per client or in a batch.
       const res = await (functions as any).createExecution(
         'generate-invoice-lines', // Replace with real ID
-        JSON.stringify({ clientId: 'ROT-CLIENT-001' }), // Mock client ID
+        JSON.stringify({ clientId: 'BP-CLIENT-001' }), // Mock client ID
         false,
         '/',
         ExecutionMethod.POST

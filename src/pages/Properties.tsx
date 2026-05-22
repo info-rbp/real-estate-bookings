@@ -1,3 +1,4 @@
+import { useState } from "react";
 import PublicNav from '../components/PublicNav';
 import Footer from '../components/Footer';
 import { Link } from 'react-router-dom';
@@ -13,6 +14,18 @@ const properties = [
 ];
 
 export default function PropertiesPage() {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('All Statuses');
+
+    const filteredProperties = properties.filter(property => {
+        const matchesSearch = property.address.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === 'All Statuses' || property.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
+
+    const availableProperties = filteredProperties.filter(p => p.status === 'For Rent');
+    const leasedProperties = filteredProperties.filter(p => p.status === 'Rented');
+
     return (
         <div className="bg-white">
             <PublicNav />
@@ -24,8 +37,8 @@ export default function PropertiesPage() {
                     <div className="py-24 sm:py-32">
                         <div className="mx-auto max-w-7xl px-6 lg:px-8">
                             <div className="mx-auto max-w-2xl text-center">
-                                <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Our Managed Properties</h1>
-                                <p className="mt-6 text-lg leading-8 text-gray-600">Explore the portfolio of properties we support on behalf of our agency clients. This is a showcase of the quality homes we help manage.</p>
+                                <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Properties Available for Lease</h1>
+                                <p className="mt-6 text-lg leading-8 text-gray-600">Browse rental properties currently available for inspection or application through BookPro.</p>
                             </div>
                         </div>
                     </div>
@@ -40,52 +53,103 @@ export default function PropertiesPage() {
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                         <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
                                     </div>
-                                    <input type="text" placeholder="Search by address..." className="block w-full rounded-md border-0 bg-white py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search by address..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="block w-full rounded-md border-0 bg-white py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm"
+                                    />
                                 </div>
-                                <select className="rounded-md border-0 bg-white py-2 pl-3 pr-8 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm">
+                                <select
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    className="rounded-md border-0 bg-white py-2 pl-3 pr-8 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm"
+                                >
                                     <option>All Statuses</option>
                                     <option>For Rent</option>
                                     <option>Rented</option>
                                 </select>
                             </div>
                         </div>
-                        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-                            {properties.map((property) => (
-                                <div key={property.id} className="group relative">
-                                    <Link to={`/properties/${property.id}`} className="block">
-                                        <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
-                                            <img src={property.imageUrl} alt={property.address} className="h-full w-full object-cover object-center group-hover:opacity-75" />
-                                        </div>
-                                        <div className="mt-4 flex justify-between">
-                                            <div>
-                                                <h3 className="text-sm text-gray-700 flex items-center">
-                                                    <MapPin className="inline h-4 w-4 mr-1 text-gray-500"/> {property.address}
-                                                </h3>
-                                                <div className="mt-2 flex items-center text-sm text-gray-500">
-                                                    <span className="mr-4 flex items-center"><BedDouble className="h-4 w-4 mr-1"/> {property.beds}</span>
-                                                    <span className="mr-4 flex items-center"><Bath className="h-4 w-4 mr-1"/> {property.baths}</span>
-                                                    <span className="flex items-center"><Car className="h-4 w-4 mr-1"/> {property.cars}</span>
-                                                </div>
+                        <div className="space-y-16">
+                            {availableProperties.length > 0 && (
+                                <div>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-8">Currently Available</h3>
+                                    <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
+                                        {availableProperties.map((property) => (
+                                            <div key={property.id} className="group relative">
+                                                <Link to={`/properties/${property.id}`} className="block">
+                                                    <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
+                                                        <img src={property.imageUrl} alt={property.address} className="h-full w-full object-cover object-center group-hover:opacity-75" />
+                                                    </div>
+                                                    <div className="mt-4 flex justify-between">
+                                                        <div>
+                                                            <h3 className="text-sm text-gray-700 flex items-center">
+                                                                <MapPin className="inline h-4 w-4 mr-1 text-gray-500"/> {property.address}
+                                                            </h3>
+                                                            <div className="mt-2 flex items-center text-sm text-gray-500">
+                                                                <span className="mr-4 flex items-center"><BedDouble className="h-4 w-4 mr-1"/> {property.beds}</span>
+                                                                <span className="mr-4 flex items-center"><Bath className="h-4 w-4 mr-1"/> {property.baths}</span>
+                                                                <span className="flex items-center"><Car className="h-4 w-4 mr-1"/> {property.cars}</span>
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-lg font-medium text-gray-900">${property.price}<span className="text-sm font-normal text-gray-500">/wk</span></p>
+                                                    </div>
+                                                </Link>
+                                                <span className={`absolute top-2 left-2 rounded-full px-3 py-1 text-xs font-semibold bg-green-100 text-green-800`}>
+                                                    Available Now
+                                                </span>
                                             </div>
-                                            <p className="text-lg font-medium text-gray-900">${property.price}<span className="text-sm font-normal text-gray-500">/wk</span></p>
-                                        </div>
-                                    </Link>
-                                    <span className={`absolute top-2 left-2 rounded-full px-3 py-1 text-xs font-semibold ${property.status === 'For Rent' ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-800'}`}>
-                                        {property.status}
-                                    </span>
+                                        ))}
+                                    </div>
                                 </div>
-                            ))}
+                            )}
+
+                            {leasedProperties.length > 0 && (
+                                <div>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-8 border-t border-outline-variant pt-12">Recently Leased</h3>
+                                    <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8 opacity-75">
+                                        {leasedProperties.map((property) => (
+                                            <div key={property.id} className="group relative">
+                                                <Link to={`/properties/${property.id}`} className="block grayscale">
+                                                    <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
+                                                        <img src={property.imageUrl} alt={property.address} className="h-full w-full object-cover object-center group-hover:opacity-75" />
+                                                    </div>
+                                                    <div className="mt-4 flex justify-between">
+                                                        <div>
+                                                            <h3 className="text-sm text-gray-700 flex items-center">
+                                                                <MapPin className="inline h-4 w-4 mr-1 text-gray-500"/> {property.address}
+                                                            </h3>
+                                                        </div>
+                                                    </div>
+                                                </Link>
+                                                <span className={`absolute top-2 left-2 rounded-full px-3 py-1 text-xs font-semibold bg-gray-200 text-gray-800`}>
+                                                    Leased
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {filteredProperties.length === 0 && (
+                                <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-outline-variant">
+                                    <p className="text-on-surface-variant italic">No properties matching your search were found.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white">
+                <div className="bg-white border-t border-outline-variant">
                     <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
                         <div className="relative isolate overflow-hidden bg-primary px-6 py-24 text-center shadow-2xl sm:rounded-3xl sm:px-16">
-                            <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl">Are You an Agency Looking for Support?</h2>
-                            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-indigo-100">BookPro provides the reliable field support you need to manage your portfolio efficiently. Let us handle the inspections, so you can focus on your clients.</p>
+                            <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl">Are You a Landlord or Agency?</h2>
+                            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-indigo-100">BookPro provides reliable field support, inspections and Work Order management to help you manage your portfolio efficiently.</p>
                             <div className="mt-10 flex items-center justify-center gap-x-6">
-                                <Link to="/engage-us" className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-primary shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Book a Consultation</Link>
+                                <Link to="/engage-us" className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-primary shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Enquire Now</Link>
+                                <Link to="/login" className="text-sm font-semibold leading-6 text-white">Create Account <span aria-hidden="true">→</span></Link>
                             </div>
                         </div>
                     </div>

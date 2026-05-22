@@ -1,4 +1,4 @@
-import { PricingClassification, RentOnTimeServiceType } from './workOrders';
+import { PricingClassification, BookProServiceType } from './workOrders';
 
 export interface RateCard {
   $id: string;
@@ -15,7 +15,7 @@ export interface RateCard {
 export interface RateCardItem {
   $id: string;
   rateCardId: string;
-  serviceType: RentOnTimeServiceType;
+  serviceType: BookProServiceType;
   pricingClassification: PricingClassification;
   priceExGst: number;
   priceType: 'fixed' | 'hourly' | 'quote';

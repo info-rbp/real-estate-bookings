@@ -200,7 +200,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signUp(email: string, password: string, fullName: string): Promise<AuthResult> {
     if (!isAppwriteConfigured) {
-      return { error: 'Appwrite is not configured. Add the required Vite environment variables first.' }
+      return { error: 'The BookPro portal is not connected yet. Please try again shortly.' }
     }
 
     try {
@@ -227,7 +227,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signIn(email: string, password: string): Promise<AuthResult> {
     if (!isAppwriteConfigured) {
-      return { error: 'Appwrite is not configured. Add the required Vite environment variables first.' }
+      return { error: 'The BookPro portal is not connected yet. Please try again shortly.' }
     }
 
     try {
@@ -259,7 +259,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function requestPasswordReset(email: string) {
     if (!isAppwriteConfigured) {
-      return { error: 'Appwrite is not configured. Add the required Vite environment variables first.' }
+      return { error: 'The BookPro portal is not connected yet. Please try again shortly.' }
     }
 
     try {
@@ -275,7 +275,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function sendEmailVerification() {
     if (!isAppwriteConfigured) {
-      return { error: 'Appwrite is not configured. Add the required Vite environment variables first.' }
+      return { error: 'The BookPro portal is not connected yet. Please try again shortly.' }
     }
 
     try {

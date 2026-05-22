@@ -1,6 +1,6 @@
-# Rent On Time Work Order Platform
+# BookPro Work Order Platform
 
-A contract-compliant real-estate Work Order booking platform for Rent On Time, built with Vite, React, TypeScript, and Appwrite.
+A contract-compliant real-estate Work Order booking platform for BookPro, built with Vite, React, TypeScript, and Appwrite.
 
 ## Overview
 
@@ -17,7 +17,7 @@ This application has been upgraded from a generic booking portal to a profession
 
 - **Work Order:** A formal request for service. Replaces "Booking" terminology.
 - **Service Area:** WA regions (Perth and Peel, Gascoyne, etc.) classified by Suburb + Postcode.
-- **Rate Card:** Client-specific pricing for Rent On Time services.
+- **Rate Card:** Client-specific pricing for BookPro services.
 - **Regional Batch:** Grouping of Work Orders for "Other Regions" to meet attendance thresholds.
 - **Access Issue:** Formal record of attendance failure with automated fee calculation (20%).
 - **Open Inspection Plan:** Weekly planning for recurring property viewings.

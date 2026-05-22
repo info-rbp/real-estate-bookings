@@ -45,11 +45,24 @@ const plans = [
   },
 ];
 
+const individualServices = [
+  { name: 'Property Condition Report', bestFor: 'Lease Starts', price: 'From $180', notes: 'Includes photos' },
+  { name: 'Routine Inspection', bestFor: 'Mid-Lease', price: 'From $60', notes: 'Factual reporting' },
+  { name: 'Exit Inspection', bestFor: 'Lease Ends', price: 'From $80', notes: 'Bond support' },
+  { name: 'Open for Inspection', bestFor: 'Vacancies', price: 'From $60', notes: 'Per attendance' },
+  { name: 'Key Safe Installation', bestFor: 'Access Control', price: '$120', notes: 'Inc. lockbox' },
+  { name: 'Maintenance Support', bestFor: 'Repairs', price: 'From $60', notes: 'On-site attendance' },
+  { name: 'Insurance Claim Support', bestFor: 'Claims', price: 'Quote Required', notes: 'Factual evidence' },
+  { name: 'Dispute Evidence Support', bestFor: 'Disputes', price: 'Quote Required', notes: 'Factual evidence' },
+  { name: 'Landlord Referral', bestFor: 'Growth', price: 'Arrangement', notes: 'Partner program' },
+  { name: 'Custom Property Support', bestFor: 'Unique Tasks', price: 'Quote Required', notes: 'Tailored tasks' },
+];
+
 const faqs = [
-    { question: 'How does the subscription plan work?', answer: 'The subscription is a weekly fee charged per property under management. It gives your agency access to a range of included inspection and field support services for that property.' },
-    { question: 'Are there any lock-in contracts?', answer: 'No, our subscription plans are flexible. You can adjust the properties covered as your rent roll changes. We focus on earning your business through reliable service, not long-term contracts.' },
-    { question: 'What is the New Property Onboarding fee?', answer: 'This is a once-off fee of $180 + GST for new properties added to your portfolio. It covers a comprehensive Property Condition Report and key safe installation to get the management started correctly.' },
-    { question: 'Can I mix and match plans?', answer: 'Yes. You can have some properties on a subscription plan while using our Pay-Per-Booking service for other one-off tasks as needed. We tailor the solution to your agency\'s requirements.' },
+    { question: 'Are these prices GST-inclusive?', answer: 'Unless otherwise stated, all indicative prices are GST-exclusive. Final invoices will include the applicable GST.' },
+    { question: 'How does the subscription plan work?', answer: 'The subscription is a weekly fee charged per property under management. It gives your workflow access to a range of included inspection and field support services for that property.' },
+    { question: 'Are there any lock-in contracts?', answer: 'No, our plans are flexible. You can adjust the properties covered as your portfolio changes. We focus on earning your business through reliable service, not long-term contracts.' },
+    { question: 'What factors affect the final price?', answer: 'Final pricing may vary based on the property service area, urgency of the request, specific access requirements, and your individual client configuration.' },
 ]
 
 export default function PricingPage() {
@@ -65,8 +78,8 @@ export default function PricingPage() {
           <div className="py-24 sm:py-32">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
               <div className="mx-auto max-w-2xl text-center">
-                <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Simple, Flexible Pricing for Agencies</h1>
-                <p className="mt-6 text-lg leading-8 text-gray-600">Choose a plan that scales with your rent roll. From single bookings to full-portfolio subscriptions, get the field support you need, when you need it.</p>
+                <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl leading-tight">Simple, Flexible Pricing for Property Professionals</h1>
+                <p className="mt-6 text-lg leading-8 text-gray-600">Choose a plan that scales with your portfolio. From single bookings to full-portfolio subscriptions, get the field support you need, when you need it.</p>
               </div>
             </div>
           </div>
@@ -75,7 +88,10 @@ export default function PricingPage() {
         {/* Pricing Section */}
         <div className="py-12 sm:py-20">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <div className="mx-auto grid max-w-md grid-cols-1 gap-8 lg:max-w-5xl lg:grid-cols-3">
+                <div className="text-center mb-12">
+                   <h2 className="text-3xl font-bold text-gray-900">Platform Plans</h2>
+                </div>
+                <div className="mx-auto grid max-w-md grid-cols-1 gap-8 lg:max-w-5xl lg:grid-cols-3 mb-24">
                     {plans.map((plan) => (
                         <div key={plan.name} className={`flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ${plan.popular ? 'ring-primary' : 'ring-gray-900/10'}`}>
                             <div>
@@ -101,6 +117,41 @@ export default function PricingPage() {
                 </div>
             </div>
         </div>
+
+        {/* Individual Service Pricing */}
+        <div className="bg-gray-50 py-24 sm:py-32">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                <div className="mx-auto max-w-2xl text-center mb-16">
+                    <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Individual Service Pricing</h2>
+                    <p className="mt-4 text-lg text-gray-600">Indicative base rates for on-demand Work Orders.</p>
+                </div>
+                <div className="overflow-hidden bg-white shadow ring-1 ring-black ring-opacity-5 sm:rounded-2xl">
+                    <table className="min-w-full divide-y divide-gray-300">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Service</th>
+                                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Best For</th>
+                                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Indicative Price</th>
+                                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 bg-white">
+                            {individualServices.map((service) => (
+                                <tr key={service.name}>
+                                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{service.name}</td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{service.bestFor}</td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-semibold">{service.price}</td>
+                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{service.notes}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                <p className="mt-8 text-center text-xs text-gray-500">
+                  * All prices are indicative and GST-exclusive. Final pricing may vary based on service area, urgency, access requirements, and reporting needs.
+                </p>
+            </div>
+        </div>
         
         {/* FAQ Section */}
         <div className="bg-gray-50 py-24 sm:py-32">
@@ -124,10 +175,10 @@ export default function PricingPage() {
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="relative isolate overflow-hidden bg-primary px-6 py-24 text-center shadow-2xl sm:rounded-3xl sm:px-16">
                     <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl">Ready to Simplify Your Field Operations?</h2>
-                    <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-indigo-100">Let's find the right solution for your agency. Book a no-obligation consultation to discuss your specific needs.</p>
+                    <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-indigo-100">Let's find the right solution for your property management workflow. Create an account to get started or enquiry to discuss your needs.</p>
                     <div className="mt-10 flex items-center justify-center gap-x-6">
-                        <a href="#" className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-primary shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Book a Consultation</a>
-                        <Link to="/services" className="text-sm font-semibold leading-6 text-white">Learn more <span aria-hidden="true">→</span></Link>
+                        <Link to="/login" className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-primary shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Get Started</Link>
+                        <Link to="/engage-us" className="text-sm font-semibold leading-6 text-white">Enquire Now <span aria-hidden="true">→</span></Link>
                     </div>
                 </div>
             </div>

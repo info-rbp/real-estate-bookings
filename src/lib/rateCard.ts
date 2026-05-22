@@ -1,4 +1,4 @@
-import { PricingClassification, RentOnTimeServiceType } from '../types/workOrders';
+import { PricingClassification, BookProServiceType } from '../types/workOrders';
 import { databases, appwriteConfig } from './appwrite';
 import { Query } from 'appwrite';
 
@@ -6,7 +6,7 @@ export const GST_RATE = 0.10;
 
 export async function calculateWorkOrderPricing(input: {
   clientId: string;
-  serviceType: RentOnTimeServiceType;
+  serviceType: BookProServiceType;
   pricingClassification: PricingClassification;
   urgentFlag?: boolean;
   outsideServiceArea?: boolean;
@@ -44,7 +44,7 @@ export async function calculateWorkOrderPricing(input: {
 
   if (!requiresQuote) {
     try {
-      // 1. Try to find client-specific rate card first (simplified for MVP: just use a default Rent On Time rate card if client card not found)
+      // 1. Try to find client-specific rate card first (simplified for MVP: just use a default BookPro rate card if client card not found)
       // For this implementation, we'll look for a rate card item that matches the service and classification.
       // In a full implementation, we'd resolve the RateCardId for the client first.
 
@@ -87,7 +87,7 @@ export async function calculateWorkOrderPricing(input: {
   }
 
   const approvedExpensesExGst = input.approvedExpensesExGst || 0;
-  const travelSurchargeExGst = 0; // Rent On Time uses regional base rates, not a flat surcharge
+  const travelSurchargeExGst = 0; // BookPro uses regional base rates, not a flat surcharge
 
   const totalPriceExGst = basePriceExGst + travelSurchargeExGst + accessIssueFeeExGst + approvedExpensesExGst;
   const gstAmount = totalPriceExGst * GST_RATE;

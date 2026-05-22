@@ -1,7 +1,7 @@
-# Rent On Time Work Order Platform Specification
+# BookPro Work Order Platform Specification
 
 ## 1. Product Goal
-Build a contract-compliant Work Order platform where Rent On Time and its clients can:
+Build a contract-compliant Work Order platform where BookPro and its clients can:
 - Submit detailed Work Orders for property services.
 - Classify properties by Service Area (Perth/Peel vs Other Regions).
 - Apply regional pricing and batching rules.
@@ -11,7 +11,7 @@ Build a contract-compliant Work Order platform where Rent On Time and its client
 - Maintain a full audit trail of all operational changes.
 
 ## 2. Core User Types
-### Client User (Rent On Time / Agency)
+### Client User (BookPro / Agency)
 - Create Work Orders.
 - Confirm legal authority for attendance.
 - View real-time status and reports.
