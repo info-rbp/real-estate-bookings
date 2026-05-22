@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8 lg:pt-32">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           <div className="space-y-8">
-            <p className="text-sm leading-6 text-gray-300">BookPro: Streamlining property inspections and bookings for real estate professionals.</p>
+            <p className="text-sm leading-6 text-gray-300">BookPro: Streamlining property inspections and work orders for real estate professionals.</p>
           </div>
           <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
             <div className="md:grid md:grid-cols-2 md:gap-8">

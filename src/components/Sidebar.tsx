@@ -4,7 +4,7 @@ import { LayoutDashboard, CalendarDays, Settings, LogOut, Plus } from 'lucide-re
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/dashboard/bookings', label: 'Bookings', icon: CalendarDays },
+  { to: '/dashboard/bookings', label: 'Work Orders', icon: CalendarDays },
   { to: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 
@@ -54,7 +54,7 @@ export default function Sidebar() {
           className="w-full bg-primary text-on-primary text-sm font-semibold py-3 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
         >
           <Plus size={18} />
-          New Booking
+            New Work Order
         </Link>
         <button
           onClick={signOut}

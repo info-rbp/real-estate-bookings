@@ -4,7 +4,7 @@ import { Bell, Calendar, Home, LogOut, Settings, Plus, Bolt } from 'lucide-react
 
 const navLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: Home },
-  { to: '/dashboard/bookings', label: 'Bookings', icon: Calendar },
+  { to: '/dashboard/bookings', label: 'Work Orders', icon: Calendar },
   { to: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect } from 'react';
 import PublicNav from '../components/PublicNav';
+import Footer from '../components/Footer';
 import { ArrowRight, ClipboardList, ClipboardCheck, CheckSquare, Home, Key, Wrench, FileText, Users, Award, Settings2 } from 'lucide-react';
 
 const services = [
