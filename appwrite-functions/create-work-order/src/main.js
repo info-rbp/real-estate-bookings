@@ -1,7 +1,10 @@
 const { Client, Databases, ID, Query } = require('node-appwrite');
 
-function env(primary, fallback) {
-  return process.env[primary] || (fallback ? process.env[fallback] : undefined);
+function env(...names) {
+  for (const name of names) {
+    if (process.env[name]) return process.env[name];
+  }
+  return undefined;
 }
 
 function parseBody(body) {
@@ -14,20 +17,20 @@ function parseBody(body) {
 
 module.exports = async ({ req, res, log, error }) => {
   const client = new Client()
-    .setEndpoint(process.env.APPWRITE_FUNCTION_ENDPOINT)
-    .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-    .setKey(process.env.APPWRITE_FUNCTION_API_KEY);
+    .setEndpoint(env('APPWRITE_ENDPOINT', 'APPWRITE_FUNCTION_API_ENDPOINT', 'APPWRITE_FUNCTION_ENDPOINT'))
+    .setProject(env('APPWRITE_PROJECT_ID', 'APPWRITE_FUNCTION_PROJECT_ID'))
+    .setKey(env('APPWRITE_API_KEY', 'APPWRITE_FUNCTION_API_KEY'));
 
   const databases = new Databases(client);
 
-  const databaseId = process.env.APPWRITE_DATABASE_ID;
-  const usersCollectionId = env('APPWRITE_USERS_COLLECTION_ID', 'VITE_APPWRITE_USERS_COLLECTION_ID');
-  const bookingsCollectionId = env('APPWRITE_BOOKINGS_COLLECTION_ID', 'VITE_APPWRITE_BOOKINGS_COLLECTION_ID');
-  const auditLogsCollectionId = env('APPWRITE_AUDIT_LOGS_COLLECTION_ID', 'VITE_APPWRITE_AUDIT_LOGS_COLLECTION_ID');
-  const contactsCollectionId = env('APPWRITE_WORK_ORDER_CONTACTS_COLLECTION_ID', 'VITE_APPWRITE_WORK_ORDER_CONTACTS_COLLECTION_ID');
-  const statusHistoryCollectionId = env('APPWRITE_WORK_ORDER_STATUS_HISTORY_COLLECTION_ID', 'VITE_APPWRITE_WORK_ORDER_STATUS_HISTORY_COLLECTION_ID');
-  const rateCardItemsCollectionId = env('APPWRITE_RATE_CARD_ITEMS_COLLECTION_ID', 'VITE_APPWRITE_RATE_CARD_ITEMS_COLLECTION_ID');
-  const rateCardsCollectionId = env('APPWRITE_RATE_CARDS_COLLECTION_ID', 'VITE_APPWRITE_RATE_CARDS_COLLECTION_ID');
+  const databaseId = env('APPWRITE_DATABASE_ID', 'VITE_APPWRITE_DATABASE_ID');
+  const usersCollectionId = env('USERS_COLLECTION_ID', 'APPWRITE_USERS_COLLECTION_ID', 'VITE_APPWRITE_USERS_COLLECTION_ID');
+  const bookingsCollectionId = env('BOOKINGS_COLLECTION_ID', 'APPWRITE_BOOKINGS_COLLECTION_ID', 'VITE_APPWRITE_BOOKINGS_COLLECTION_ID');
+  const auditLogsCollectionId = env('AUDIT_LOGS_COLLECTION_ID', 'APPWRITE_AUDIT_LOGS_COLLECTION_ID', 'VITE_APPWRITE_AUDIT_LOGS_COLLECTION_ID');
+  const contactsCollectionId = env('WORK_ORDER_CONTACTS_COLLECTION_ID', 'APPWRITE_WORK_ORDER_CONTACTS_COLLECTION_ID', 'VITE_APPWRITE_WORK_ORDER_CONTACTS_COLLECTION_ID');
+  const statusHistoryCollectionId = env('WORK_ORDER_STATUS_HISTORY_COLLECTION_ID', 'APPWRITE_WORK_ORDER_STATUS_HISTORY_COLLECTION_ID', 'VITE_APPWRITE_WORK_ORDER_STATUS_HISTORY_COLLECTION_ID');
+  const rateCardItemsCollectionId = env('RATE_CARD_ITEMS_COLLECTION_ID', 'APPWRITE_RATE_CARD_ITEMS_COLLECTION_ID', 'VITE_APPWRITE_RATE_CARD_ITEMS_COLLECTION_ID');
+  const rateCardsCollectionId = env('RATE_CARDS_COLLECTION_ID', 'APPWRITE_RATE_CARDS_COLLECTION_ID', 'VITE_APPWRITE_RATE_CARDS_COLLECTION_ID');
 
   // 1. Authenticate user
   const userId = req.headers['x-appwrite-user-id'];

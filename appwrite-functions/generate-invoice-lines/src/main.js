@@ -1,5 +1,12 @@
 const { Client, Databases, ID, Query } = require('node-appwrite');
 
+function env(...names) {
+  for (const name of names) {
+    if (process.env[name]) return process.env[name];
+  }
+  return undefined;
+}
+
 function parseBody(body) {
   try {
     return JSON.parse(body || '{}');
@@ -38,15 +45,15 @@ function resolvePaymentCycleDate(inputDate) {
 
 module.exports = async ({ req, res, log, error }) => {
   const client = new Client()
-    .setEndpoint(process.env.APPWRITE_FUNCTION_ENDPOINT)
-    .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-    .setKey(process.env.APPWRITE_FUNCTION_API_KEY);
+    .setEndpoint(env('APPWRITE_ENDPOINT', 'APPWRITE_FUNCTION_API_ENDPOINT', 'APPWRITE_FUNCTION_ENDPOINT'))
+    .setProject(env('APPWRITE_PROJECT_ID', 'APPWRITE_FUNCTION_PROJECT_ID'))
+    .setKey(env('APPWRITE_API_KEY', 'APPWRITE_FUNCTION_API_KEY'));
 
   const databases = new Databases(client);
-  const databaseId = process.env.APPWRITE_DATABASE_ID;
-  const workOrdersCollectionId = process.env.APPWRITE_BOOKINGS_COLLECTION_ID || process.env.VITE_APPWRITE_BOOKINGS_COLLECTION_ID || 'bookings';
-  const invoiceLinesCollectionId = process.env.APPWRITE_INVOICE_LINES_COLLECTION_ID || process.env.VITE_APPWRITE_INVOICE_LINES_COLLECTION_ID || 'invoiceLines';
-  const auditLogsCollectionId = process.env.APPWRITE_AUDIT_LOGS_COLLECTION_ID || process.env.VITE_APPWRITE_AUDIT_LOGS_COLLECTION_ID || 'auditLogs';
+  const databaseId = env('APPWRITE_DATABASE_ID', 'VITE_APPWRITE_DATABASE_ID');
+  const workOrdersCollectionId = env('BOOKINGS_COLLECTION_ID', 'APPWRITE_BOOKINGS_COLLECTION_ID', 'VITE_APPWRITE_BOOKINGS_COLLECTION_ID') || 'bookings';
+  const invoiceLinesCollectionId = env('INVOICE_LINES_COLLECTION_ID', 'APPWRITE_INVOICE_LINES_COLLECTION_ID', 'VITE_APPWRITE_INVOICE_LINES_COLLECTION_ID') || 'invoiceLines';
+  const auditLogsCollectionId = env('AUDIT_LOGS_COLLECTION_ID', 'APPWRITE_AUDIT_LOGS_COLLECTION_ID', 'VITE_APPWRITE_AUDIT_LOGS_COLLECTION_ID') || 'auditLogs';
 
   if (req.method !== 'POST') {
     return res.json({ error: 'Method not allowed' }, 405);
