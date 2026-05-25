@@ -10,7 +10,7 @@ const includedServices = [
 ];
 
 const pricingTiers = [
-    { name: 'Weekly Property Subscription', price: '$5.00 + GST', unit: 'per week per property', description: 'Charged for each property managed under the BookPro service arrangement.' },
+    { name: 'Weekly Property Subscription', price: '$5.00 + GST', unit: 'per week per property', description: 'Charged for each property managed under the ProInspect service arrangement.' },
     { name: 'Rooming Properties', price: '$5.00 + GST', unit: 'per week per room', description: 'Where a property is leased by room, the subscription applies to each room.' },
 ];
 
@@ -19,8 +19,8 @@ const faqs = [
     { question: 'What happens if a property is leased by room?', answer: 'For rooming or co-living arrangements, the subscription applies per room rather than per whole property to reflect the separate tenancies.' },
     { question: 'Is there a setup fee for existing properties?', answer: 'No. Existing managed properties can be included in the subscription without any onboarding fee.' },
     { question: 'When does the onboarding fee apply?', answer: 'The onboarding fee applies only when your agency adds a new property to the portfolio and requires our onboarding support (PCR and key safe installation).' },
-    { question: 'Does BookPro perform the actual maintenance work?', answer: 'No. We assist with coordination, site attendance, and observations. Actual maintenance work, repairs, and trade services are quoted and completed by approved contractors.' },
-    { question: 'Does BookPro replace our property managers?', answer: 'No. Your agency remains responsible for all property management decisions and communications. We act as your field support partner to help your team operate more efficiently.' },
+    { question: 'Does ProInspect perform the actual maintenance work?', answer: 'No. We assist with coordination, site attendance, and observations. Actual maintenance work, repairs, and trade services are quoted and completed by approved contractors.' },
+    { question: 'Does ProInspect replace our property managers?', answer: 'No. Your agency remains responsible for all property management decisions and communications. We act as your field support partner to help your team operate more efficiently.' },
 ];
 
 export default function SubscriptionPage() {
@@ -95,7 +95,7 @@ export default function SubscriptionPage() {
                         <div className="mx-auto max-w-2xl lg:text-center">
                              <h2 className="text-base font-semibold leading-7 text-primary">A Simple Start for Every New Management</h2>
                             <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">New Property Onboarding</p>
-                            <p className="mt-6 text-lg leading-8 text-gray-600">When your agency brings on a new management, BookPro can assist with the practical onboarding tasks required to get the property ready for your team.</p>
+                            <p className="mt-6 text-lg leading-8 text-gray-600">When your agency brings on a new management, ProInspect can assist with the practical onboarding tasks required to get the property ready for your team.</p>
                         </div>
                         <div className="mx-auto mt-16 max-w-2xl rounded-3xl ring-1 ring-gray-200 sm:mt-20 lg:mx-0 lg:flex lg:max-w-none">
                             <div className="p-8 sm:p-10 lg:flex-auto">
@@ -142,7 +142,7 @@ export default function SubscriptionPage() {
             <footer className="bg-gray-900" aria-labelledby="footer-heading">
                 <div className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8 lg:pt-32">
                     <div className="mt-16 border-t border-white/10 pt-8 sm:mt-20 lg:mt-24">
-                        <p className="text-xs leading-5 text-gray-400">&copy; 2024 BookPro Inc. All rights reserved.</p>
+                        <p className="text-xs leading-5 text-gray-400">&copy; 2024 ProInspect Inc. All rights reserved.</p>
                     </div>
                 </div>
             </footer>

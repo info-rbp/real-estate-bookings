@@ -104,7 +104,7 @@ function OverviewTab() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
         <h1 className="text-4xl font-display font-medium text-on-surface mb-2">Admin Overview</h1>
-        <p className="text-on-surface-variant">Real-time status of the Rent On Time operations.</p>
+        <p className="text-on-surface-variant">Real-time status of the ProInspect operations.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

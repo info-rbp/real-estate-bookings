@@ -1,4 +1,4 @@
-# Rent On Time Work Order Appwrite schema and permissions plan
+# ProInspect Work Order Appwrite schema and permissions plan
 
 Status: Upgraded for Work Order platform compliance.
 
@@ -68,7 +68,7 @@ Indexes:
 
 ### clients
 
-Purpose: Agencies, landlords, property managers, leasing teams, and other BookPro customer accounts.
+Purpose: Agencies, landlords, property managers, leasing teams, and other ProInspect customer accounts.
 
 Key fields:
 

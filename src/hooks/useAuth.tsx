@@ -204,8 +204,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
+      const userId = ID.unique()
       await account.create(
-        ID.unique(),
+        userId,
         email,
         password,
         fullName
@@ -214,7 +215,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await account.createEmailPasswordSession(email, password)
 
       const currentUser = await account.get()
-      const nextProfile = (await fetchProfile(currentUser)) || getProfileDefaults(currentUser)
+
+      // Ensure profile document exists in the users collection
+      let nextProfile = await fetchProfile(currentUser)
+
+      if (!nextProfile && appwriteConfig.databaseId && appwriteConfig.usersCollectionId) {
+        const defaults = getProfileDefaults(currentUser)
+        try {
+          const profileDoc = await databases.createDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.usersCollectionId,
+            currentUser.$id,
+            {
+              appwriteUserId: currentUser.$id,
+              full_name: defaults.full_name,
+              email: defaults.email,
+              role: defaults.role,
+              status: defaults.status,
+              timezone: defaults.timezone,
+              email_notifications: defaults.email_notifications,
+              sms_notifications: defaults.sms_notifications,
+              two_factor_enabled: defaults.two_factor_enabled,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            }
+          )
+          nextProfile = normalizeProfile(currentUser, profileDoc as unknown as Partial<AppProfile>)
+        } catch (createErr) {
+          console.error('Failed to create initial profile document', createErr)
+          // Fallback to local defaults if document creation fails (e.g. permission issue)
+          nextProfile = defaults
+        }
+      } else if (!nextProfile) {
+        nextProfile = getProfileDefaults(currentUser)
+      }
 
       setUser(currentUser)
       setProfile(nextProfile)

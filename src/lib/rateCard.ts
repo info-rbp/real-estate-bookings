@@ -45,7 +45,7 @@ export async function calculateWorkOrderPricing(input: {
 
   if (!requiresQuote) {
     try {
-      // 1. Try to find client-specific rate card first (simplified for MVP: just use a default Rent On Time rate card if client card not found)
+      // 1. Try to find client-specific rate card first (simplified for MVP: just use a default ProInspect rate card if client card not found)
       // For this implementation, we'll look for a rate card item that matches the service and classification.
       // In a full implementation, we'd resolve the RateCardId for the client first.
 
@@ -88,7 +88,7 @@ export async function calculateWorkOrderPricing(input: {
   }
 
   const approvedExpensesExGst = input.approvedExpensesExGst || 0;
-  const travelSurchargeExGst = 0; // Rent On Time uses regional base rates, not a flat surcharge
+  const travelSurchargeExGst = 0; // ProInspect uses regional base rates, not a flat surcharge
 
   const totalPriceExGst = basePriceExGst + travelSurchargeExGst + accessIssueFeeExGst + approvedExpensesExGst;
   const gstAmount = totalPriceExGst * GST_RATE;

@@ -14,7 +14,7 @@ export default function Home() {
         {/* Hero */}
         <MarketingHero
           title="Reliable Field Support for Real Estate Agencies"
-          subtitle="Rent On Time provides on-demand property inspection and work order management to help your agency save time and enhance client satisfaction."
+          subtitle="ProInspect provides on-demand property inspection and work order management to help your agency save time and enhance client satisfaction."
           ctaText="Book a Work Order"
           ctaLink="/login"
         />
@@ -88,7 +88,7 @@ export default function Home() {
         <section className="py-24 bg-primary">
           <div className="max-w-7xl mx-auto px-6 md:px-10 text-center">
             <h2 className="text-4xl font-display font-medium text-on-primary mb-4">Ready to Enhance Your Agency's Efficiency?</h2>
-            <p className="text-lg text-on-primary/80 mb-8 max-w-2xl mx-auto">Let Rent On Time handle the fieldwork so you can focus on building client relationships and growing your business.</p>
+            <p className="text-lg text-on-primary/80 mb-8 max-w-2xl mx-auto">Let ProInspect handle the fieldwork so you can focus on building client relationships and growing your business.</p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/login" className="terris-btn-primary bg-white text-primary hover:bg-surface-variant">
                 Get Started

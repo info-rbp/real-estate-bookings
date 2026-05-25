@@ -35,7 +35,7 @@ export default function AboutPage() {
             <div className="mx-auto max-w-2xl py-24 sm:py-32">
               <div className="text-center">
                 <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Your On-Demand Field Support Team</h1>
-                <p className="mt-6 text-lg leading-8 text-gray-600">BookPro was founded to give real estate agencies a reliable partner for property inspections and on-site tasks. We provide the extra capacity you need, without the overhead of expanding your in-house team.</p>
+                <p className="mt-6 text-lg leading-8 text-gray-600">ProInspect was founded to give real estate agencies a reliable partner for property inspections and on-site tasks. We provide the extra capacity you need, without the overhead of expanding your in-house team.</p>
               </div>
             </div>
           </div>
@@ -49,7 +49,7 @@ export default function AboutPage() {
                     <div className="lg:w-full lg:max-w-2xl lg:flex-auto">
                         <p className="text-xl leading-8 text-gray-600">To provide real estate agencies with seamless, reliable, and efficient field support services, enabling them to focus on core property management activities and growth.</p>
                         <div className="mt-10 max-w-xl text-base leading-7 text-gray-700">
-                            <p>We understand the daily pressures faced by property managers. Balancing inspections, tenant requests, owner communications, and business growth is a constant challenge. BookPro was created to alleviate that pressure by offering a professional, on-demand extension to your team.</p>
+                            <p>We understand the daily pressures faced by property managers. Balancing inspections, tenant requests, owner communications, and business growth is a constant challenge. ProInspect was created to alleviate that pressure by offering a professional, on-demand extension to your team.</p>
                             <p className="mt-10">Our services are designed to integrate smoothly with your existing workflows. Whether you need support for a single inspection or across your entire portfolio, we provide the same high level of professionalism and attention to detail, ensuring your agency's reputation is enhanced with every task we complete.</p>
                         </div>
                     </div>
@@ -80,7 +80,7 @@ export default function AboutPage() {
         <div className="mx-auto mt-32 max-w-7xl px-6 sm:mt-40 lg:px-8">
             <div className="mx-auto max-w-2xl lg:mx-0">
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Meet Our Leadership</h2>
-                <p className="mt-6 text-lg leading-8 text-gray-600">Our leadership team combines decades of experience in real estate, technology, and service delivery to ensure BookPro remains the leading field support partner for agencies.</p>
+                <p className="mt-6 text-lg leading-8 text-gray-600">Our leadership team combines decades of experience in real estate, technology, and service delivery to ensure ProInspect remains the leading field support partner for agencies.</p>
             </div>
             <ul role="list" className="mx-auto mt-20 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 text-center sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
                 {team.map((person) => (
@@ -97,7 +97,7 @@ export default function AboutPage() {
         <div className="relative isolate mt-32 px-6 py-24 sm:py-32 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Ready to Enhance Your Agency's Capacity?</h2>
-                <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-gray-600">Discover how BookPro can help you scale your property management operations with our flexible, on-demand field support.</p>
+                <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-gray-600">Discover how ProInspect can help you scale your property management operations with our flexible, on-demand field support.</p>
                 <div className="mt-10 flex items-center justify-center gap-x-6">
                     <Link to="/pricing" className="rounded-md bg-primary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">View Pricing</Link>
                     <Link to="/services" className="text-sm font-semibold leading-6 text-gray-900">Our Services <span aria-hidden="true">→</span></Link>
