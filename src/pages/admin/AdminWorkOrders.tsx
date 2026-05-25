@@ -1,3 +1,4 @@
+// TODO(security): Move sensitive pricing/status/fee mutations behind Appwrite Functions with server-side authorization checks.
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { databases, appwriteConfig } from '../../lib/appwrite'

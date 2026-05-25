@@ -1,5 +1,41 @@
 const { Client, Databases, ID, Query } = require('node-appwrite');
 
+function parseBody(body) {
+  try {
+    return JSON.parse(body || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function resolvePaymentCycleDate(inputDate) {
+  if (inputDate) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(inputDate)) {
+      throw new Error('paymentCycleDate must use YYYY-MM-DD format');
+    }
+
+    const explicit = new Date(`${inputDate}T00:00:00.000Z`);
+    if (Number.isNaN(explicit.getTime())) {
+      throw new Error('paymentCycleDate is invalid');
+    }
+
+    return explicit;
+  }
+
+  const now = new Date();
+  const isAfterThursdayNoonUtc = now.getUTCDay() > 4 || (now.getUTCDay() === 4 && now.getUTCHours() >= 4);
+  const paymentCycleDate = new Date(now);
+
+  if (isAfterThursdayNoonUtc) {
+    paymentCycleDate.setUTCDate(now.getUTCDate() + (12 - now.getUTCDay()) % 7 + 7);
+  } else {
+    paymentCycleDate.setUTCDate(now.getUTCDate() + (5 - now.getUTCDay() + 7) % 7);
+  }
+
+  paymentCycleDate.setUTCHours(0, 0, 0, 0);
+  return paymentCycleDate;
+}
+
 module.exports = async ({ req, res, log, error }) => {
   const client = new Client()
     .setEndpoint(process.env.APPWRITE_FUNCTION_ENDPOINT)
@@ -17,23 +53,30 @@ module.exports = async ({ req, res, log, error }) => {
   }
 
   try {
-    const { clientId, workOrderIds } = JSON.parse(req.body);
+    const body = parseBody(req.body);
+    const scope = body.scope === 'client' ? 'client' : 'all';
+    const paymentCycleDate = resolvePaymentCycleDate(body.paymentCycleDate);
 
-    if (!clientId) {
-      return res.json({ error: 'Client ID is required' }, 400);
+    const clientId = typeof body.clientId === 'string' ? body.clientId.trim() : '';
+    if (scope === 'client' && !clientId) {
+      return res.json({ error: 'clientId is required when scope is client' }, 400);
     }
 
-    // Query eligible Work Orders
-    let queries = [
-      Query.equal('clientId', clientId),
-      Query.equal('invoiceStatus', 'pending'), // Assuming default is pending or null
+    const workOrderIds = Array.isArray(body.workOrderIds) ? body.workOrderIds.filter(Boolean) : [];
+
+    const queries = [
+      Query.equal('invoiceStatus', 'pending'),
       Query.or([
         Query.equal('status', 'completed'),
         Query.equal('status', 'report_delivered')
       ])
     ];
 
-    if (workOrderIds && workOrderIds.length > 0) {
+    if (scope === 'client') {
+      queries.push(Query.equal('clientId', clientId));
+    }
+
+    if (workOrderIds.length > 0) {
       queries.push(Query.equal('$id', workOrderIds));
     }
 
@@ -41,21 +84,6 @@ module.exports = async ({ req, res, log, error }) => {
 
     const generatedLines = [];
     const now = new Date();
-
-    // Payment Cycle Logic
-    // Thursday 12:00 PM Perth is Thursday 04:00 AM UTC (Perth is UTC+8)
-    // We'll simplify to node's local time assuming environment is Perth or we use offsets
-    const isAfterThursdayNoon = now.getUTCDay() > 4 || (now.getUTCDay() === 4 && now.getUTCHours() >= 4);
-
-    const paymentCycleDate = new Date();
-    if (isAfterThursdayNoon) {
-      // Next Friday
-      paymentCycleDate.setUTCDate(now.getUTCDate() + (12 - now.getUTCDay()) % 7 + 7);
-    } else {
-      // Upcoming Friday
-      paymentCycleDate.setUTCDate(now.getUTCDate() + (5 - now.getUTCDay() + 7) % 7);
-    }
-    paymentCycleDate.setUTCHours(0, 0, 0, 0);
 
     for (const wo of workOrders.documents) {
       const line = await databases.createDocument(
@@ -81,37 +109,24 @@ module.exports = async ({ req, res, log, error }) => {
         }
       );
 
-      // Update WO status
-      await databases.updateDocument(
-        databaseId,
-        workOrdersCollectionId,
-        wo.$id,
-        {
-          invoiceStatus: 'invoiced',
-          updatedAt: now.toISOString()
-        }
-      );
+      await databases.updateDocument(databaseId, workOrdersCollectionId, wo.$id, {
+        invoiceStatus: 'invoiced',
+        updatedAt: now.toISOString()
+      });
 
       generatedLines.push(line);
 
-      // Audit
-      await databases.createDocument(
-        databaseId,
-        auditLogsCollectionId,
-        ID.unique(),
-        {
-          actorId: req.headers['x-appwrite-user-id'],
-          action: 'invoice_line_generated',
-          entityType: 'workOrder',
-          entityId: wo.$id,
-          metadata: JSON.stringify({ invoiceLineId: line.$id }),
-          createdAt: now.toISOString()
-        }
-      );
+      await databases.createDocument(databaseId, auditLogsCollectionId, ID.unique(), {
+        actorId: req.headers['x-appwrite-user-id'],
+        action: 'invoice_line_generated',
+        entityType: 'workOrder',
+        entityId: wo.$id,
+        metadata: JSON.stringify({ invoiceLineId: line.$id, scope }),
+        createdAt: now.toISOString()
+      });
     }
 
-    return res.json({ success: true, count: generatedLines.length, lines: generatedLines });
-
+    return res.json({ success: true, scope, paymentCycleDate: paymentCycleDate.toISOString(), count: generatedLines.length, lines: generatedLines });
   } catch (err) {
     error(err.message);
     return res.json({ error: err.message }, 500);

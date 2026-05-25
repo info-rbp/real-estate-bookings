@@ -4,7 +4,36 @@ A contract-compliant real-estate Work Order booking platform for Rent On Time, b
 
 ## Overview
 
+This app is built with **Vite** and deployed as **Cloudflare Workers Static Assets** using **Wrangler**.
+
 This application has been upgraded from a generic booking portal to a professional Work Order management system. It supports multi-step Work Order creation, service-area classification, rate card pricing, regional batching, open-for-inspection planning, and automated invoice line generation.
+
+## Deployment (Cloudflare Workers Static Assets)
+
+- **Production domain:** `real-estate.remotebusinesspartner.com.au`
+- **Worker name:** `rbp-real-estate`
+- **Build command:** `npm run build`
+- **Deploy command:** `npm run deploy`
+- **Assets directory:** `dist`
+
+### Local verification before deploy
+
+```bash
+npm ci
+npm run check:env
+npm run typecheck
+npm run build
+```
+
+`npm run check:env` verifies required variable names only and does not print values. It may fail locally if production variables are intentionally unset.
+
+### Environment and Appwrite platform requirements
+
+- Cloudflare production environment variables must be configured in Cloudflare project/worker settings and must **not** be committed to this repository.
+- Appwrite Web Platform allowed origins should include:
+  - `real-estate.remotebusinesspartner.com.au`
+  - `localhost`
+  - optional: workers.dev hostname used for direct Worker testing.
 
 ## Technical Stack
 

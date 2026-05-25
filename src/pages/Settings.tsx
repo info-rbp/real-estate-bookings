@@ -17,7 +17,7 @@ export default function Settings() {
   const [fullName, setFullName] = useState(profile?.full_name || '')
   const [email, setEmail] = useState(profile?.email || '')
   const [phone, setPhone] = useState(profile?.phone || '')
-  const [timezone, setTimezone] = useState(profile?.timezone || 'America/New_York')
+  const [timezone, setTimezone] = useState(profile?.timezone || 'Australia/Perth')
   const [emailNotif, setEmailNotif] = useState(profile?.email_notifications ?? true)
   const [smsNotif, setSmsNotif] = useState(profile?.sms_notifications ?? false)
   const [twoFactor, setTwoFactor] = useState(profile?.two_factor_enabled ?? false)
@@ -102,10 +102,13 @@ export default function Settings() {
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-semibold text-on-surface">Timezone</label>
                     <select value={timezone} onChange={e => setTimezone(e.target.value)} className="border border-outline-variant rounded-lg p-4 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm appearance-none">
-                      <option value="America/New_York">Eastern Time (ET)</option>
-                      <option value="America/Chicago">Central Time (CT)</option>
-                      <option value="America/Denver">Mountain Time (MT)</option>
-                      <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                      <option value="Australia/Perth">Australia/Perth (AWST)</option>
+                      <option value="Australia/Darwin">Australia/Darwin (ACST)</option>
+                      <option value="Australia/Adelaide">Australia/Adelaide (ACST/ACDT)</option>
+                      <option value="Australia/Brisbane">Australia/Brisbane (AEST)</option>
+                      <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+                      <option value="Australia/Melbourne">Australia/Melbourne (AEST/AEDT)</option>
+                      <option value="Australia/Hobart">Australia/Hobart (AEST/AEDT)</option>
                     </select>
                   </div>
                 </div>
