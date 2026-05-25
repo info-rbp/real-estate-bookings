@@ -1,3 +1,4 @@
+// TODO(security): Move sensitive pricing/status/fee mutations behind Appwrite Functions with server-side authorization checks.
 import { ID } from 'appwrite';
 import { databases, appwriteConfig } from './appwrite';
 

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
+import { useAuth } from '../../hooks/useAuth'
 import { databases, appwriteConfig, functions } from '../../lib/appwrite'
 import { Query } from 'appwrite'
 import { ExecutionMethod } from 'appwrite'
 import { FileText, Download, Check, AlertCircle, Calendar } from 'lucide-react'
 
 export default function AdminInvoices() {
+  const { profile } = useAuth()
   const [lines, setLines] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
@@ -36,9 +38,16 @@ export default function AdminInvoices() {
     try {
       // For this demo/MVP, we'll trigger generation for all clients
       // In production, this would be triggered per client or in a batch.
-      const res = await (functions as any).createExecution(
-        'generate-invoice-lines', // Replace with real ID
-        JSON.stringify({ clientId: 'ROT-CLIENT-001' }), // Mock client ID
+      if (!appwriteConfig.generateInvoiceLinesFunctionId) {
+        throw new Error('Invoice line generation is not configured. Contact support.')
+      }
+      if (!profile?.clientId) {
+        throw new Error('Missing client context. Please refresh and try again.')
+      }
+      // TODO(security): Invoice generation must remain server-authoritative in Appwrite Functions.
+      await functions.createExecution(
+        appwriteConfig.generateInvoiceLinesFunctionId,
+        JSON.stringify({ clientId: profile.clientId }),
         false,
         '/',
         ExecutionMethod.POST

@@ -120,8 +120,11 @@ export default function BookService() {
   async function fetchAvailability() {
     setFetchingSlots(true)
     try {
-      const res = await (functions as any).createExecution(
-        'fetch-calendar-availability',
+      if (!appwriteConfig.fetchCalendarAvailabilityFunctionId) {
+        throw new Error('Calendar availability is not configured. Contact support.')
+      }
+      const res = await functions.createExecution(
+        appwriteConfig.fetchCalendarAvailabilityFunctionId,
         JSON.stringify({ dateFrom: requestedDate, dateTo: requestedDate }),
         false,
         '/',
@@ -150,8 +153,12 @@ export default function BookService() {
     setError('')
 
     try {
-      const res = await (functions as any).createExecution(
-        'create-work-order',
+      if (!appwriteConfig.createWorkOrderFunctionId) {
+        throw new Error('Work order submission is not configured. Contact support.')
+      }
+      // TODO(security): Keep pricing/work-order creation server-side in the Appwrite Function to prevent client-side tampering.
+      const res = await functions.createExecution(
+        appwriteConfig.createWorkOrderFunctionId,
         JSON.stringify({
           serviceId: selectedService.id,
           serviceType: selectedService.id,
@@ -199,11 +206,14 @@ export default function BookService() {
         ExecutionMethod.POST
       )
 
-      const execution = res as any
-      if (execution.responseStatusCode >= 400) {
+      const execution = res as { responseStatusCode?: number; responseBody?: string }
+      if ((execution.responseStatusCode ?? 500) >= 400) {
         throw new Error('Failed to create Work Order')
       }
 
+      if (!execution.responseBody) {
+        throw new Error('Work order submission returned an empty response.')
+      }
       setConfirmedWO(JSON.parse(execution.responseBody))
     } catch (err: any) {
       setError(err.message)
