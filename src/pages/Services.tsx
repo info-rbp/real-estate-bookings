@@ -12,7 +12,7 @@ const services = [
   { icon: FileText, title: 'Insurance Claim Support', description: 'We assist with property attendance for insurance-related matters by capturing photographs, recording observations and providing practical claim support information where required.' },
   { icon: Users, title: 'Tenant Dispute Support', description: 'We can assist agencies with inspection attendance, photographic evidence and property condition information where tenant disputes or property condition issues require additional support.' },
   { icon: Award, title: 'Landlord Referral Support', description: 'Through our agency relationships and property attendance work, we can help identify and refer landlords who may require professional property management services.' },
-  { icon: Settings2, title: 'Custom Property Support', description: 'Need support outside a standard inspection? BookPro can work with your agency to design practical solutions based on your landlords, tenants, properties and operational needs.' },
+  { icon: Settings2, title: 'Custom Property Support', description: 'Need support outside a standard inspection? ProInspect can work with your agency to design practical solutions based on your landlords, tenants, properties and operational needs.' },
 ];
 
 const benefits = [
@@ -24,7 +24,7 @@ const benefits = [
 
 const howItWorks = [
     { step: 1, title: 'Submit a Booking', description: 'Your agency submits the inspection, open home or property support request through the agreed booking process.' },
-    { step: 2, title: 'We Attend the Property', description: 'BookPro attends the property at the scheduled time and completes the agreed field task.' },
+    { step: 2, title: 'We Attend the Property', description: 'ProInspect attends the property at the scheduled time and completes the agreed field task.' },
     { step: 3, title: 'We Capture the Details', description: 'Photos, notes, observations and attendance details are collected in line with the service requested.' },
     { step: 4, title: 'Your Team Receives the Report', description: 'We provide the agreed report, confirmation or supporting information so your agency can continue managing the property.' },
 ]
@@ -32,10 +32,10 @@ const howItWorks = [
 export default function ServicesPage() {
 
     useEffect(() => {
-        document.title = 'Property Inspection Services for Real Estate Agencies | BookPro';
+        document.title = 'Property Inspection Services for Real Estate Agencies | ProInspect';
         const metaDescription = document.querySelector('meta[name="description"]');
         if (metaDescription) {
-            metaDescription.setAttribute('content', 'BookPro provides property inspection and field support services for real estate agencies, including routine inspections, PCRs, exit inspections, open homes, key safe installation, maintenance support and insurance claim assistance.');
+            metaDescription.setAttribute('content', 'ProInspect provides property inspection and field support services for real estate agencies, including routine inspections, PCRs, exit inspections, open homes, key safe installation, maintenance support and insurance claim assistance.');
         }
     }, []);
 
@@ -53,7 +53,7 @@ export default function ServicesPage() {
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
               <div className="mx-auto max-w-2xl text-center">
                 <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Property Inspection & Field Support for Real Estate Agencies</h1>
-                <p className="mt-6 text-lg leading-8 text-gray-600">BookPro helps real estate agencies manage inspections, open homes, key access, maintenance coordination and on-site property tasks with reliable field support across their managed portfolio.</p>
+                <p className="mt-6 text-lg leading-8 text-gray-600">ProInspect helps real estate agencies manage inspections, open homes, key access, maintenance coordination and on-site property tasks with reliable field support across their managed portfolio.</p>
                 <div className="mt-10 flex items-center justify-center gap-x-6">
                   <a href="#" className="rounded-md bg-primary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">Book a Consultation</a>
                   <a href="#services" className="text-sm font-semibold leading-6 text-gray-900">View Our Services <span aria-hidden="true">→</span></a>
@@ -73,7 +73,7 @@ export default function ServicesPage() {
                             <h2 className="text-base font-semibold leading-7 text-primary">Practical Support</h2>
                             <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Practical Support for Busy Property Management Teams</p>
                             <p className="mt-6 text-lg leading-8 text-gray-600">Managing a rent roll takes more than office-based administration. Properties need to be inspected, photographed, opened for viewings, checked at lease transitions and supported when maintenance issues arise.</p>
-                            <p className="mt-8 text-lg leading-8 text-gray-600">BookPro provides outsourced property inspection and field support services for real estate agencies that need extra capacity without adding pressure to their internal team.</p>
+                            <p className="mt-8 text-lg leading-8 text-gray-600">ProInspect provides outsourced property inspection and field support services for real estate agencies that need extra capacity without adding pressure to their internal team.</p>
                              <p className="mt-8 text-lg leading-8 text-gray-600">We work alongside your agency to complete agreed on-site tasks, capture clear information and provide practical reporting support so your team can stay focused on owners, tenants and portfolio growth.</p>
                         </div>
                     </div>
@@ -87,7 +87,7 @@ export default function ServicesPage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl lg:text-center">
               <h2 className="text-base font-semibold leading-7 text-primary">Our Services</h2>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">BookPro supports agencies with the key inspection and property attendance services required across the management lifecycle.</p>
+              <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">ProInspect supports agencies with the key inspection and property attendance services required across the management lifecycle.</p>
             </div>
             <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
               <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
@@ -107,12 +107,12 @@ export default function ServicesPage() {
           </div>
         </div>
 
-        {/* Why Agencies Use BookPro Section */}
+        {/* Why Agencies Use ProInspect Section */}
         <div className="bg-white py-24 sm:py-32">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl lg:text-center">
-                    <h2 className="text-base font-semibold leading-7 text-primary">Why Agencies Choose BookPro</h2>
-                    <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">BookPro is built for agencies that need dependable inspection capacity, better field coverage and less pressure on internal property management teams.</p>
+                    <h2 className="text-base font-semibold leading-7 text-primary">Why Agencies Choose ProInspect</h2>
+                    <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">ProInspect is built for agencies that need dependable inspection capacity, better field coverage and less pressure on internal property management teams.</p>
                 </div>
                 <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-6 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-4 lg:gap-8">
                     {benefits.map((benefit) => (
@@ -132,7 +132,7 @@ export default function ServicesPage() {
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl lg:text-center">
                     <h2 className="text-base font-semibold leading-7 text-primary">How It Works</h2>
-                    <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">How BookPro Works With Your Agency</p>
+                    <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">How ProInspect Works With Your Agency</p>
                 </div>
                 <div className="mx-auto mt-16 flow-root sm:mt-20">
                     <div className="-m-4 flex flex-wrap justify-between">
@@ -152,7 +152,7 @@ export default function ServicesPage() {
         <div className="bg-white px-6 py-24 sm:py-32 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Built to Support Your Agency, Not Replace It</h2>
-                <p className="mt-6 text-lg leading-8 text-gray-600">BookPro provides inspection and field support services for real estate agencies. Your agency remains responsible for property management decisions, owner instructions, tenant communication, statutory notices, approvals and final decision-making.</p>
+                <p className="mt-6 text-lg leading-8 text-gray-600">ProInspect provides inspection and field support services for real estate agencies. Your agency remains responsible for property management decisions, owner instructions, tenant communication, statutory notices, approvals and final decision-making.</p>
                 <p className="mt-6 text-lg leading-8 text-gray-600">Our role is to provide reliable on-site support, clear property information and practical assistance that helps your team manage properties more efficiently.</p>
             </div>
         </div>
@@ -165,10 +165,10 @@ export default function ServicesPage() {
             </div>
             <div className="relative mx-auto max-w-md px-6 py-12 sm:py-20 md:py-28 lg:px-8 lg:py-32 lg:max-w-7xl lg:pl-1/2">
                 <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Need Reliable Property Inspection Support?</h2>
-                <p className="mt-6 text-lg leading-8 text-gray-100">BookPro helps real estate agencies complete inspection work, open homes, key access tasks and property attendance requirements without overloading the internal team.</p>
+                <p className="mt-6 text-lg leading-8 text-gray-100">ProInspect helps real estate agencies complete inspection work, open homes, key access tasks and property attendance requirements without overloading the internal team.</p>
                 <div className="mt-10 flex items-center gap-x-6">
                   <a href="#" className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-primary shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Book a Consultation</a>
-                  <a href="#" className="text-sm font-semibold leading-6 text-white">Contact BookPro <span aria-hidden="true">→</span></a>
+                  <a href="#" className="text-sm font-semibold leading-6 text-white">Contact ProInspect <span aria-hidden="true">→</span></a>
                 </div>
             </div>
         </div>
@@ -179,7 +179,7 @@ export default function ServicesPage() {
         <h2 id="footer-heading" className="sr-only">Footer</h2>
         <div className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8 lg:pt-32">
           <div className="mt-16 border-t border-white/10 pt-8 sm:mt-20 lg:mt-24">
-            <p className="text-xs leading-5 text-gray-400">&copy; 2024 BookPro Inc. All rights reserved.</p>
+            <p className="text-xs leading-5 text-gray-400">&copy; 2024 ProInspect Inc. All rights reserved.</p>
           </div>
         </div>
       </footer>

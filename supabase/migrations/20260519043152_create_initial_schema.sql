@@ -1,5 +1,5 @@
 /*
-  # Create BookPro Initial Schema
+  # Create ProInspect Initial Schema
 
   1. New Tables
     - `profiles`: User profile data linked to auth.users

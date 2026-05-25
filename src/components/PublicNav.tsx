@@ -19,7 +19,7 @@ export default function PublicNav() {
   return (
     <header className="bg-surface border-b border-outline-variant shadow-sm sticky top-0 z-50">
       <nav className="flex justify-between items-center px-6 md:px-10 h-20 w-full max-w-7xl mx-auto">
-        <Link to="/" className="text-2xl font-bold text-primary">BookPro</Link>
+        <Link to="/" className="text-2xl font-bold text-primary">ProInspect</Link>
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map(link => (
             <Link key={link.label} to={link.to} className="text-base text-on-surface-variant hover:text-primary transition-colors">

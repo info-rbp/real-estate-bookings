@@ -139,7 +139,7 @@ export default function Settings() {
                   <div className="p-2 bg-tertiary-fixed rounded-lg"><CalendarSync size={18} className="text-tertiary" /></div>
                   <h4 className="text-sm font-semibold">Google Calendar</h4>
                 </div>
-                <p className="text-sm text-on-surface-variant mb-6">Sync all your BookPro appointments automatically.</p>
+                <p className="text-sm text-on-surface-variant mb-6">Sync all your ProInspect appointments automatically.</p>
                 <button className="w-full border border-outline-variant py-2 rounded-lg text-sm font-semibold hover:bg-surface-container-low transition-colors">Sync Account</button>
               </div>
             </div>

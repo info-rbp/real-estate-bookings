@@ -83,7 +83,7 @@ export default function PropertiesPage() {
                     <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
                         <div className="relative isolate overflow-hidden bg-primary px-6 py-24 text-center shadow-2xl sm:rounded-3xl sm:px-16">
                             <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl">Are You an Agency Looking for Support?</h2>
-                            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-indigo-100">BookPro provides the reliable field support you need to manage your portfolio efficiently. Let us handle the inspections, so you can focus on your clients.</p>
+                            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-indigo-100">ProInspect provides the reliable field support you need to manage your portfolio efficiently. Let us handle the inspections, so you can focus on your clients.</p>
                             <div className="mt-10 flex items-center justify-center gap-x-6">
                                 <Link to="/engage-us" className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-primary shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Book a Consultation</Link>
                             </div>

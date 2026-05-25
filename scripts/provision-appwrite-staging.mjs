@@ -9,25 +9,25 @@ const REQUIRED_ENV = [
 ]
 
 const COLLECTIONS = {
-  users: process.env.VITE_APPWRITE_USERS_COLLECTION_ID || 'users',
-  clients: process.env.VITE_APPWRITE_CLIENTS_COLLECTION_ID || 'clients',
-  services: process.env.VITE_APPWRITE_SERVICES_COLLECTION_ID || 'services',
-  leads: process.env.VITE_APPWRITE_LEADS_COLLECTION_ID || 'leads',
-  bookings: process.env.VITE_APPWRITE_BOOKINGS_COLLECTION_ID || 'bookings',
-  auditLogs: process.env.VITE_APPWRITE_AUDIT_LOGS_COLLECTION_ID || 'auditLogs',
-  serviceAreas: process.env.VITE_APPWRITE_SERVICE_AREAS_COLLECTION_ID || 'serviceAreas',
-  rateCards: process.env.VITE_APPWRITE_RATE_CARDS_COLLECTION_ID || 'rateCards',
-  rateCardItems: process.env.VITE_APPWRITE_RATE_CARD_ITEMS_COLLECTION_ID || 'rateCardItems',
-  workOrderContacts: process.env.VITE_APPWRITE_WORK_ORDER_CONTACTS_COLLECTION_ID || 'workOrderContacts',
-  workOrderStatusHistory: process.env.VITE_APPWRITE_WORK_ORDER_STATUS_HISTORY_COLLECTION_ID || 'workOrderStatusHistory',
-  accessIssues: process.env.VITE_APPWRITE_ACCESS_ISSUES_COLLECTION_ID || 'accessIssues',
-  regionalBatches: process.env.VITE_APPWRITE_REGIONAL_BATCHES_COLLECTION_ID || 'regionalBatches',
-  openInspectionPlans: process.env.VITE_APPWRITE_OPEN_INSPECTION_PLANS_COLLECTION_ID || 'openInspectionPlans',
-  openInspectionItems: process.env.VITE_APPWRITE_OPEN_INSPECTION_ITEMS_COLLECTION_ID || 'openInspectionItems',
-  invoiceLines: process.env.VITE_APPWRITE_INVOICE_LINES_COLLECTION_ID || 'invoiceLines',
+  users: process.env.VITE_APPWRITE_USERS_COLLECTION_ID || process.env.APPWRITE_USERS_COLLECTION_ID || 'users',
+  clients: process.env.VITE_APPWRITE_CLIENTS_COLLECTION_ID || process.env.APPWRITE_CLIENTS_COLLECTION_ID || 'clients',
+  services: process.env.VITE_APPWRITE_SERVICES_COLLECTION_ID || process.env.APPWRITE_SERVICES_COLLECTION_ID || 'services',
+  leads: process.env.VITE_APPWRITE_LEADS_COLLECTION_ID || process.env.APPWRITE_LEADS_COLLECTION_ID || 'leads',
+  bookings: process.env.VITE_APPWRITE_BOOKINGS_COLLECTION_ID || process.env.APPWRITE_BOOKINGS_COLLECTION_ID || 'bookings',
+  auditLogs: process.env.VITE_APPWRITE_AUDIT_LOGS_COLLECTION_ID || process.env.APPWRITE_AUDIT_LOGS_COLLECTION_ID || 'auditLogs',
+  serviceAreas: process.env.VITE_APPWRITE_SERVICE_AREAS_COLLECTION_ID || process.env.APPWRITE_SERVICE_AREAS_COLLECTION_ID || 'serviceAreas',
+  rateCards: process.env.VITE_APPWRITE_RATE_CARDS_COLLECTION_ID || process.env.APPWRITE_RATE_CARDS_COLLECTION_ID || 'rateCards',
+  rateCardItems: process.env.VITE_APPWRITE_RATE_CARD_ITEMS_COLLECTION_ID || process.env.APPWRITE_RATE_CARD_ITEMS_COLLECTION_ID || 'rateCardItems',
+  workOrderContacts: process.env.VITE_APPWRITE_WORK_ORDER_CONTACTS_COLLECTION_ID || process.env.APPWRITE_WORK_ORDER_CONTACTS_COLLECTION_ID || 'workOrderContacts',
+  workOrderStatusHistory: process.env.VITE_APPWRITE_WORK_ORDER_STATUS_HISTORY_COLLECTION_ID || process.env.APPWRITE_WORK_ORDER_STATUS_HISTORY_COLLECTION_ID || 'workOrderStatusHistory',
+  accessIssues: process.env.VITE_APPWRITE_ACCESS_ISSUES_COLLECTION_ID || process.env.APPWRITE_ACCESS_ISSUES_COLLECTION_ID || 'accessIssues',
+  regionalBatches: process.env.VITE_APPWRITE_REGIONAL_BATCHES_COLLECTION_ID || process.env.APPWRITE_REGIONAL_BATCHES_COLLECTION_ID || 'regionalBatches',
+  openInspectionPlans: process.env.VITE_APPWRITE_OPEN_INSPECTION_PLANS_COLLECTION_ID || process.env.APPWRITE_OPEN_INSPECTION_PLANS_COLLECTION_ID || 'openInspectionPlans',
+  openInspectionItems: process.env.VITE_APPWRITE_OPEN_INSPECTION_ITEMS_COLLECTION_ID || process.env.APPWRITE_OPEN_INSPECTION_ITEMS_COLLECTION_ID || 'openInspectionItems',
+  invoiceLines: process.env.VITE_APPWRITE_INVOICE_LINES_COLLECTION_ID || process.env.APPWRITE_INVOICE_LINES_COLLECTION_ID || 'invoiceLines',
 }
 
-const DATABASE_ID = process.env.APPWRITE_DATABASE_ID
+const DATABASE_ID = process.env.VITE_APPWRITE_DATABASE_ID || process.env.APPWRITE_DATABASE_ID
 
 function required(name) {
   const value = process.env[name]
@@ -43,7 +43,7 @@ function getStaffTeamId() {
   return process.env.APPWRITE_STAFF_TEAM_ID || 'staff'
 }
 
-function collectionPermissions({ publicRead = false, publicCreate = false, staffRead = false } = {}) {
+function collectionPermissions({ publicRead = false, publicCreate = false, staffRead = false, userOwned = false } = {}) {
   const permissions = [
     Permission.read(Role.team(getAdminTeamId())),
     Permission.create(Role.team(getAdminTeamId())),
@@ -54,6 +54,12 @@ function collectionPermissions({ publicRead = false, publicCreate = false, staff
   if (staffRead) permissions.push(Permission.read(Role.team(getStaffTeamId())))
   if (publicRead) permissions.push(Permission.read(Role.any()))
   if (publicCreate) permissions.push(Permission.create(Role.any()))
+
+  if (userOwned) {
+    permissions.push(Permission.create(Role.users()))
+    permissions.push(Permission.read(Role.users()))
+    permissions.push(Permission.update(Role.users()))
+  }
 
   return permissions
 }
@@ -127,7 +133,7 @@ async function index(databases, collectionId, key, type, attributes, orders = un
 
 async function createUsers(databases) {
   const c = COLLECTIONS.users
-  await ensureCollection(databases, c, 'Users', collectionPermissions({ staffRead: true }))
+  await ensureCollection(databases, c, 'Users', collectionPermissions({ staffRead: true, userOwned: true }))
   await stringAttr(databases, c, 'appwriteUserId', 128, true)
   await stringAttr(databases, c, 'clientId', 128, false)
   await stringAttr(databases, c, 'full_name', 160, true)
@@ -213,7 +219,7 @@ async function createLeads(databases) {
 
 async function createBookings(databases) {
   const c = COLLECTIONS.bookings
-  await ensureCollection(databases, c, 'Bookings', collectionPermissions({ staffRead: true }))
+  await ensureCollection(databases, c, 'Bookings', collectionPermissions({ staffRead: true, userOwned: true }))
 
   await stringAttr(databases, c, 'workOrderNumber', 64, false)
   await stringAttr(databases, c, 'appwriteUserId', 128, true)
@@ -538,12 +544,21 @@ async function seedServices(databases) {
 }
 
 async function main() {
-  for (const envName of REQUIRED_ENV) required(envName)
+  // Check for either prefixed or unprefixed required variables
+  const endpoint = process.env.VITE_APPWRITE_ENDPOINT || process.env.APPWRITE_ENDPOINT
+  const projectId = process.env.VITE_APPWRITE_PROJECT_ID || process.env.APPWRITE_PROJECT_ID
+  const apiKey = process.env.VITE_APPWRITE_API_KEY || process.env.APPWRITE_API_KEY
+  const databaseId = process.env.VITE_APPWRITE_DATABASE_ID || process.env.APPWRITE_DATABASE_ID
+
+  if (!endpoint) throw new Error('Missing APPWRITE_ENDPOINT or VITE_APPWRITE_ENDPOINT')
+  if (!projectId) throw new Error('Missing APPWRITE_PROJECT_ID or VITE_APPWRITE_PROJECT_ID')
+  if (!apiKey) throw new Error('Missing APPWRITE_API_KEY or VITE_APPWRITE_API_KEY')
+  if (!databaseId) throw new Error('Missing APPWRITE_DATABASE_ID or VITE_APPWRITE_DATABASE_ID')
 
   const client = new Client()
-    .setEndpoint(required('APPWRITE_ENDPOINT'))
-    .setProject(required('APPWRITE_PROJECT_ID'))
-    .setKey(required('APPWRITE_API_KEY'))
+    .setEndpoint(endpoint)
+    .setProject(projectId)
+    .setKey(apiKey)
 
   const databases = new Databases(client)
 

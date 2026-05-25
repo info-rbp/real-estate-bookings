@@ -1,13 +1,13 @@
-# Rent On Time Work Order platform upgrade - Technical README
+# ProInspect Work Order platform upgrade - Technical README
 
 ## Project Overview
-This application is a contract-compliant Work Order platform for Rent On Time. It handles the full lifecycle of real estate service requests, from submission to regional batching, attendance, and invoicing.
+This application is a contract-compliant Work Order platform for ProInspect. It handles the full lifecycle of real estate service requests, from submission to regional batching, attendance, and invoicing.
 
 ## 1. Information Architecture & Page Flows
 
 ### A. Public-Facing & Onboarding Flow
 1.  **Home Page:** Terris-inspired premium landing page.
-2.  **Services Catalog:** Detailed view of Rent On Time services with pricing classification.
+2.  **Services Catalog:** Detailed view of ProInspect services with pricing classification.
 3.  **Authentication:** Unified login/register gateway.
 4.  **Registration Workflow:** Account basics, professional profile, and security preferences.
 
@@ -18,7 +18,7 @@ This application is a contract-compliant Work Order platform for Rent On Time. I
 
 ### C. Multi-Step Work Order Workflow
 The booking engine is a 7-step progressive disclosure form:
-1.  **Service Selection:** Choose Rent On Time service.
+1.  **Service Selection:** Choose ProInspect service.
 2.  **Property & Service Area:** Capture location and classify region (Perth/Peel vs Other).
 3.  **Contacts:** Tenant, landlord, and contractor details.
 4.  **Access & Safety:** Entry instructions and hazard reporting.

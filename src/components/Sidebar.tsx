@@ -15,7 +15,7 @@ export default function Sidebar() {
   return (
     <aside className="h-screen w-64 fixed left-0 top-0 bg-surface-container border-r border-outline-variant flex flex-col py-8 z-50">
       <div className="px-6 mb-8">
-        <h1 className="text-xl font-bold text-primary">BookPro</h1>
+        <h1 className="text-xl font-bold text-primary">ProInspect</h1>
       </div>
 
       <div className="flex items-center gap-4 px-6 mb-8">

@@ -17,7 +17,7 @@ export default function DashboardLayout() {
       {/* Sidebar Navigation */}
       <nav className="h-screen w-64 fixed left-0 top-0 bg-surface-container border-r border-outline-variant flex flex-col py-8">
         <div className="px-4 mb-8">
-          <Link to="/" className="text-2xl font-bold text-primary">BookPro</Link>
+          <Link to="/" className="text-2xl font-bold text-primary">ProInspect</Link>
         </div>
         <div className="flex items-center gap-4 px-4 mb-8">
           <img 

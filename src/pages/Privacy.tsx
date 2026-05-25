@@ -11,7 +11,7 @@ export default function Privacy() {
           This staging policy placeholder keeps the public forms and booking flow from pointing to dead links while final privacy text is being approved.
         </p>
         <section className="space-y-3 text-sm leading-7 text-slate-700">
-          <p>BookPro collects contact, booking, property, inspection, and billing information needed to deliver authorised services.</p>
+          <p>ProInspect collects contact, booking, property, inspection, and billing information needed to deliver authorised services.</p>
           <p>Public lead and inspection forms should only collect the minimum information required and must be backed by consent-aware production handling before launch.</p>
           <p>Final retention, disclosure, and access terms are still pending business and legal review.</p>
         </section>

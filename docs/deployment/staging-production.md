@@ -1,8 +1,8 @@
-# BookPro staging and production deployment guide
+# ProInspect staging and production deployment guide
 
 ## Purpose
 
-This document covers the minimum setup required to move the BookPro frontend from local development into a real staging and production deployment using Appwrite and Stripe.
+This document covers the minimum setup required to move the ProInspect frontend from local development into a real staging and production deployment using Appwrite and Stripe.
 
 ## Environment split
 
