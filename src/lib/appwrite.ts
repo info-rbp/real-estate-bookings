@@ -36,6 +36,9 @@ export const appwriteConfig = {
   pricingFunctionId: import.meta.env.VITE_APPWRITE_FUNCTION_PRICING_ID,
   stripeCheckoutFunctionId: import.meta.env.VITE_APPWRITE_FUNCTION_STRIPE_CHECKOUT_ID,
   stripeWebhookFunctionId: import.meta.env.VITE_APPWRITE_FUNCTION_STRIPE_WEBHOOK_ID,
+  createWorkOrderFunctionId: import.meta.env.VITE_APPWRITE_FUNCTION_CREATE_WORK_ORDER_ID,
+  fetchCalendarAvailabilityFunctionId: import.meta.env.VITE_APPWRITE_FUNCTION_FETCH_CALENDAR_AVAILABILITY_ID,
+  generateInvoiceLinesFunctionId: import.meta.env.VITE_APPWRITE_FUNCTION_GENERATE_INVOICE_LINES_ID,
 } as const
 
 export const isAppwriteConfigured = Boolean(endpoint && projectId)

@@ -10,7 +10,7 @@
   "dependencies": {
     "@stripe/react-stripe-js": "^6.4.0",
     "@stripe/stripe-js": "^9.6.0",
-    "appwrite": "^14.0.0",
+    "appwrite": "14.0.1",
     "lucide-react": "^1.16.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -23,7 +23,7 @@
     "@vitejs/plugin-react": "^4.2.0",
     "node-appwrite": "^17.2.0",
     "tailwindcss": "^4.3.0",
-    "typescript": "^5.3.3",
-    "vite": "^5.0.0"
+    "typescript": "5.9.3",
+    "vite": "5.4.21"
   }
 }
