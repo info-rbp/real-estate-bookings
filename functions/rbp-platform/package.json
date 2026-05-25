@@ -1,0 +1,40 @@
+{
+  "name": "rbp-platform",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "appwrite:inspect": "npx --yes tsx scripts/appwrite/inspect-appwrite.ts",
+    "appwrite:connection:validate": "npx --yes tsx scripts/appwrite/validate-connection.ts",
+    "appwrite:schema:validate": "npx --yes tsx scripts/appwrite/validate-schema.ts",
+    "appwrite:schema:diff": "npx --yes tsx scripts/appwrite/diff-live-schema.ts",
+    "appwrite:schema:deploy": "npx --yes tsx scripts/appwrite/deploy-schema.ts",
+    "appwrite:permissions:validate": "npx --yes tsx scripts/appwrite/validate-permissions.ts",
+    "appwrite:functions:validate": "npx --yes tsx scripts/appwrite/validate-functions.ts",
+    "appwrite:functions:deploy": "npx --yes tsx scripts/appwrite/deploy-functions.ts",
+    "appwrite:functions:verify": "npx --yes tsx scripts/appwrite/verify-functions.ts",
+    "appwrite:seed:qa": "npx --yes tsx scripts/appwrite/seed-qa.ts",
+    "appwrite:reset:qa": "npx --yes tsx scripts/appwrite/reset-qa-data.ts",
+    "appwrite:seed:validate": "npx --yes tsx scripts/appwrite/validate-qa-seed.ts",
+    "appwrite:stripe-plan-mapping:validate": "npx --yes tsx scripts/appwrite/validate-stripe-plan-mapping.ts",
+    "cloudflare:env:validate": "npx --yes tsx scripts/cloudflare/validate-build-env.ts",
+    "smoke:qa:auth": "node scripts/smoke/run-smoke-check.mjs auth",
+    "smoke:qa:billing": "node scripts/smoke/run-smoke-check.mjs billing",
+    "smoke:qa:stripe-webhook": "node scripts/smoke/run-smoke-check.mjs stripe-webhook",
+    "smoke:qa:service-requests": "node scripts/smoke/run-smoke-check.mjs service-requests",
+    "smoke:qa:admin": "node scripts/smoke/run-smoke-check.mjs admin",
+    "smoke:qa:permissions": "node scripts/smoke/run-smoke-check.mjs permissions",
+    "smoke:qa:email": "node scripts/smoke/run-email-live-proof.mjs",
+    "build:frontend": "cd frontend/portal && npm run build",
+    "validate:ci": "npm run build:frontend && npm test",
+    "test": "npm run test:unit && npm run test:integration && npm run test:smoke:dry-run",
+    "test:unit": "node --test tests/config/*.test.mjs tests/schema/*.test.mjs && npx --yes tsx --test tests/functions/*.test.ts",
+    "test:integration": "node --test tests/integration/*.test.mjs && npx --yes tsx --test tests/runtime/*.test.ts",
+    "test:smoke:dry-run": "node --test tests/smoke/*.test.mjs",
+    "appwrite:verify:activation": "npx --yes tsx scripts/appwrite/verify-user-activation.ts"
+  },
+  "dependencies": {
+    "node-appwrite": "^15.0.1",
+    "stripe": "^18.3.0"
+  }
+}

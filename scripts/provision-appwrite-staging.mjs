@@ -1,19 +1,18 @@
 #!/usr/bin/env node
-import { Client, Databases, Permission, Role, ID } from 'node-appwrite'
-
-const REQUIRED_ENV = [
-  'APPWRITE_ENDPOINT',
-  'APPWRITE_PROJECT_ID',
-  'APPWRITE_API_KEY',
-  'APPWRITE_DATABASE_ID',
-]
+import { Client, Databases, Permission, Role, Storage } from 'node-appwrite'
 
 const COLLECTIONS = {
   users: process.env.VITE_APPWRITE_USERS_COLLECTION_ID || process.env.APPWRITE_USERS_COLLECTION_ID || 'users',
   clients: process.env.VITE_APPWRITE_CLIENTS_COLLECTION_ID || process.env.APPWRITE_CLIENTS_COLLECTION_ID || 'clients',
   services: process.env.VITE_APPWRITE_SERVICES_COLLECTION_ID || process.env.APPWRITE_SERVICES_COLLECTION_ID || 'services',
+  clientPricing: process.env.VITE_APPWRITE_CLIENT_PRICING_COLLECTION_ID || process.env.APPWRITE_CLIENT_PRICING_COLLECTION_ID || 'clientPricing',
   leads: process.env.VITE_APPWRITE_LEADS_COLLECTION_ID || process.env.APPWRITE_LEADS_COLLECTION_ID || 'leads',
   bookings: process.env.VITE_APPWRITE_BOOKINGS_COLLECTION_ID || process.env.APPWRITE_BOOKINGS_COLLECTION_ID || 'bookings',
+  properties: process.env.VITE_APPWRITE_PROPERTIES_COLLECTION_ID || process.env.APPWRITE_PROPERTIES_COLLECTION_ID || 'properties',
+  openInspections: process.env.VITE_APPWRITE_OPEN_INSPECTIONS_COLLECTION_ID || process.env.APPWRITE_OPEN_INSPECTIONS_COLLECTION_ID || 'openInspections',
+  inspectionCheckIns: process.env.VITE_APPWRITE_INSPECTION_CHECK_INS_COLLECTION_ID || process.env.APPWRITE_INSPECTION_CHECK_INS_COLLECTION_ID || 'inspectionCheckIns',
+  payments: process.env.VITE_APPWRITE_PAYMENTS_COLLECTION_ID || process.env.APPWRITE_PAYMENTS_COLLECTION_ID || 'payments',
+  subscriptions: process.env.VITE_APPWRITE_SUBSCRIPTIONS_COLLECTION_ID || process.env.APPWRITE_SUBSCRIPTIONS_COLLECTION_ID || 'subscriptions',
   auditLogs: process.env.VITE_APPWRITE_AUDIT_LOGS_COLLECTION_ID || process.env.APPWRITE_AUDIT_LOGS_COLLECTION_ID || 'auditLogs',
   serviceAreas: process.env.VITE_APPWRITE_SERVICE_AREAS_COLLECTION_ID || process.env.APPWRITE_SERVICE_AREAS_COLLECTION_ID || 'serviceAreas',
   rateCards: process.env.VITE_APPWRITE_RATE_CARDS_COLLECTION_ID || process.env.APPWRITE_RATE_CARDS_COLLECTION_ID || 'rateCards',
@@ -28,6 +27,10 @@ const COLLECTIONS = {
 }
 
 const DATABASE_ID = process.env.VITE_APPWRITE_DATABASE_ID || process.env.APPWRITE_DATABASE_ID
+const BUCKETS = {
+  propertyImages: process.env.VITE_APPWRITE_STORAGE_PROPERTY_IMAGES_BUCKET_ID || process.env.APPWRITE_STORAGE_PROPERTY_IMAGES_BUCKET_ID || 'propertyImages',
+  reports: process.env.VITE_APPWRITE_STORAGE_REPORTS_BUCKET_ID || process.env.APPWRITE_STORAGE_REPORTS_BUCKET_ID || 'reports',
+}
 
 function required(name) {
   const value = process.env[name]
@@ -64,6 +67,10 @@ function collectionPermissions({ publicRead = false, publicCreate = false, staff
   return permissions
 }
 
+async function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 async function ignoreConflict(label, action) {
   try {
     await action()
@@ -73,6 +80,17 @@ async function ignoreConflict(label, action) {
       console.log(`[exists] ${label}`)
       return
     }
+
+    if (error?.type === 'attribute_limit_exceeded') {
+      console.warn(`[skipped] ${label}: Appwrite collection attribute limit reached`)
+      return
+    }
+
+    if (error?.type && String(error.type).includes('index')) {
+      console.warn(`[skipped] ${label}: ${error.message}`)
+      return
+    }
+
     throw error
   }
 }
@@ -83,9 +101,22 @@ async function ensureCollection(databases, collectionId, name, permissions) {
   )
 }
 
+async function ensureBucket(storage, bucketId, name, permissions, options = {}) {
+  const {
+    fileSecurity = true,
+    enabled = true,
+    maximumFileSize = 20 * 1024 * 1024,
+    allowedFileExtensions = [],
+  } = options
+
+  await ignoreConflict(`bucket ${bucketId}`, () =>
+    storage.createBucket(bucketId, name, permissions, fileSecurity, enabled, maximumFileSize, allowedFileExtensions),
+  )
+}
+
 async function stringAttr(databases, collectionId, key, size, required = false, defaultValue = undefined, array = false) {
   await ignoreConflict(`${collectionId}.${key}`, () =>
-    databases.createStringAttribute(DATABASE_ID, collectionId, key, size, required, defaultValue, array),
+    databases.createStringAttribute(DATABASE_ID, collectionId, key, size, defaultValue === undefined ? required : false, defaultValue, array),
   )
 }
 
@@ -97,38 +128,58 @@ async function emailAttr(databases, collectionId, key, required = false) {
 
 async function boolAttr(databases, collectionId, key, required = false, defaultValue = undefined) {
   await ignoreConflict(`${collectionId}.${key}`, () =>
-    databases.createBooleanAttribute(DATABASE_ID, collectionId, key, required, defaultValue),
+    databases.createBooleanAttribute(DATABASE_ID, collectionId, key, defaultValue === undefined ? required : false, defaultValue),
   )
 }
 
 async function intAttr(databases, collectionId, key, required = false, min = undefined, max = undefined, defaultValue = undefined) {
   await ignoreConflict(`${collectionId}.${key}`, () =>
-    databases.createIntegerAttribute(DATABASE_ID, collectionId, key, required, min, max, defaultValue),
+    databases.createIntegerAttribute(DATABASE_ID, collectionId, key, defaultValue === undefined ? required : false, min, max, defaultValue),
   )
 }
 
 async function floatAttr(databases, collectionId, key, required = false, min = undefined, max = undefined, defaultValue = undefined) {
   await ignoreConflict(`${collectionId}.${key}`, () =>
-    databases.createFloatAttribute(DATABASE_ID, collectionId, key, required, min, max, defaultValue),
+    databases.createFloatAttribute(DATABASE_ID, collectionId, key, defaultValue === undefined ? required : false, min, max, defaultValue),
   )
 }
 
 async function datetimeAttr(databases, collectionId, key, required = false, defaultValue = undefined) {
   await ignoreConflict(`${collectionId}.${key}`, () =>
-    databases.createDatetimeAttribute(DATABASE_ID, collectionId, key, required, defaultValue),
+    databases.createDatetimeAttribute(DATABASE_ID, collectionId, key, defaultValue === undefined ? required : false, defaultValue),
   )
 }
 
 async function enumAttr(databases, collectionId, key, elements, required = false, defaultValue = undefined, array = false) {
   await ignoreConflict(`${collectionId}.${key}`, () =>
-    databases.createEnumAttribute(DATABASE_ID, collectionId, key, elements, required, defaultValue, array),
+    databases.createEnumAttribute(DATABASE_ID, collectionId, key, elements, defaultValue === undefined ? required : false, defaultValue, array),
   )
 }
 
 async function index(databases, collectionId, key, type, attributes, orders = undefined) {
-  await ignoreConflict(`${collectionId}.index.${key}`, () =>
-    databases.createIndex(DATABASE_ID, collectionId, key, type, attributes, orders),
-  )
+  const label = `${collectionId}.index.${key}`
+
+  for (let attempt = 1; attempt <= 8; attempt += 1) {
+    try {
+      await ignoreConflict(label, () =>
+        databases.createIndex(DATABASE_ID, collectionId, key, type, attributes, orders),
+      )
+      return
+    } catch (error) {
+      if (error?.type === 'attribute_not_available' && attempt < 8) {
+        console.warn(`[retry] ${label}: attribute not available yet; retrying in 5s (${attempt}/8)`)
+        await sleep(5000)
+        continue
+      }
+
+      if (error?.type === 'attribute_not_available') {
+        console.warn(`[deferred] ${label}: attribute still unavailable after retries; rerun provisioning later`)
+        return
+      }
+
+      throw error
+    }
+  }
 }
 
 async function createUsers(databases) {
@@ -139,12 +190,12 @@ async function createUsers(databases) {
   await stringAttr(databases, c, 'full_name', 160, true)
   await emailAttr(databases, c, 'email', true)
   await stringAttr(databases, c, 'phone', 40, false)
-  await stringAttr(databases, c, 'timezone', 80, true, 'Australia/Perth')
-  await boolAttr(databases, c, 'email_notifications', true, true)
-  await boolAttr(databases, c, 'sms_notifications', true, false)
-  await boolAttr(databases, c, 'two_factor_enabled', true, false)
-  await enumAttr(databases, c, 'role', ['pending', 'client_user', 'client_admin', 'staff', 'admin'], true, 'pending')
-  await enumAttr(databases, c, 'status', ['pending', 'invited', 'active', 'disabled'], true, 'pending')
+  await stringAttr(databases, c, 'timezone', 80, false, 'Australia/Perth')
+  await boolAttr(databases, c, 'email_notifications', false, true)
+  await boolAttr(databases, c, 'sms_notifications', false, false)
+  await boolAttr(databases, c, 'two_factor_enabled', false, false)
+  await enumAttr(databases, c, 'role', ['pending', 'client_user', 'client_admin', 'staff', 'admin'], false, 'pending')
+  await enumAttr(databases, c, 'status', ['pending', 'invited', 'active', 'disabled'], false, 'pending')
   await stringAttr(databases, c, 'avatar_url', 2048, false)
   await datetimeAttr(databases, c, 'createdAt', false)
   await datetimeAttr(databases, c, 'updatedAt', false)
@@ -159,7 +210,7 @@ async function createClients(databases) {
   const c = COLLECTIONS.clients
   await ensureCollection(databases, c, 'Clients', collectionPermissions({ staffRead: true }))
   await stringAttr(databases, c, 'name', 200, true)
-  await enumAttr(databases, c, 'clientType', ['agency', 'landlord', 'property_manager', 'other'], true, 'agency')
+  await enumAttr(databases, c, 'clientType', ['agency', 'landlord', 'property_manager', 'other'], false, 'agency')
   await stringAttr(databases, c, 'abn', 32, false)
   await emailAttr(databases, c, 'billingEmail', false)
   await stringAttr(databases, c, 'phone', 40, false)
@@ -169,7 +220,7 @@ async function createClients(databases) {
   await stringAttr(databases, c, 'state', 40, false)
   await stringAttr(databases, c, 'postcode', 16, false)
   await stringAttr(databases, c, 'country', 80, false, 'Australia')
-  await enumAttr(databases, c, 'status', ['prospect', 'active', 'paused', 'disabled'], true, 'active')
+  await enumAttr(databases, c, 'status', ['prospect', 'active', 'paused', 'disabled'], false, 'active')
   await datetimeAttr(databases, c, 'createdAt', false)
   await datetimeAttr(databases, c, 'updatedAt', false)
   await index(databases, c, 'status_idx', 'key', ['status'])
@@ -184,16 +235,34 @@ async function createServices(databases) {
   await stringAttr(databases, c, 'category', 120, true)
   await stringAttr(databases, c, 'description', 2000, false)
   await floatAttr(databases, c, 'defaultPriceExGst', true, 0)
-  await intAttr(databases, c, 'durationMinutes', true, 1, 1440, 60)
-  await enumAttr(databases, c, 'priceType', ['fixed', 'hourly', 'quote'], true, 'fixed')
-  await boolAttr(databases, c, 'active', true, true)
-  await intAttr(databases, c, 'sortOrder', true, 0, 10000, 0)
+  await intAttr(databases, c, 'durationMinutes', false, 1, 1440, 60)
+  await enumAttr(databases, c, 'priceType', ['fixed', 'hourly', 'quote'], false, 'fixed')
+  await boolAttr(databases, c, 'active', false, true)
+  await intAttr(databases, c, 'sortOrder', false, 0, 10000, 0)
   await datetimeAttr(databases, c, 'createdAt', false)
   await datetimeAttr(databases, c, 'updatedAt', false)
   await index(databases, c, 'active_idx', 'key', ['active'])
   await index(databases, c, 'slug_unique', 'unique', ['slug'])
   await index(databases, c, 'category_idx', 'key', ['category'])
   await index(databases, c, 'sortOrder_idx', 'key', ['sortOrder'])
+}
+
+async function createClientPricing(databases) {
+  const c = COLLECTIONS.clientPricing
+  await ensureCollection(databases, c, 'Client Pricing', collectionPermissions({ staffRead: true }))
+  await stringAttr(databases, c, 'clientId', 128, true)
+  await stringAttr(databases, c, 'serviceId', 128, true)
+  await floatAttr(databases, c, 'customPriceExGst', true, 0)
+  await enumAttr(databases, c, 'billingType', ['fixed', 'hourly', 'quote'], false, 'fixed')
+  await floatAttr(databases, c, 'gstRate', false, 0, 1, 0.1)
+  await boolAttr(databases, c, 'travelIncluded', false, false)
+  await datetimeAttr(databases, c, 'activeFrom', false)
+  await datetimeAttr(databases, c, 'activeUntil', false)
+  await enumAttr(databases, c, 'status', ['draft', 'active', 'expired', 'disabled'], false, 'active')
+  await datetimeAttr(databases, c, 'createdAt', false)
+  await datetimeAttr(databases, c, 'updatedAt', false)
+  await index(databases, c, 'client_service_idx', 'key', ['clientId', 'serviceId'])
+  await index(databases, c, 'status_idx', 'key', ['status'])
 }
 
 async function createLeads(databases) {
@@ -205,9 +274,9 @@ async function createLeads(databases) {
   await emailAttr(databases, c, 'email', true)
   await stringAttr(databases, c, 'phone', 40, false)
   await stringAttr(databases, c, 'message', 4000, true)
-  await stringAttr(databases, c, 'source', 80, true, 'engage-us')
-  await enumAttr(databases, c, 'status', ['new', 'contacted', 'qualified', 'closed'], true, 'new')
-  await enumAttr(databases, c, 'notificationStatus', ['pending', 'sent', 'failed'], true, 'pending')
+  await stringAttr(databases, c, 'source', 80, false, 'engage-us')
+  await enumAttr(databases, c, 'status', ['new', 'contacted', 'qualified', 'closed'], false, 'new')
+  await enumAttr(databases, c, 'notificationStatus', ['pending', 'sent', 'failed'], false, 'pending')
   await stringAttr(databases, c, 'assignedTo', 128, false)
   await datetimeAttr(databases, c, 'createdAt', false)
   await datetimeAttr(databases, c, 'updatedAt', false)
@@ -272,10 +341,10 @@ async function createBookings(databases) {
 
   await datetimeAttr(databases, c, 'scheduledStart', false)
   await datetimeAttr(databases, c, 'scheduledEnd', false)
-  await intAttr(databases, c, 'durationMinutes', true, 1, 1440, 60)
+  await intAttr(databases, c, 'durationMinutes', false, 1, 1440, 60)
 
-  const statusEnum = ['draft', 'submitted', 'pending_acceptance', 'requires_information', 'quote_required', 'awaiting_batch', 'accepted', 'declined', 'scheduled', 'in_progress', 'completed', 'report_delivered', 'invoiced', 'paid', 'cancelled', 'access_issue', 'reattendance_required', 'failed']
-  await enumAttr(databases, c, 'status', statusEnum, true, 'pending')
+  const statusEnum = ['draft', 'pending', 'submitted', 'pending_acceptance', 'requires_information', 'quote_required', 'awaiting_batch', 'accepted', 'confirmed', 'declined', 'scheduled', 'in_progress', 'completed', 'report_delivered', 'invoiced', 'paid', 'cancelled', 'access_issue', 'reattendance_required', 'failed']
+  await enumAttr(databases, c, 'status', statusEnum, false, 'pending')
   await enumAttr(databases, c, 'acceptanceStatus', ['pending', 'accepted', 'declined'], false, 'pending')
   await datetimeAttr(databases, c, 'acceptedAt', false)
   await stringAttr(databases, c, 'acceptedBy', 128, false)
@@ -297,7 +366,7 @@ async function createBookings(databases) {
   await floatAttr(databases, c, 'totalPriceExGst', true, 0)
   await floatAttr(databases, c, 'totalPriceIncGst', false, 0)
 
-  await enumAttr(databases, c, 'paymentStatus', ['not_required', 'unpaid', 'pending', 'paid', 'failed', 'refunded'], true, 'unpaid')
+  await enumAttr(databases, c, 'paymentStatus', ['not_required', 'unpaid', 'pending', 'paid', 'failed', 'refunded'], false, 'unpaid')
   await enumAttr(databases, c, 'invoiceStatus', ['pending', 'invoiced', 'paid', 'cancelled'], false, 'pending')
   await stringAttr(databases, c, 'invoiceBatchId', 128, false)
 
@@ -314,6 +383,115 @@ async function createBookings(databases) {
   await index(databases, c, 'invoiceBatchId_idx', 'key', ['invoiceBatchId'])
 }
 
+async function createProperties(databases) {
+  const c = COLLECTIONS.properties
+  await ensureCollection(databases, c, 'Properties', collectionPermissions({ publicRead: true, staffRead: true }))
+  await stringAttr(databases, c, 'clientId', 128, false)
+  await stringAttr(databases, c, 'slug', 160, true)
+  await stringAttr(databases, c, 'address', 300, true)
+  await stringAttr(databases, c, 'suburb', 120, false)
+  await stringAttr(databases, c, 'state', 40, false, 'WA')
+  await stringAttr(databases, c, 'postcode', 16, false)
+  await floatAttr(databases, c, 'weeklyRent', false, 0)
+  await floatAttr(databases, c, 'bond', false, 0)
+  await intAttr(databases, c, 'bedrooms', false, 0, 20)
+  await intAttr(databases, c, 'bathrooms', false, 0, 20)
+  await intAttr(databases, c, 'carSpaces', false, 0, 20)
+  await stringAttr(databases, c, 'features', 200, false, undefined, true)
+  await enumAttr(databases, c, 'status', ['draft', 'published', 'leased', 'archived'], false, 'draft')
+  await datetimeAttr(databases, c, 'availableDate', false)
+  await stringAttr(databases, c, 'heroImageUrl', 2048, false)
+  await stringAttr(databases, c, 'seoTitle', 160, false)
+  await stringAttr(databases, c, 'seoDescription', 320, false)
+  await datetimeAttr(databases, c, 'createdAt', false)
+  await datetimeAttr(databases, c, 'updatedAt', false)
+  await index(databases, c, 'clientId_idx', 'key', ['clientId'])
+  await index(databases, c, 'slug_unique', 'unique', ['slug'])
+  await index(databases, c, 'status_idx', 'key', ['status'])
+  await index(databases, c, 'suburb_idx', 'key', ['suburb'])
+  await index(databases, c, 'postcode_idx', 'key', ['postcode'])
+}
+
+async function createOpenInspections(databases) {
+  const c = COLLECTIONS.openInspections
+  await ensureCollection(databases, c, 'Open Inspections', collectionPermissions({ publicRead: true, staffRead: true }))
+  await stringAttr(databases, c, 'propertyId', 128, true)
+  await stringAttr(databases, c, 'clientId', 128, false)
+  await datetimeAttr(databases, c, 'startDateTime', true)
+  await datetimeAttr(databases, c, 'endDateTime', true)
+  await intAttr(databases, c, 'attendeeCap', false, 0, 10000)
+  await enumAttr(databases, c, 'status', ['draft', 'scheduled', 'open', 'closed', 'cancelled'], false, 'draft')
+  await boolAttr(databases, c, 'checkInEnabled', false, false)
+  await stringAttr(databases, c, 'qrCodeUrl', 2048, false)
+  await datetimeAttr(databases, c, 'createdAt', false)
+  await datetimeAttr(databases, c, 'updatedAt', false)
+  await index(databases, c, 'propertyId_idx', 'key', ['propertyId'])
+  await index(databases, c, 'clientId_idx', 'key', ['clientId'])
+  await index(databases, c, 'status_idx', 'key', ['status'])
+  await index(databases, c, 'startDateTime_idx', 'key', ['startDateTime'])
+}
+
+async function createInspectionCheckIns(databases) {
+  const c = COLLECTIONS.inspectionCheckIns
+  await ensureCollection(databases, c, 'Inspection Check Ins', collectionPermissions({ publicCreate: true, staffRead: true }))
+  await stringAttr(databases, c, 'inspectionId', 128, true)
+  await stringAttr(databases, c, 'propertyId', 128, true)
+  await stringAttr(databases, c, 'clientId', 128, false)
+  await stringAttr(databases, c, 'firstName', 120, true)
+  await stringAttr(databases, c, 'lastName', 120, true)
+  await emailAttr(databases, c, 'email', true)
+  await stringAttr(databases, c, 'phone', 40, false)
+  await boolAttr(databases, c, 'consentToContact', false, false)
+  await boolAttr(databases, c, 'privacyAccepted', false, false)
+  await datetimeAttr(databases, c, 'checkedInAt', false)
+  await stringAttr(databases, c, 'source', 80, false, 'open-inspection')
+  await stringAttr(databases, c, 'duplicateKey', 256, false)
+  await datetimeAttr(databases, c, 'createdAt', false)
+  await index(databases, c, 'inspectionId_idx', 'key', ['inspectionId'])
+  await index(databases, c, 'clientId_idx', 'key', ['clientId'])
+  await index(databases, c, 'email_idx', 'key', ['email'])
+  await index(databases, c, 'duplicateKey_idx', 'key', ['duplicateKey'])
+  await index(databases, c, 'checkedInAt_idx', 'key', ['checkedInAt'])
+}
+
+async function createPayments(databases) {
+  const c = COLLECTIONS.payments
+  await ensureCollection(databases, c, 'Payments', collectionPermissions({ staffRead: true }))
+  await stringAttr(databases, c, 'clientId', 128, true)
+  await stringAttr(databases, c, 'bookingId', 128, false)
+  await stringAttr(databases, c, 'stripePaymentIntentId', 128, false)
+  await stringAttr(databases, c, 'stripeInvoiceId', 128, false)
+  await floatAttr(databases, c, 'amountIncGst', true, 0)
+  await stringAttr(databases, c, 'currency', 8, false, 'aud')
+  await enumAttr(databases, c, 'status', ['pending', 'requires_action', 'paid', 'failed', 'refunded', 'cancelled'], false, 'pending')
+  await datetimeAttr(databases, c, 'createdAt', false)
+  await datetimeAttr(databases, c, 'updatedAt', false)
+  await index(databases, c, 'clientId_idx', 'key', ['clientId'])
+  await index(databases, c, 'bookingId_idx', 'key', ['bookingId'])
+  await index(databases, c, 'status_idx', 'key', ['status'])
+  await index(databases, c, 'paymentIntent_idx', 'key', ['stripePaymentIntentId'])
+  await index(databases, c, 'stripeInvoice_idx', 'key', ['stripeInvoiceId'])
+}
+
+async function createSubscriptions(databases) {
+  const c = COLLECTIONS.subscriptions
+  await ensureCollection(databases, c, 'Subscriptions', collectionPermissions({ staffRead: true }))
+  await stringAttr(databases, c, 'clientId', 128, true)
+  await stringAttr(databases, c, 'stripeSubscriptionId', 128, false)
+  await enumAttr(databases, c, 'billingMode', ['subscription', 'per_job', 'hybrid'], false, 'per_job')
+  await floatAttr(databases, c, 'unitPriceExGst', false, 0)
+  await intAttr(databases, c, 'quantity', false, 0, 100000)
+  await enumAttr(databases, c, 'status', ['trialing', 'active', 'past_due', 'paused', 'cancelled', 'incomplete'], false, 'active')
+  await datetimeAttr(databases, c, 'currentPeriodStart', false)
+  await datetimeAttr(databases, c, 'currentPeriodEnd', false)
+  await boolAttr(databases, c, 'cancelAtPeriodEnd', false, false)
+  await datetimeAttr(databases, c, 'createdAt', false)
+  await datetimeAttr(databases, c, 'updatedAt', false)
+  await index(databases, c, 'clientId_idx', 'key', ['clientId'])
+  await index(databases, c, 'stripeSubscription_idx', 'key', ['stripeSubscriptionId'])
+  await index(databases, c, 'status_idx', 'key', ['status'])
+}
+
 async function createServiceAreas(databases) {
   const c = COLLECTIONS.serviceAreas
   await ensureCollection(databases, c, 'Service Areas', collectionPermissions({ publicRead: true, staffRead: true }))
@@ -321,7 +499,7 @@ async function createServiceAreas(databases) {
   await stringAttr(databases, c, 'suburb', 120, true)
   await stringAttr(databases, c, 'postcode', 16, true)
   await enumAttr(databases, c, 'pricingClassification', ['perth_peel', 'other_region', 'outside_service_area'], true)
-  await boolAttr(databases, c, 'active', true, true)
+  await boolAttr(databases, c, 'active', false, true)
   await stringAttr(databases, c, 'source', 100, false)
   await datetimeAttr(databases, c, 'createdAt', false)
   await datetimeAttr(databases, c, 'updatedAt', false)
@@ -336,10 +514,10 @@ async function createRateCards(databases) {
   await ensureCollection(databases, c, 'Rate Cards', collectionPermissions({ staffRead: true }))
   await stringAttr(databases, c, 'clientId', 128, true)
   await stringAttr(databases, c, 'name', 200, true)
-  await enumAttr(databases, c, 'status', ['draft', 'active', 'expired'], true, 'active')
+  await enumAttr(databases, c, 'status', ['draft', 'active', 'expired'], false, 'active')
   await datetimeAttr(databases, c, 'effectiveFrom', true)
   await datetimeAttr(databases, c, 'effectiveUntil', false)
-  await floatAttr(databases, c, 'gstRate', true, 0, 1, 0.1)
+  await floatAttr(databases, c, 'gstRate', false, 0, 1, 0.1)
   await datetimeAttr(databases, c, 'createdAt', false)
   await datetimeAttr(databases, c, 'updatedAt', false)
   await index(databases, c, 'clientId_idx', 'key', ['clientId'])
@@ -352,10 +530,10 @@ async function createRateCardItems(databases) {
   await stringAttr(databases, c, 'serviceType', 64, true)
   await enumAttr(databases, c, 'pricingClassification', ['perth_peel', 'other_region', 'outside_service_area'], true)
   await floatAttr(databases, c, 'priceExGst', true, 0)
-  await enumAttr(databases, c, 'priceType', ['fixed', 'hourly', 'quote'], true, 'fixed')
-  await boolAttr(databases, c, 'requiresQuote', true, false)
-  await boolAttr(databases, c, 'includedUnlessOtherwiseAgreed', true, false)
-  await boolAttr(databases, c, 'active', true, true)
+  await enumAttr(databases, c, 'priceType', ['fixed', 'hourly', 'quote'], false, 'fixed')
+  await boolAttr(databases, c, 'requiresQuote', false, false)
+  await boolAttr(databases, c, 'includedUnlessOtherwiseAgreed', false, false)
+  await boolAttr(databases, c, 'active', false, true)
   await index(databases, c, 'rateCardId_idx', 'key', ['rateCardId'])
 }
 
@@ -418,10 +596,10 @@ async function createRegionalBatches(databases) {
   await stringAttr(databases, c, 'routeName', 200, false)
   await datetimeAttr(databases, c, 'targetAttendanceStart', false)
   await datetimeAttr(databases, c, 'targetAttendanceEnd', false)
-  await intAttr(databases, c, 'minimumAcceptedBookings', true, 1, 100, 10)
-  await intAttr(databases, c, 'maximumRequiredBookings', true, 1, 200, 15)
-  await intAttr(databases, c, 'acceptedBookingCount', true, 0, 200, 0)
-  await enumAttr(databases, c, 'status', ['draft', 'collecting', 'ready_for_acceptance', 'accepted', 'scheduled', 'in_progress', 'completed', 'cancelled'], true, 'draft')
+  await intAttr(databases, c, 'minimumAcceptedBookings', false, 1, 100, 10)
+  await intAttr(databases, c, 'maximumRequiredBookings', false, 1, 200, 15)
+  await intAttr(databases, c, 'acceptedBookingCount', false, 0, 200, 0)
+  await enumAttr(databases, c, 'status', ['draft', 'collecting', 'ready_for_acceptance', 'accepted', 'scheduled', 'in_progress', 'completed', 'cancelled'], false, 'draft')
   await stringAttr(databases, c, 'workOrderIds', 128, false, undefined, true)
   await boolAttr(databases, c, 'travelApprovalRequired', false, false)
   await floatAttr(databases, c, 'approvedExpensesExGst', false, 0)
@@ -439,7 +617,7 @@ async function createOpenInspectionPlans(databases) {
   await datetimeAttr(databases, c, 'weekCommencing', true)
   await datetimeAttr(databases, c, 'cutoffAt', false)
   await datetimeAttr(databases, c, 'submittedAt', false)
-  await enumAttr(databases, c, 'status', ['draft', 'submitted', 'active', 'completed', 'cancelled'], true, 'draft')
+  await enumAttr(databases, c, 'status', ['draft', 'submitted', 'active', 'completed', 'cancelled'], false, 'draft')
   await boolAttr(databases, c, 'routeOptimised', false, false)
   await stringAttr(databases, c, 'routeNotes', 2000, false)
   await stringAttr(databases, c, 'createdBy', 128, false)
@@ -453,12 +631,13 @@ async function createOpenInspectionItems(databases) {
   await stringAttr(databases, c, 'planId', 128, true)
   await stringAttr(databases, c, 'workOrderId', 128, true)
   await stringAttr(databases, c, 'propertyAddress', 300, true)
+  await stringAttr(databases, c, 'propertyCity', 120, false)
   await stringAttr(databases, c, 'propertySuburb', 120, false)
   await stringAttr(databases, c, 'propertyPostcode', 16, false)
   await datetimeAttr(databases, c, 'scheduledStart', false)
   await datetimeAttr(databases, c, 'scheduledEnd', false)
   const statusEnum = ['planned', 'scheduled', 'attended', 'cancelled', 'leased', 'no_access', 'changed']
-  await enumAttr(databases, c, 'status', statusEnum, true, 'planned')
+  await enumAttr(databases, c, 'status', statusEnum, false, 'planned')
   await boolAttr(databases, c, 'leased', false, false)
   await boolAttr(databases, c, 'cancelled', false, false)
   await boolAttr(databases, c, 'addedLate', false, false)
@@ -481,12 +660,12 @@ async function createInvoiceLines(databases) {
   await stringAttr(databases, c, 'propertyAddress', 300, false)
   await stringAttr(databases, c, 'region', 64, false)
   await stringAttr(databases, c, 'pricingClassification', 64, false)
-  await intAttr(databases, c, 'quantity', true, 1, 1000, 1)
+  await intAttr(databases, c, 'quantity', false, 1, 1000, 1)
   await floatAttr(databases, c, 'unitPriceExGst', true, 0)
   await floatAttr(databases, c, 'subtotalExGst', true, 0)
   await floatAttr(databases, c, 'gstAmount', true, 0)
   await floatAttr(databases, c, 'totalIncGst', true, 0)
-  await enumAttr(databases, c, 'lineStatus', ['pending', 'invoiced', 'paid', 'cancelled', 'disputed'], true, 'pending')
+  await enumAttr(databases, c, 'lineStatus', ['pending', 'invoiced', 'paid', 'cancelled', 'disputed'], false, 'pending')
   await stringAttr(databases, c, 'invoiceBatchId', 128, false)
   await datetimeAttr(databases, c, 'paymentCycleDate', false)
   await datetimeAttr(databases, c, 'exportedAt', false)
@@ -514,6 +693,46 @@ async function createAuditLogs(databases) {
   await index(databases, c, 'entity_idx', 'key', ['entityType', 'entityId'])
   await index(databases, c, 'action_idx', 'key', ['action'])
   await index(databases, c, 'createdAt_idx', 'key', ['createdAt'])
+}
+
+async function createStorageBuckets(storage) {
+  await ensureBucket(
+    storage,
+    BUCKETS.propertyImages,
+    'Property Images',
+    [
+      Permission.read(Role.any()),
+      Permission.create(Role.users()),
+      Permission.update(Role.team(getStaffTeamId())),
+      Permission.delete(Role.team(getStaffTeamId())),
+      Permission.create(Role.team(getAdminTeamId())),
+      Permission.update(Role.team(getAdminTeamId())),
+      Permission.delete(Role.team(getAdminTeamId())),
+    ],
+    {
+      maximumFileSize: 20 * 1024 * 1024,
+      allowedFileExtensions: ['jpg', 'jpeg', 'png', 'webp'],
+    },
+  )
+
+  await ensureBucket(
+    storage,
+    BUCKETS.reports,
+    'Reports',
+    [
+      Permission.read(Role.team(getAdminTeamId())),
+      Permission.create(Role.team(getAdminTeamId())),
+      Permission.update(Role.team(getAdminTeamId())),
+      Permission.delete(Role.team(getAdminTeamId())),
+      Permission.read(Role.team(getStaffTeamId())),
+      Permission.create(Role.team(getStaffTeamId())),
+      Permission.update(Role.team(getStaffTeamId())),
+    ],
+    {
+      maximumFileSize: 50 * 1024 * 1024,
+      allowedFileExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'webp'],
+    },
+  )
 }
 
 async function seedServices(databases) {
@@ -547,12 +766,12 @@ async function main() {
   // Check for either prefixed or unprefixed required variables
   const endpoint = process.env.VITE_APPWRITE_ENDPOINT || process.env.APPWRITE_ENDPOINT
   const projectId = process.env.VITE_APPWRITE_PROJECT_ID || process.env.APPWRITE_PROJECT_ID
-  const apiKey = process.env.VITE_APPWRITE_API_KEY || process.env.APPWRITE_API_KEY
+  const apiKey = process.env.APPWRITE_API_KEY
   const databaseId = process.env.VITE_APPWRITE_DATABASE_ID || process.env.APPWRITE_DATABASE_ID
 
   if (!endpoint) throw new Error('Missing APPWRITE_ENDPOINT or VITE_APPWRITE_ENDPOINT')
   if (!projectId) throw new Error('Missing APPWRITE_PROJECT_ID or VITE_APPWRITE_PROJECT_ID')
-  if (!apiKey) throw new Error('Missing APPWRITE_API_KEY or VITE_APPWRITE_API_KEY')
+  if (!apiKey) throw new Error('Missing APPWRITE_API_KEY')
   if (!databaseId) throw new Error('Missing APPWRITE_DATABASE_ID or VITE_APPWRITE_DATABASE_ID')
 
   const client = new Client()
@@ -561,12 +780,19 @@ async function main() {
     .setKey(apiKey)
 
   const databases = new Databases(client)
+  const storage = new Storage(client)
 
   await createUsers(databases)
   await createClients(databases)
   await createServices(databases)
+  await createClientPricing(databases)
   await createLeads(databases)
   await createBookings(databases)
+  await createProperties(databases)
+  await createOpenInspections(databases)
+  await createInspectionCheckIns(databases)
+  await createPayments(databases)
+  await createSubscriptions(databases)
   await createAuditLogs(databases)
   await createServiceAreas(databases)
   await createRateCards(databases)
@@ -578,6 +804,7 @@ async function main() {
   await createOpenInspectionPlans(databases)
   await createOpenInspectionItems(databases)
   await createInvoiceLines(databases)
+  await createStorageBuckets(storage)
   await seedServices(databases)
 
   console.log('Appwrite staging schema baseline complete.')

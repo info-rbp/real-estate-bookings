@@ -1,0 +1,63 @@
+{
+  "projectId": "69ff55980009b1cd7dbe",
+  "projectName": "Rent On Time",
+  "endpoint": "https://syd.cloud.appwrite.io/v1",
+  "functions": [
+    {
+      "$id": "profile-update",
+      "name": "Profile Update",
+      "runtime": "node-22",
+      "path": "appwrite-functions/profile-update",
+      "entrypoint": "src/main.js",
+      "commands": "npm install",
+      "timeout": 15,
+      "execute": ["users"],
+      "events": [],
+      "schedule": "",
+      "enabled": true,
+      "logging": true
+    },
+    {
+      "$id": "create-work-order",
+      "name": "Create Work Order",
+      "runtime": "node-22",
+      "path": "appwrite-functions/create-work-order",
+      "entrypoint": "src/main.js",
+      "commands": "npm install",
+      "timeout": 30,
+      "execute": ["users"],
+      "events": [],
+      "schedule": "",
+      "enabled": true,
+      "logging": true
+    },
+    {
+      "$id": "fetch-calendar-availability",
+      "name": "Fetch Calendar Availability",
+      "runtime": "node-22",
+      "path": "appwrite-functions/fetch-calendar-availability",
+      "entrypoint": "src/main.js",
+      "commands": "npm install",
+      "timeout": 30,
+      "execute": ["users"],
+      "events": [],
+      "schedule": "",
+      "enabled": true,
+      "logging": true
+    },
+    {
+      "$id": "generate-invoice-lines",
+      "name": "Generate Invoice Lines",
+      "runtime": "node-22",
+      "path": "appwrite-functions/generate-invoice-lines",
+      "entrypoint": "src/main.js",
+      "commands": "npm install",
+      "timeout": 30,
+      "execute": ["users"],
+      "events": [],
+      "schedule": "",
+      "enabled": true,
+      "logging": true
+    }
+  ]
+}
