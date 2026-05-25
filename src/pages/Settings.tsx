@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { User, Shield, Bell, Wallet, Camera, Lock, CalendarSync } from 'lucide-react'
+import { User, Shield, Bell, Wallet, Camera, Lock, CalendarSync, KeyRound, Receipt, Monitor } from 'lucide-react'
 import PaymentForm from '../components/Payment'
 
 const tabs = [
@@ -117,7 +117,7 @@ export default function Settings() {
             </div>
           )}
 
-          {(activeTab === 'security' || activeTab === 'billing') && (
+          {activeTab === 'security' && (
             <div className="grid grid-cols-2 gap-6">
               <div className="bg-white rounded-xl soft-saas-shadow p-6">
                 <div className="flex items-center gap-3 mb-4">
@@ -137,11 +137,47 @@ export default function Settings() {
               </div>
               <div className="bg-white rounded-xl soft-saas-shadow p-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-tertiary-fixed rounded-lg"><CalendarSync size={18} className="text-tertiary" /></div>
-                  <h4 className="text-sm font-semibold">Google Calendar</h4>
+                  <div className="p-2 bg-tertiary-fixed rounded-lg"><KeyRound size={18} className="text-tertiary" /></div>
+                  <h4 className="text-sm font-semibold">Password Security</h4>
                 </div>
-                <p className="text-sm text-on-surface-variant mb-6">Sync all your ProInspect appointments automatically.</p>
-                <button className="w-full border border-outline-variant py-2 rounded-lg text-sm font-semibold hover:bg-surface-container-low transition-colors">Sync Account</button>
+                <p className="text-sm text-on-surface-variant mb-6">Password changes are handled through your account authentication provider.</p>
+                <button className="w-full border border-outline-variant py-2 rounded-lg text-sm font-semibold text-on-surface-variant cursor-not-allowed" disabled>Manage Password</button>
+              </div>
+              <div className="bg-white rounded-xl soft-saas-shadow p-6 col-span-2">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-primary-container rounded-lg"><Monitor size={18} className="text-on-primary-container" /></div>
+                  <h4 className="text-sm font-semibold">Account Sessions</h4>
+                </div>
+                <p className="text-sm text-on-surface-variant">Session review and device management will appear here when backend session controls are available.</p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'billing' && (
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-white rounded-xl soft-saas-shadow p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-secondary-container rounded-lg"><Wallet size={18} className="text-on-secondary-container" /></div>
+                  <h4 className="text-sm font-semibold">Billing Account</h4>
+                </div>
+                <p className="text-sm text-on-surface-variant mb-6">Plan, billing owner, and account status details will appear here once billing is connected.</p>
+                <button className="w-full border border-outline-variant py-2 rounded-lg text-sm font-semibold text-on-surface-variant cursor-not-allowed" disabled>Manage Billing</button>
+              </div>
+              <div className="bg-white rounded-xl soft-saas-shadow p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-primary-container rounded-lg"><Receipt size={18} className="text-on-primary-container" /></div>
+                  <h4 className="text-sm font-semibold">Invoice Delivery</h4>
+                </div>
+                <p className="text-sm text-on-surface-variant mb-6">Invoice recipients and delivery preferences will be configurable after billing support is enabled.</p>
+                <button className="w-full border border-outline-variant py-2 rounded-lg text-sm font-semibold text-on-surface-variant cursor-not-allowed" disabled>Configure Invoices</button>
+              </div>
+              <div className="bg-white rounded-xl soft-saas-shadow p-6 col-span-2">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-tertiary-fixed rounded-lg"><CalendarSync size={18} className="text-tertiary" /></div>
+                  <h4 className="text-sm font-semibold">Google Calendar Sync</h4>
+                </div>
+                <p className="text-sm text-on-surface-variant mb-6">Calendar sync is not connected yet. Configure the Appwrite/Google Calendar function before enabling appointment sync.</p>
+                <button className="border border-outline-variant px-4 py-2 rounded-lg text-sm font-semibold text-on-surface-variant cursor-not-allowed" disabled>Sync Account</button>
               </div>
             </div>
           )}
