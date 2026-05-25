@@ -1,4 +1,5 @@
 {
+  "name": "proinspect",
   "type": "module",
   "scripts": {
     "dev": "vite",
