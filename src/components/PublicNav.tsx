@@ -11,9 +11,7 @@ export default function PublicNav() {
     { to: '/services', label: 'Services' },
     { to: '/pricing', label: 'Pricing' },
     { to: '/about', label: 'About' },
-    { to: '/subscription', label: 'Subscription' },
-    { to: '/engage-us', label: 'Engage Us' },
-    { to: '/properties', label: 'Properties' },
+    { to: '/engage-us', label: 'Contact / Request Access' },
   ]
 
   return (
@@ -35,8 +33,8 @@ export default function PublicNav() {
           ) : (
             <>
               <Link to="/login" className="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors">Login</Link>
-              <Link to="/login" className="bg-primary text-on-primary px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">
-                Get Started
+              <Link to="/engage-us" className="bg-primary text-on-primary px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">
+                Request Access
               </Link>
             </>
           )}
@@ -49,14 +47,17 @@ export default function PublicNav() {
         <div className="md:hidden border-t border-outline-variant bg-surface-container-lowest px-6 py-4 space-y-3">
           {navLinks.map(link => (
             <Link key={link.label} to={link.to} className="block text-base text-on-surface-variant" onClick={() => setMobileOpen(false)}>
-                {link.label}
+              {link.label}
             </Link>
           ))}
           <div className="pt-4 mt-2 border-t border-outline-variant/50">
-             {user ? (
+            {user ? (
               <Link to="/dashboard" className="block text-base text-primary font-semibold" onClick={() => setMobileOpen(false)}>Dashboard</Link>
             ) : (
-              <Link to="/login" className="block text-base text-primary font-semibold" onClick={() => setMobileOpen(false)}>Login / Sign Up</Link>
+              <div className="space-y-3">
+                <Link to="/login" className="block text-base text-on-surface-variant" onClick={() => setMobileOpen(false)}>Login</Link>
+                <Link to="/engage-us" className="block text-base text-primary font-semibold" onClick={() => setMobileOpen(false)}>Request Access</Link>
+              </div>
             )}
           </div>
         </div>
