@@ -52,17 +52,11 @@ export default function AdminInvoices() {
       await functions.createExecution(
         appwriteConfig.generateInvoiceLinesFunctionId,
         JSON.stringify(payload),
-      if (!profile?.clientId) {
-        throw new Error('Missing client context. Please refresh and try again.')
-      }
-      // TODO(security): Invoice generation must remain server-authoritative in Appwrite Functions.
-      await functions.createExecution(
-        appwriteConfig.generateInvoiceLinesFunctionId,
-        JSON.stringify({ clientId: profile.clientId }),
         false,
         '/',
         ExecutionMethod.POST
       )
+
       await fetchInvoiceLines()
     } catch (err: any) {
       setError(err.message)
