@@ -44,9 +44,9 @@ module.exports = async ({ req, res, log, error }) => {
 
   const databases = new Databases(client);
   const databaseId = process.env.APPWRITE_DATABASE_ID;
-  const workOrdersCollectionId = 'bookings';
-  const invoiceLinesCollectionId = 'invoiceLines';
-  const auditLogsCollectionId = 'auditLogs';
+  const workOrdersCollectionId = process.env.APPWRITE_BOOKINGS_COLLECTION_ID || process.env.VITE_APPWRITE_BOOKINGS_COLLECTION_ID || 'bookings';
+  const invoiceLinesCollectionId = process.env.APPWRITE_INVOICE_LINES_COLLECTION_ID || process.env.VITE_APPWRITE_INVOICE_LINES_COLLECTION_ID || 'invoiceLines';
+  const auditLogsCollectionId = process.env.APPWRITE_AUDIT_LOGS_COLLECTION_ID || process.env.VITE_APPWRITE_AUDIT_LOGS_COLLECTION_ID || 'auditLogs';
 
   if (req.method !== 'POST') {
     return res.json({ error: 'Method not allowed' }, 405);
@@ -54,7 +54,11 @@ module.exports = async ({ req, res, log, error }) => {
 
   try {
     const body = parseBody(req.body);
-    const scope = body.scope === 'client' ? 'client' : 'all';
+    if (!['all', 'client'].includes(body.scope)) {
+      return res.json({ error: 'scope must be "all" or "client"' }, 400);
+    }
+
+    const scope = body.scope;
     const paymentCycleDate = resolvePaymentCycleDate(body.paymentCycleDate);
 
     const clientId = typeof body.clientId === 'string' ? body.clientId.trim() : '';
@@ -103,7 +107,7 @@ module.exports = async ({ req, res, log, error }) => {
           subtotalExGst: wo.totalPriceExGst,
           gstAmount: wo.gstAmount,
           totalIncGst: wo.totalPriceIncGst,
-          lineStatus: 'generated',
+          lineStatus: 'pending',
           paymentCycleDate: paymentCycleDate.toISOString(),
           createdAt: now.toISOString()
         }

@@ -1,89 +1,60 @@
-const { Client, Databases, Query } = require('node-appwrite');
-const { pickSafeProfileUpdates, validateSafeProfileUpdates } = require('./safe-fields.js');
+import { Client, Databases } from 'node-appwrite'
 
-function header(req, name) {
-  return req.headers?.[name] || req.headers?.[name.toLowerCase()] || req.headers?.[name.toUpperCase()]
-}
+const editableFields = [
+  'full_name',
+  'phone',
+  'timezone',
+  'email_notifications',
+  'sms_notifications',
+  'avatar_url'
+]
 
-function requiredEnv(name) {
-  const value = process.env[name]
-  if (!value) throw new Error(`Missing ${name}`)
-  return value
-}
-
-function parseJsonBody(req) {
-  if (!req.body) return {}
-  if (typeof req.body === 'object') return req.body
+export default async ({ req, res, log, error }) => {
   try {
-    return JSON.parse(req.body)
-  } catch (e) {
-    return {}
-  }
-}
+    const endpoint = process.env.APPWRITE_ENDPOINT || process.env.APPWRITE_FUNCTION_API_ENDPOINT
+    const projectId = process.env.APPWRITE_PROJECT_ID || process.env.APPWRITE_FUNCTION_PROJECT_ID
+    const apiKey = process.env.APPWRITE_API_KEY
+    const databaseId = process.env.APPWRITE_DATABASE_ID
+    const usersCollectionId = process.env.USERS_COLLECTION_ID || 'users'
 
-async function getProfileDocument(databases, databaseId, usersCollectionId, appwriteUserId) {
-  try {
-    return await databases.getDocument(databaseId, usersCollectionId, appwriteUserId)
-  } catch {
-    const response = await databases.listDocuments(databaseId, usersCollectionId, [
-      Query.equal('appwriteUserId', appwriteUserId),
-      Query.limit(1),
-    ])
+    if (!endpoint || !projectId || !apiKey || !databaseId) {
+      return res.json({ error: 'Profile update function is not configured.' }, 500)
+    }
 
-    return response.documents[0] || null
-  }
-}
+    const userId = req.headers['x-appwrite-user-id']
 
-async function writeAuditLog(databases, databaseId, auditLogsCollectionId, actorId, safeUpdates, deniedFields) {
-  if (!auditLogsCollectionId) return
+    if (!userId) {
+      return res.json({ error: 'Not authenticated.' }, 401)
+    }
 
-  try {
-    await databases.createDocument(databaseId, auditLogsCollectionId, 'unique()', {
-      actorId,
-      actorRole: 'self',
-      clientId: null,
-      action: 'profile.update.self',
-      entityType: 'users',
-      entityId: actorId,
-      metadata: JSON.stringify({ updatedFields: Object.keys(safeUpdates), deniedFields }),
-      createdAt: new Date().toISOString(),
-    })
-  } catch (auditError) {
-    console.warn('profile-update audit log failed', auditError)
-  }
-}
+    const body = req.bodyJson || JSON.parse(req.body || '{}')
+    const safeUpdate = {}
 
-module.exports = async function ({ req, res, log, error }) {
-  try {
-    const appwriteUserId = header(req, 'x-appwrite-user-id')
-    if (!appwriteUserId) return res.json({ error: 'Authentication required.' }, 401)
+    for (const key of editableFields) {
+      if (Object.prototype.hasOwnProperty.call(body, key)) {
+        safeUpdate[key] = body[key]
+      }
+    }
 
-    const databaseId = requiredEnv('APPWRITE_DATABASE_ID')
-    const usersCollectionId = requiredEnv('APPWRITE_USERS_COLLECTION_ID')
-    const auditLogsCollectionId = process.env.APPWRITE_AUDIT_LOGS_COLLECTION_ID
-
-    const { safe, denied } = pickSafeProfileUpdates(parseJsonBody(req))
-    if (denied.length > 0) log(`Denied profile fields for ${appwriteUserId}: ${denied.join(', ')}`)
-    if (Object.keys(safe).length === 0) return res.json({ error: 'No safe profile fields were provided.' }, 400)
-
-    const validationError = validateSafeProfileUpdates(safe)
-    if (validationError) return res.json({ error: validationError }, 400)
+    safeUpdate.updatedAt = new Date().toISOString()
 
     const client = new Client()
-      .setEndpoint(requiredEnv('APPWRITE_ENDPOINT'))
-      .setProject(requiredEnv('APPWRITE_PROJECT_ID'))
-      .setKey(requiredEnv('APPWRITE_API_KEY'))
+      .setEndpoint(endpoint)
+      .setProject(projectId)
+      .setKey(apiKey)
 
     const databases = new Databases(client)
-    const existingProfile = await getProfileDocument(databases, databaseId, usersCollectionId, appwriteUserId)
-    if (!existingProfile) return res.json({ error: 'Profile not found.' }, 404)
 
-    const profile = await databases.updateDocument(databaseId, usersCollectionId, existingProfile.$id, safe)
-    await writeAuditLog(databases, databaseId, auditLogsCollectionId, appwriteUserId, safe, denied)
+    const profile = await databases.updateDocument(
+      databaseId,
+      usersCollectionId,
+      userId,
+      safeUpdate
+    )
 
-    return res.json({ profile }, 200)
+    return res.json({ profile })
   } catch (err) {
-    error(err instanceof Error ? err.message : String(err))
-    return res.json({ error: 'Unable to update profile.' }, 500)
+    error(err.message)
+    return res.json({ error: err.message }, 500)
   }
 }

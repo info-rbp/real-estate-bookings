@@ -7,8 +7,10 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "appwrite:provision:staging": "node scripts/provision-appwrite-staging.mjs",
+    "appwrite:provision:local": "node --env-file=.env.local scripts/provision-appwrite-staging.mjs",
     "deploy": "wrangler deploy --assets=./dist --name rbp-real-estate",
-    "check:env": "node scripts/check-required-env.mjs"
+    "check:env": "node scripts/check-required-env.mjs",
+    "check:env:local": "node --env-file=.env.local scripts/check-required-env.mjs"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^6.4.0",

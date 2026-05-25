@@ -1,5 +1,17 @@
 const { Client, Databases, ID, Query } = require('node-appwrite');
 
+function env(primary, fallback) {
+  return process.env[primary] || (fallback ? process.env[fallback] : undefined);
+}
+
+function parseBody(body) {
+  try {
+    return JSON.parse(body || '{}');
+  } catch {
+    return null;
+  }
+}
+
 module.exports = async ({ req, res, log, error }) => {
   const client = new Client()
     .setEndpoint(process.env.APPWRITE_FUNCTION_ENDPOINT)
@@ -9,13 +21,13 @@ module.exports = async ({ req, res, log, error }) => {
   const databases = new Databases(client);
 
   const databaseId = process.env.APPWRITE_DATABASE_ID;
-  const usersCollectionId = process.env.VITE_APPWRITE_USERS_COLLECTION_ID;
-  const bookingsCollectionId = process.env.VITE_APPWRITE_BOOKINGS_COLLECTION_ID;
-  const auditLogsCollectionId = process.env.VITE_APPWRITE_AUDIT_LOGS_COLLECTION_ID;
-  const contactsCollectionId = process.env.VITE_APPWRITE_WORK_ORDER_CONTACTS_COLLECTION_ID;
-  const statusHistoryCollectionId = process.env.VITE_APPWRITE_WORK_ORDER_STATUS_HISTORY_COLLECTION_ID;
-  const rateCardItemsCollectionId = process.env.VITE_APPWRITE_RATE_CARD_ITEMS_COLLECTION_ID;
-  const rateCardsCollectionId = process.env.VITE_APPWRITE_RATE_CARDS_COLLECTION_ID;
+  const usersCollectionId = env('APPWRITE_USERS_COLLECTION_ID', 'VITE_APPWRITE_USERS_COLLECTION_ID');
+  const bookingsCollectionId = env('APPWRITE_BOOKINGS_COLLECTION_ID', 'VITE_APPWRITE_BOOKINGS_COLLECTION_ID');
+  const auditLogsCollectionId = env('APPWRITE_AUDIT_LOGS_COLLECTION_ID', 'VITE_APPWRITE_AUDIT_LOGS_COLLECTION_ID');
+  const contactsCollectionId = env('APPWRITE_WORK_ORDER_CONTACTS_COLLECTION_ID', 'VITE_APPWRITE_WORK_ORDER_CONTACTS_COLLECTION_ID');
+  const statusHistoryCollectionId = env('APPWRITE_WORK_ORDER_STATUS_HISTORY_COLLECTION_ID', 'VITE_APPWRITE_WORK_ORDER_STATUS_HISTORY_COLLECTION_ID');
+  const rateCardItemsCollectionId = env('APPWRITE_RATE_CARD_ITEMS_COLLECTION_ID', 'VITE_APPWRITE_RATE_CARD_ITEMS_COLLECTION_ID');
+  const rateCardsCollectionId = env('APPWRITE_RATE_CARDS_COLLECTION_ID', 'VITE_APPWRITE_RATE_CARDS_COLLECTION_ID');
 
   // 1. Authenticate user
   const userId = req.headers['x-appwrite-user-id'];
@@ -44,7 +56,11 @@ module.exports = async ({ req, res, log, error }) => {
   }
 
   // 3. Validate payload
-  const payload = JSON.parse(req.body);
+  const payload = parseBody(req.body);
+  if (!payload) {
+    return res.json({ error: 'INVALID_JSON' }, 400);
+  }
+
   const requiredFields = ['serviceId', 'propertyAddress', 'propertyPostcode', 'hasLegalAuthority', 'pricingClassification'];
   for (const field of requiredFields) {
     if (!payload[field]) {

@@ -1,5 +1,10 @@
-# Appwrite frontend build-time configuration.
-# These VITE_* values are public and are baked into the Vite bundle at build time.
+# Cloudflare Build Variables
+
+Set these as Cloudflare production build variables before running `npm run build`. Vite bakes `VITE_*` values into the browser bundle at build time, so Worker runtime secrets alone will not configure Appwrite in the frontend.
+
+Do not add `APPWRITE_API_KEY`, Stripe secret keys, or webhook secrets to frontend build variables.
+
+```sh
 VITE_APPWRITE_ENDPOINT=https://syd.cloud.appwrite.io/v1
 VITE_APPWRITE_PROJECT_ID=69ff55980009b1cd7dbe
 VITE_APPWRITE_DATABASE_ID=6a05bbdb00081175d56c
@@ -37,7 +42,6 @@ VITE_APPWRITE_FUNCTION_FETCH_CALENDAR_AVAILABILITY_ID=fetch-calendar-availabilit
 VITE_APPWRITE_FUNCTION_GENERATE_INVOICE_LINES_ID=generate-invoice-lines
 VITE_APPWRITE_FUNCTION_STRIPE_CHECKOUT_ID=stripe-checkout
 VITE_APPWRITE_FUNCTION_STRIPE_WEBHOOK_ID=stripe-webhook
+```
 
-# Public Stripe browser key only. Do not put Stripe secret keys here.
-VITE_STRIPE_PUBLISHABLE_KEY=
-PUBLIC_SITE_URL=https://real-estate.remotebusinesspartner.com.au
+After setting or changing these values, trigger a fresh production build and deploy.
