@@ -5,6 +5,11 @@ import { Query } from 'appwrite';
 
 export const GST_RATE = 0.10;
 
+function toValidPrice(value: unknown): number | null {
+  const price = Number(value);
+  return Number.isFinite(price) && price >= 0 ? price : null;
+}
+
 export async function calculateWorkOrderPricing(input: {
   clientId: string;
   serviceType: RentOnTimeServiceType;
@@ -45,34 +50,57 @@ export async function calculateWorkOrderPricing(input: {
 
   if (!requiresQuote) {
     try {
-      // 1. Try to find client-specific rate card first (simplified for MVP: just use a default ProInspect rate card if client card not found)
-      // For this implementation, we'll look for a rate card item that matches the service and classification.
-      // In a full implementation, we'd resolve the RateCardId for the client first.
+      let clientPriceApplied = false;
 
-      const response = await databases.listDocuments(
-        appwriteConfig.databaseId!,
-        appwriteConfig.rateCardItemsCollectionId!,
-        [
-          Query.equal('serviceType', input.serviceType),
-          Query.equal('pricingClassification', input.pricingClassification),
-          Query.equal('active', true),
-          Query.limit(1)
-        ]
-      );
+      if (appwriteConfig.clientPricingCollectionId && input.clientId && input.serviceType) {
+        const clientPricingResponse = await databases.listDocuments(
+          appwriteConfig.databaseId!,
+          appwriteConfig.clientPricingCollectionId,
+          [
+            Query.equal('clientId', input.clientId),
+            Query.equal('serviceId', input.serviceType),
+            Query.equal('status', 'active'),
+            Query.limit(1)
+          ]
+        );
 
-      if (response.documents.length > 0) {
-        const item = response.documents[0];
-        basePriceExGst = item.priceExGst;
-        if (item.requiresQuote) {
+        if (clientPricingResponse.documents.length > 0) {
+          const clientPricing = clientPricingResponse.documents[0];
+          const customPriceExGst = toValidPrice(clientPricing.customPriceExGst);
+          if (customPriceExGst !== null) {
+            basePriceExGst = customPriceExGst;
+            clientPriceApplied = true;
+            pricingNotes.push('Premium client pricing applied.');
+          }
+        }
+      }
+
+      if (!clientPriceApplied) {
+        const response = await databases.listDocuments(
+          appwriteConfig.databaseId!,
+          appwriteConfig.rateCardItemsCollectionId!,
+          [
+            Query.equal('serviceType', input.serviceType),
+            Query.equal('pricingClassification', input.pricingClassification),
+            Query.equal('active', true),
+            Query.limit(1)
+          ]
+        );
+
+        if (response.documents.length > 0) {
+          const item = response.documents[0];
+          basePriceExGst = item.priceExGst;
+          if (item.requiresQuote) {
+            requiresQuote = true;
+            pricingNotes.push('Service item is marked as quote required.');
+          }
+          if (item.includedUnlessOtherwiseAgreed && basePriceExGst === 0) {
+            pricingNotes.push('Service is included in base agreement.');
+          }
+        } else {
           requiresQuote = true;
-          pricingNotes.push('Service item is marked as quote required.');
+          pricingNotes.push('No rate card found for this service and region.');
         }
-        if (item.includedUnlessOtherwiseAgreed && basePriceExGst === 0) {
-          pricingNotes.push('Service is included in base agreement.');
-        }
-      } else {
-        requiresQuote = true;
-        pricingNotes.push('No rate card found for this service and region.');
       }
     } catch (error) {
       console.error('Error fetching rate card:', error);
