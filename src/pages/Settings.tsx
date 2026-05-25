@@ -13,6 +13,7 @@ const tabs = [
 
 export default function Settings() {
   const { profile, updateProfile } = useAuth()
+  const stripeConfigured = Boolean(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
   const [activeTab, setActiveTab] = useState('profile')
   const [fullName, setFullName] = useState(profile?.full_name || '')
   const [email, setEmail] = useState(profile?.email || '')
@@ -174,12 +175,18 @@ export default function Settings() {
             </div>
           )}
 
-        {activeTab === 'payments' && (
+          {activeTab === 'payments' && (
             <div className="bg-white rounded-xl soft-saas-shadow p-6">
               <h3 className="text-lg font-semibold text-on-surface border-b border-outline-variant pb-4 mb-6">Payment Methods</h3>
-              <PaymentForm />
-              </div>
-        )}
+              {stripeConfigured ? (
+                <PaymentForm />
+              ) : (
+                <p className="text-sm text-on-surface-variant">
+                  Payments are not configured yet. Add VITE_STRIPE_PUBLISHABLE_KEY and the Stripe checkout function before enabling card payments.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
