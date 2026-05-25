@@ -11,6 +11,8 @@ export default function AdminInvoices() {
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState('')
+  const [paymentCycleDate, setPaymentCycleDate] = useState(() => new Date().toISOString().split('T')[0])
+  const [clientFilterId, setClientFilterId] = useState('')
 
   useEffect(() => {
     fetchInvoiceLines()
@@ -41,6 +43,15 @@ export default function AdminInvoices() {
       if (!appwriteConfig.generateInvoiceLinesFunctionId) {
         throw new Error('Invoice line generation is not configured. Contact support.')
       }
+      const trimmedClientId = clientFilterId.trim()
+      const payload = trimmedClientId
+        ? { scope: 'client', clientId: trimmedClientId, paymentCycleDate }
+        : { scope: 'all', paymentCycleDate }
+
+      // TODO(security): Invoice generation must remain server-authoritative in Appwrite Functions.
+      await functions.createExecution(
+        appwriteConfig.generateInvoiceLinesFunctionId,
+        JSON.stringify(payload),
       if (!profile?.clientId) {
         throw new Error('Missing client context. Please refresh and try again.')
       }
@@ -96,10 +107,29 @@ export default function AdminInvoices() {
           <h1 className="text-3xl font-display font-medium text-on-surface">Invoice Management</h1>
           <p className="text-on-surface-variant">Generate invoice lines and export CSV for payments.</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-col md:flex-row gap-4 md:items-end">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Payment cycle date</label>
+            <input
+              type="date"
+              value={paymentCycleDate}
+              onChange={e => setPaymentCycleDate(e.target.value)}
+              className="terris-input min-w-[180px]"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Client ID (optional)</label>
+            <input
+              type="text"
+              placeholder="Leave blank for all eligible clients"
+              value={clientFilterId}
+              onChange={e => setClientFilterId(e.target.value)}
+              className="terris-input min-w-[260px]"
+            />
+          </div>
           <button
             onClick={handleGenerateLines}
-            disabled={generating}
+            disabled={generating || !paymentCycleDate}
             className="terris-btn-primary flex items-center gap-2"
           >
             <Check size={18} />
@@ -115,6 +145,8 @@ export default function AdminInvoices() {
           </button>
         </div>
       </div>
+
+      <p className="text-sm text-on-surface-variant">Leave Client ID blank to generate invoice lines for all eligible clients for the selected payment cycle date.</p>
 
       {error && (
         <div className="p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl flex items-center gap-3">
