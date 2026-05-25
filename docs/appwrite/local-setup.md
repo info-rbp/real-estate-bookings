@@ -79,6 +79,13 @@ Additional frontend IDs reserved for later deployment:
 
 Each function directory contains its own README with environment variables and payload contracts. Server-side function secrets must be configured in Appwrite Function settings, not as frontend `VITE_*` variables.
 
+The `create-work-order` function also needs the service-specific booking side-collection IDs:
+
+```sh
+BOOKING_SERVICE_DETAILS_COLLECTION_ID=bookingServiceDetails
+BOOKING_PROPERTIES_COLLECTION_ID=bookingProperties
+```
+
 ## Web platforms
 
 The Appwrite project must include these Web platforms:

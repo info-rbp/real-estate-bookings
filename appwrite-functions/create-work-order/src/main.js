@@ -31,6 +31,33 @@ module.exports = async ({ req, res, log, error }) => {
   const statusHistoryCollectionId = env('WORK_ORDER_STATUS_HISTORY_COLLECTION_ID', 'APPWRITE_WORK_ORDER_STATUS_HISTORY_COLLECTION_ID', 'VITE_APPWRITE_WORK_ORDER_STATUS_HISTORY_COLLECTION_ID');
   const rateCardItemsCollectionId = env('RATE_CARD_ITEMS_COLLECTION_ID', 'APPWRITE_RATE_CARD_ITEMS_COLLECTION_ID', 'VITE_APPWRITE_RATE_CARD_ITEMS_COLLECTION_ID');
   const rateCardsCollectionId = env('RATE_CARDS_COLLECTION_ID', 'APPWRITE_RATE_CARDS_COLLECTION_ID', 'VITE_APPWRITE_RATE_CARDS_COLLECTION_ID');
+  const bookingServiceDetailsCollectionId = env('BOOKING_SERVICE_DETAILS_COLLECTION_ID', 'APPWRITE_BOOKING_SERVICE_DETAILS_COLLECTION_ID', 'VITE_APPWRITE_BOOKING_SERVICE_DETAILS_COLLECTION_ID');
+  const bookingPropertiesCollectionId = env('BOOKING_PROPERTIES_COLLECTION_ID', 'APPWRITE_BOOKING_PROPERTIES_COLLECTION_ID', 'VITE_APPWRITE_BOOKING_PROPERTIES_COLLECTION_ID');
+
+  async function getCollectionInfo(collectionId) {
+    const attributes = await databases.listAttributes(databaseId, collectionId);
+    const statusAttribute = attributes.attributes.find((attribute) => attribute.key === 'status');
+    return {
+      attributes: new Set(attributes.attributes.map((attribute) => attribute.key)),
+      statusValues: statusAttribute?.elements || [],
+    };
+  }
+
+  function pickSchemaSafe(data, attributes) {
+    const safe = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== undefined && value !== null && attributes.has(key)) safe[key] = value;
+    }
+    return safe;
+  }
+
+  function validStatus(preferred, statusValues, fallback = 'pending_acceptance') {
+    if (statusValues.includes(preferred)) return preferred;
+    if (statusValues.includes(fallback)) return fallback;
+    if (statusValues.includes('submitted')) return 'submitted';
+    if (statusValues.includes('pending')) return 'pending';
+    return statusValues[0] || fallback;
+  }
 
   // 1. Authenticate user
   const userId = req.headers['x-appwrite-user-id'];
@@ -71,6 +98,23 @@ module.exports = async ({ req, res, log, error }) => {
     }
   }
 
+  if (payload.calendarRequired && (!payload.calendarEventStart || !payload.calendarEventEnd) && payload.submitForReviewDueToNoCalendarSlots !== true) {
+    return res.json({ error: 'VALIDATION_FAILED', fields: { calendarEventStart: 'Calendar slot is required for this service' } }, 400);
+  }
+
+  if (payload.serviceType === 'open_for_inspection') {
+    if (!Array.isArray(payload.ofiProperties) || payload.ofiProperties.length < 1 || payload.ofiProperties.length > 10) {
+      return res.json({ error: 'VALIDATION_FAILED', fields: { ofiProperties: 'Open For Inspection requires 1 to 10 properties' } }, 400);
+    }
+    for (const [index, property] of payload.ofiProperties.entries()) {
+      for (const field of ['propertyAddress', 'propertySuburb', 'propertyPostcode', 'accessMethod', 'accessInstructions']) {
+        if (!property[field]) {
+          return res.json({ error: 'VALIDATION_FAILED', fields: { [`ofiProperties.${index}.${field}`]: 'Field is required' } }, 400);
+        }
+      }
+    }
+  }
+
   // 4. Server-side Pricing Calculation
   let basePriceExGst = 0;
   let requiresQuote = payload.outsideServiceArea || payload.pricingClassification === 'outside_service_area';
@@ -108,6 +152,21 @@ module.exports = async ({ req, res, log, error }) => {
   const totalPriceExGst = basePriceExGst;
   const totalPriceIncGst = basePriceExGst + gstAmount;
 
+  let bookingsInfo;
+  try {
+    bookingsInfo = await getCollectionInfo(bookingsCollectionId);
+  } catch (err) {
+    error('Error inspecting bookings collection: ' + err.message);
+    return res.json({ error: 'INTERNAL_ERROR', message: err.message }, 500);
+  }
+
+  let status = requiresQuote ? 'quote_required' : 'pending_acceptance';
+  if (payload.serviceType === 'open_for_inspection') status = 'pending_scheduling';
+  if (payload.pricingClassification === 'outside_service_area') status = 'quote_required';
+  if (payload.serviceType === 'maintenance_requests' && ['urgent', 'emergency'].includes(payload.bookingServiceDetails?.urgencyLevel)) status = 'pending_acceptance';
+  if (payload.serviceType === 'insurance_claims_management' && (payload.bookingServiceDetails?.quoteRequired || payload.bookingServiceDetails?.scopeIncomplete)) status = 'quote_required';
+  status = validStatus(status, bookingsInfo.statusValues);
+
   // 5. Generate Work Order Number
   const date = new Date();
   const yearMonth = date.getFullYear().toString() + (date.getMonth() + 1).toString().padStart(2, '0');
@@ -117,7 +176,7 @@ module.exports = async ({ req, res, log, error }) => {
   // 6. Create Work Order
   let workOrder;
   try {
-    workOrder = await databases.createDocument(databaseId, bookingsCollectionId, ID.unique(), {
+    const bookingDocument = pickSchemaSafe({
       workOrderNumber,
       appwriteUserId: userId,
       clientId: profile.clientId,
@@ -134,14 +193,21 @@ module.exports = async ({ req, res, log, error }) => {
       requestedAttendanceDate: payload.requestedAttendanceDate,
       requestedAttendanceWindowStart: payload.requestedAttendanceWindowStart,
       requestedAttendanceWindowEnd: payload.requestedAttendanceWindowEnd,
-      status: requiresQuote ? 'quote_required' : 'pending_acceptance',
-      hasLegalAuthority: true,
-      authorityConfirmedBy: profile.full_name,
+      scheduledStart: payload.calendarEventStart,
+      scheduledEnd: payload.calendarEventEnd,
+      durationMinutes: payload.durationMinutes || undefined,
+      status,
+      hasLegalAuthority: Boolean(payload.hasLegalAuthority),
+      authorityConfirmedBy: payload.authorityConfirmedBy || profile.full_name,
       authorityConfirmedAt: new Date().toISOString(),
       basePriceExGst,
+      travelSurchargeExGst: 0,
       totalPriceExGst,
       totalPriceIncGst,
       gstAmount,
+      requiresQuote,
+      urgentFlag: Boolean(payload.bookingServiceDetails?.urgencyLevel === 'urgent' || payload.bookingServiceDetails?.urgencyLevel === 'emergency'),
+      notes: payload.bookerNotes,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       // Capture all other fields from payload if they exist in schema
@@ -165,10 +231,59 @@ module.exports = async ({ req, res, log, error }) => {
       specificQuestionsRequired: payload.specificQuestionsRequired,
       reportingRequirements: payload.reportingRequirements,
       timingRestrictions: payload.timingRestrictions
-    });
+    }, bookingsInfo.attributes);
+
+    workOrder = await databases.createDocument(databaseId, bookingsCollectionId, ID.unique(), bookingDocument);
   } catch (err) {
     error('Error creating work order: ' + err.message);
     return res.json({ error: 'INTERNAL_ERROR', message: err.message }, 500);
+  }
+
+  if (bookingServiceDetailsCollectionId && payload.bookingServiceDetails && typeof payload.bookingServiceDetails === 'object') {
+    try {
+      const info = await getCollectionInfo(bookingServiceDetailsCollectionId);
+      await databases.createDocument(databaseId, bookingServiceDetailsCollectionId, ID.unique(), pickSchemaSafe({
+        bookingId: workOrder.$id,
+        serviceType: payload.serviceType,
+        detailsJson: JSON.stringify(payload.bookingServiceDetails),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }, info.attributes));
+    } catch (e) {
+      error('Error creating booking service details: ' + e.message);
+    }
+  }
+
+  if (bookingPropertiesCollectionId && payload.serviceType === 'open_for_inspection') {
+    try {
+      const info = await getCollectionInfo(bookingPropertiesCollectionId);
+      for (const [index, property] of payload.ofiProperties.entries()) {
+        await databases.createDocument(databaseId, bookingPropertiesCollectionId, ID.unique(), pickSchemaSafe({
+          bookingId: workOrder.$id,
+          sequence: index + 1,
+          propertyAddress: property.propertyAddress,
+          propertySuburb: property.propertySuburb,
+          propertyPostcode: property.propertyPostcode,
+          listingUrl: property.listingUrl,
+          preferredOpenDate: property.preferredOpenDate,
+          preferredOpenStartTime: property.preferredOpenStartTime,
+          preferredOpenDurationMinutes: property.preferredOpenDurationMinutes,
+          accessMethod: property.accessMethod,
+          accessInstructions: property.accessInstructions,
+          lockboxCode: property.lockboxCode,
+          keyCollectionDetails: property.keyCollectionDetails,
+          parkingDetails: property.parkingDetails,
+          tenantOccupied: property.tenantOccupied,
+          tenantContactName: property.tenantContactName,
+          tenantContactPhone: property.tenantContactPhone,
+          notes: property.notes,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }, info.attributes));
+      }
+    } catch (e) {
+      error('Error creating booking property rows: ' + e.message);
+    }
   }
 
   // 7. Create Contacts
@@ -187,26 +302,36 @@ module.exports = async ({ req, res, log, error }) => {
   }
 
   // 8. Audit Log & Status History
-  await databases.createDocument(databaseId, statusHistoryCollectionId, ID.unique(), {
-    workOrderId: workOrder.$id,
-    fromStatus: 'draft',
-    toStatus: workOrder.status,
-    actorId: userId,
-    actorRole: profile.role,
-    reason: 'Initial submission',
-    createdAt: new Date().toISOString()
-  });
+  try {
+    const statusHistoryInfo = await getCollectionInfo(statusHistoryCollectionId);
+    await databases.createDocument(databaseId, statusHistoryCollectionId, ID.unique(), pickSchemaSafe({
+      workOrderId: workOrder.$id,
+      fromStatus: 'draft',
+      toStatus: workOrder.status,
+      actorId: userId,
+      actorRole: profile.role,
+      reason: 'Initial submission',
+      createdAt: new Date().toISOString()
+    }, statusHistoryInfo.attributes));
+  } catch (e) {
+    error('Error creating status history: ' + e.message);
+  }
 
-  await databases.createDocument(databaseId, auditLogsCollectionId, ID.unique(), {
-    actorId: userId,
-    actorRole: profile.role,
-    clientId: profile.clientId,
-    action: 'CREATE_WORK_ORDER',
-    entityType: 'workOrder',
-    entityId: workOrder.$id,
-    metadata: JSON.stringify({ workOrderNumber }),
-    createdAt: new Date().toISOString()
-  });
+  try {
+    const auditInfo = await getCollectionInfo(auditLogsCollectionId);
+    await databases.createDocument(databaseId, auditLogsCollectionId, ID.unique(), pickSchemaSafe({
+      actorId: userId,
+      actorRole: profile.role,
+      clientId: profile.clientId,
+      action: 'CREATE_WORK_ORDER',
+      entityType: 'workOrder',
+      entityId: workOrder.$id,
+      metadata: JSON.stringify({ workOrderNumber }),
+      createdAt: new Date().toISOString()
+    }, auditInfo.attributes));
+  } catch (e) {
+    error('Error creating audit log: ' + e.message);
+  }
 
   return res.json(workOrder);
 };

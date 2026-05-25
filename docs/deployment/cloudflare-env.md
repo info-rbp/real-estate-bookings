@@ -14,6 +14,8 @@ VITE_APPWRITE_CLIENTS_COLLECTION_ID=clients
 VITE_APPWRITE_SERVICES_COLLECTION_ID=services
 VITE_APPWRITE_CLIENT_PRICING_COLLECTION_ID=clientPricing
 VITE_APPWRITE_BOOKINGS_COLLECTION_ID=bookings
+VITE_APPWRITE_BOOKING_SERVICE_DETAILS_COLLECTION_ID=bookingServiceDetails
+VITE_APPWRITE_BOOKING_PROPERTIES_COLLECTION_ID=bookingProperties
 VITE_APPWRITE_PROPERTIES_COLLECTION_ID=properties
 VITE_APPWRITE_LEADS_COLLECTION_ID=leads
 VITE_APPWRITE_OPEN_INSPECTIONS_COLLECTION_ID=openInspections
@@ -45,3 +47,10 @@ VITE_APPWRITE_FUNCTION_STRIPE_WEBHOOK_ID=stripe-webhook
 ```
 
 After setting or changing these values, trigger a fresh production build and deploy.
+
+Configure these as Appwrite Function variables on `create-work-order`, not as frontend secrets:
+
+```sh
+BOOKING_SERVICE_DETAILS_COLLECTION_ID=bookingServiceDetails
+BOOKING_PROPERTIES_COLLECTION_ID=bookingProperties
+```

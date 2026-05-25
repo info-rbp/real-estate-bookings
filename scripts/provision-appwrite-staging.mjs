@@ -8,6 +8,8 @@ const COLLECTIONS = {
   clientPricing: process.env.VITE_APPWRITE_CLIENT_PRICING_COLLECTION_ID || process.env.APPWRITE_CLIENT_PRICING_COLLECTION_ID || 'clientPricing',
   leads: process.env.VITE_APPWRITE_LEADS_COLLECTION_ID || process.env.APPWRITE_LEADS_COLLECTION_ID || 'leads',
   bookings: process.env.VITE_APPWRITE_BOOKINGS_COLLECTION_ID || process.env.APPWRITE_BOOKINGS_COLLECTION_ID || 'bookings',
+  bookingServiceDetails: process.env.VITE_APPWRITE_BOOKING_SERVICE_DETAILS_COLLECTION_ID || process.env.APPWRITE_BOOKING_SERVICE_DETAILS_COLLECTION_ID || 'bookingServiceDetails',
+  bookingProperties: process.env.VITE_APPWRITE_BOOKING_PROPERTIES_COLLECTION_ID || process.env.APPWRITE_BOOKING_PROPERTIES_COLLECTION_ID || 'bookingProperties',
   properties: process.env.VITE_APPWRITE_PROPERTIES_COLLECTION_ID || process.env.APPWRITE_PROPERTIES_COLLECTION_ID || 'properties',
   openInspections: process.env.VITE_APPWRITE_OPEN_INSPECTIONS_COLLECTION_ID || process.env.APPWRITE_OPEN_INSPECTIONS_COLLECTION_ID || 'openInspections',
   inspectionCheckIns: process.env.VITE_APPWRITE_INSPECTION_CHECK_INS_COLLECTION_ID || process.env.APPWRITE_INSPECTION_CHECK_INS_COLLECTION_ID || 'inspectionCheckIns',
@@ -383,6 +385,47 @@ async function createBookings(databases) {
   await index(databases, c, 'invoiceBatchId_idx', 'key', ['invoiceBatchId'])
 }
 
+async function createBookingServiceDetails(databases) {
+  const c = COLLECTIONS.bookingServiceDetails
+  await ensureCollection(databases, c, 'Booking Service Details', collectionPermissions({ staffRead: true, userOwned: true }))
+  await stringAttr(databases, c, 'bookingId', 128, true)
+  await stringAttr(databases, c, 'serviceType', 64, true)
+  await stringAttr(databases, c, 'detailsJson', 20000, true)
+  await datetimeAttr(databases, c, 'createdAt', false)
+  await datetimeAttr(databases, c, 'updatedAt', false)
+  await index(databases, c, 'bookingId_idx', 'key', ['bookingId'])
+  await index(databases, c, 'serviceType_idx', 'key', ['serviceType'])
+}
+
+async function createBookingProperties(databases) {
+  const c = COLLECTIONS.bookingProperties
+  await ensureCollection(databases, c, 'Booking Properties', collectionPermissions({ staffRead: true, userOwned: true }))
+  await stringAttr(databases, c, 'bookingId', 128, true)
+  await intAttr(databases, c, 'sequence', true)
+  await stringAttr(databases, c, 'propertyAddress', 300, true)
+  await stringAttr(databases, c, 'propertySuburb', 120, true)
+  await stringAttr(databases, c, 'propertyPostcode', 16, true)
+  await stringAttr(databases, c, 'listingUrl', 2048, false)
+  await datetimeAttr(databases, c, 'preferredOpenDate', false)
+  await stringAttr(databases, c, 'preferredOpenStartTime', 10, false)
+  await intAttr(databases, c, 'preferredOpenDurationMinutes', false)
+  await stringAttr(databases, c, 'accessMethod', 64, true)
+  await stringAttr(databases, c, 'accessInstructions', 2000, true)
+  await stringAttr(databases, c, 'lockboxCode', 64, false)
+  await stringAttr(databases, c, 'keyCollectionDetails', 500, false)
+  await stringAttr(databases, c, 'parkingDetails', 200, false)
+  await boolAttr(databases, c, 'tenantOccupied', false)
+  await stringAttr(databases, c, 'tenantContactName', 160, false)
+  await stringAttr(databases, c, 'tenantContactPhone', 40, false)
+  await stringAttr(databases, c, 'notes', 2000, false)
+  await datetimeAttr(databases, c, 'createdAt', false)
+  await datetimeAttr(databases, c, 'updatedAt', false)
+  await index(databases, c, 'bookingId_idx', 'key', ['bookingId'])
+  await index(databases, c, 'sequence_idx', 'key', ['sequence'])
+  await index(databases, c, 'propertySuburb_idx', 'key', ['propertySuburb'])
+  await index(databases, c, 'propertyPostcode_idx', 'key', ['propertyPostcode'])
+}
+
 async function createProperties(databases) {
   const c = COLLECTIONS.properties
   await ensureCollection(databases, c, 'Properties', collectionPermissions({ publicRead: true, staffRead: true }))
@@ -738,6 +781,13 @@ async function createStorageBuckets(storage) {
 async function seedServices(databases) {
   const c = COLLECTIONS.services
   const services = [
+    ['property_condition_report', 'Property Condition Report', 'Inspections', 'Detailed property condition report with configured template and upload destination.', 220, 90, 10],
+    ['routine_inspection', 'Routine Inspection', 'Inspections', 'Standard routine inspection with tenant notice and owner focus areas.', 165, 30, 20],
+    ['exit_inspection', 'Exit Inspection', 'Inspections', 'Exit inspection with vacate, keys, cleaning, damage, garden, and bond notes.', 220, 60, 30],
+    ['open_for_inspection', 'Open For Inspection', 'Leasing', 'Batch open-for-inspection attendance with attendee capture and admin route scheduling.', 145, 60, 40],
+    ['insurance_claims_management', 'Insurance Claims Management', 'Claims', 'Insurance claim attendance, photo, observation, stakeholder, and document coordination.', 0, 60, 50],
+    ['maintenance_requests', 'Maintenance Requests', 'Maintenance', 'Maintenance attendance coordination with approval, contractor, access, and urgency details.', 0, 60, 60],
+    ['key_installation', 'Key Installation', 'Access', 'Key collection and lockbox or key-safe installation with photo confirmation.', 120, 60, 70],
     ['routine-inspection', 'Routine Inspection', 'Inspections', 'Standard property inspection and condition notes.', 165, 60, 10],
     ['final-bond-inspection', 'Final Bond Inspection', 'Inspections', 'Exit inspection and supporting condition report.', 220, 90, 20],
     ['open-home-attendance', 'Open Home Attendance', 'Leasing', 'Staffed open home attendance and attendee follow-up notes.', 145, 60, 30],
@@ -788,6 +838,8 @@ async function main() {
   await createClientPricing(databases)
   await createLeads(databases)
   await createBookings(databases)
+  await createBookingServiceDetails(databases)
+  await createBookingProperties(databases)
   await createProperties(databases)
   await createOpenInspections(databases)
   await createInspectionCheckIns(databases)

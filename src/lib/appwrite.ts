@@ -12,6 +12,8 @@ export const appwriteConfig = {
   servicesCollectionId: import.meta.env.VITE_APPWRITE_SERVICES_COLLECTION_ID,
   clientPricingCollectionId: import.meta.env.VITE_APPWRITE_CLIENT_PRICING_COLLECTION_ID,
   bookingsCollectionId: import.meta.env.VITE_APPWRITE_BOOKINGS_COLLECTION_ID,
+  bookingServiceDetailsCollectionId: import.meta.env.VITE_APPWRITE_BOOKING_SERVICE_DETAILS_COLLECTION_ID,
+  bookingPropertiesCollectionId: import.meta.env.VITE_APPWRITE_BOOKING_PROPERTIES_COLLECTION_ID,
   propertiesCollectionId: import.meta.env.VITE_APPWRITE_PROPERTIES_COLLECTION_ID,
   leadsCollectionId: import.meta.env.VITE_APPWRITE_LEADS_COLLECTION_ID,
   openInspectionsCollectionId: import.meta.env.VITE_APPWRITE_OPEN_INSPECTIONS_COLLECTION_ID,
