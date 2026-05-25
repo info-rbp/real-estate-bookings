@@ -112,6 +112,14 @@ function parseProfileExecutionResponse(responseBody?: string): AppProfile | null
   }
 }
 
+function getAuthErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message.includes('Creation of a session is prohibited when a session is active')) {
+    return 'An existing login session was found. Please refresh and try again.'
+  }
+
+  return error instanceof Error ? error.message : fallback
+}
+
 async function fetchProfile(user: Models.User<Models.Preferences>): Promise<AppProfile | null> {
   if (!appwriteConfig.databaseId || !appwriteConfig.usersCollectionId) {
     return null
@@ -154,6 +162,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const nextProfile = (await fetchProfile(user)) || getProfileDefaults(user)
     setProfile(nextProfile)
     return nextProfile
+  }
+
+  async function clearExistingSession() {
+    if (!isAppwriteConfigured) {
+      return
+    }
+
+    try {
+      await account.get()
+      await account.deleteSession('current')
+    } catch {
+      // No active session or session already invalid. Ignore.
+    }
+
+    setUser(null)
+    setProfile(null)
   }
 
   useEffect(() => {
@@ -204,6 +228,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
+      await clearExistingSession()
+
       const userId = ID.unique()
       await account.create(
         userId,
@@ -255,7 +281,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return { error: null, profile: nextProfile }
     } catch (error) {
-      return { error: error instanceof Error ? error.message : 'Unable to create your account right now.' }
+      return { error: getAuthErrorMessage(error, 'Unable to create your account right now.') }
     }
   }
 
@@ -265,6 +291,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
+      await clearExistingSession()
       await account.createEmailPasswordSession(email, password)
       const currentUser = await account.get()
       const currentProfile = (await fetchProfile(currentUser)) || getProfileDefaults(currentUser)
@@ -274,7 +301,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return { error: null, profile: currentProfile }
     } catch (error) {
-      return { error: error instanceof Error ? error.message : 'Unable to sign you in right now.' }
+      return { error: getAuthErrorMessage(error, 'Unable to sign you in right now.') }
     }
   }
 
