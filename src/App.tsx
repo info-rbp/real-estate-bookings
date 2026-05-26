@@ -13,7 +13,6 @@ import BookingDetail from './pages/BookingDetail'
 import Settings from './pages/Settings'
 import BookService from './pages/BookService'
 import DashboardLayout from './components/DashboardNav'
-import Subscription from './pages/Subscription'
 import EngageUs from './pages/EngageUs'
 import Properties from './pages/Properties'
 import { AdminLogin } from './pages/AdminLogin'
@@ -72,7 +71,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/subscription',
-    element: <Subscription />,
+    element: <Navigate to="/pricing#subscription" replace />,
   },
   {
     path: '/engage-us',
@@ -80,15 +79,15 @@ const router = createBrowserRouter([
   },
   {
     path: '/properties',
-    element: <Properties />,
+    element: <Navigate to="/" replace />,
   },
   {
     path: '/properties/:id',
-    element: <PropertyDetail />,
+    element: <Navigate to="/" replace />,
   },
   {
     path: '/book/inspection/:propertyId',
-    element: <InspectionBooking />,
+    element: <Navigate to="/" replace />,
   },
   {
     path: '/terms',
