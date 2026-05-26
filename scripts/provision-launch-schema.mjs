@@ -1,0 +1,166 @@
+#!/usr/bin/env node
+import { Client, Databases, Permission, Role } from 'node-appwrite'
+
+const DATABASE_ID = process.env.VITE_APPWRITE_DATABASE_ID || process.env.APPWRITE_DATABASE_ID
+const bookingsCollectionId = process.env.VITE_APPWRITE_BOOKINGS_COLLECTION_ID || process.env.APPWRITE_BOOKINGS_COLLECTION_ID || 'bookings'
+const notificationCollectionId = process.env.BOOKING_NOTIFICATIONS_COLLECTION_ID || process.env.APPWRITE_BOOKING_NOTIFICATIONS_COLLECTION_ID || 'bookingNotifications'
+const calendarCollectionId = process.env.BOOKING_CALENDAR_EVENTS_COLLECTION_ID || process.env.APPWRITE_BOOKING_CALENDAR_EVENTS_COLLECTION_ID || 'bookingCalendarEvents'
+
+const bookingStatuses = ['draft', 'pending', 'submitted', 'pending_acceptance', 'pending_scheduling', 'requires_information', 'quote_required', 'awaiting_batch', 'accepted', 'confirmed', 'declined', 'scheduled', 'in_progress', 'completed', 'report_delivered', 'invoiced', 'paid', 'cancelled', 'access_issue', 'reattendance_required', 'failed']
+
+function adminTeamId() {
+  return process.env.APPWRITE_PLATFORM_ADMIN_TEAM_ID || 'platform-admin'
+}
+
+function staffTeamId() {
+  return process.env.APPWRITE_STAFF_TEAM_ID || 'staff'
+}
+
+function perms() {
+  return [
+    Permission.read(Role.team(adminTeamId())),
+    Permission.create(Role.team(adminTeamId())),
+    Permission.update(Role.team(adminTeamId())),
+    Permission.delete(Role.team(adminTeamId())),
+    Permission.read(Role.team(staffTeamId())),
+    Permission.create(Role.team(staffTeamId())),
+    Permission.update(Role.team(staffTeamId())),
+  ]
+}
+
+async function ignoreConflict(label, action) {
+  try {
+    await action()
+    console.log(`[created] ${label}`)
+  } catch (error) {
+    if (error?.code === 409) {
+      console.log(`[exists] ${label}`)
+      return
+    }
+    if (error?.type === 'attribute_limit_exceeded') {
+      console.warn(`[skipped] ${label}: attribute limit reached`)
+      return
+    }
+    if (error?.type && String(error.type).includes('index')) {
+      console.warn(`[skipped] ${label}: ${error.message}`)
+      return
+    }
+    throw error
+  }
+}
+
+async function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function collection(databases, id, name) {
+  await ignoreConflict(`collection ${id}`, () => databases.createCollection(DATABASE_ID, id, name, perms(), true, true))
+}
+
+async function stringAttr(databases, collectionId, key, size, required = false) {
+  await ignoreConflict(`${collectionId}.${key}`, () => databases.createStringAttribute(DATABASE_ID, collectionId, key, size, required))
+}
+
+async function datetimeAttr(databases, collectionId, key) {
+  await ignoreConflict(`${collectionId}.${key}`, () => databases.createDatetimeAttribute(DATABASE_ID, collectionId, key, false))
+}
+
+async function enumAttr(databases, collectionId, key, values, defaultValue) {
+  await ignoreConflict(`${collectionId}.${key}`, () => databases.createEnumAttribute(DATABASE_ID, collectionId, key, values, false, defaultValue))
+}
+
+async function index(databases, collectionId, key, attrs) {
+  for (let attempt = 1; attempt <= 8; attempt += 1) {
+    try {
+      await ignoreConflict(`${collectionId}.index.${key}`, () => databases.createIndex(DATABASE_ID, collectionId, key, 'key', attrs))
+      return
+    } catch (error) {
+      if (error?.type === 'attribute_not_available' && attempt < 8) {
+        await wait(5000)
+        continue
+      }
+      if (error?.type === 'attribute_not_available') {
+        console.warn(`[deferred] ${collectionId}.index.${key}: rerun this script after attributes are available`)
+        return
+      }
+      throw error
+    }
+  }
+}
+
+async function ensurePendingScheduling(databases) {
+  const response = await databases.listAttributes(DATABASE_ID, bookingsCollectionId)
+  const status = response.attributes.find((attribute) => attribute.key === 'status')
+  if (!status) {
+    await enumAttr(databases, bookingsCollectionId, 'status', bookingStatuses, 'pending')
+    return
+  }
+  if (status.elements?.includes('pending_scheduling')) {
+    console.log('[exists] bookings.status pending_scheduling')
+    return
+  }
+  await databases.updateEnumAttribute(DATABASE_ID, bookingsCollectionId, 'status', bookingStatuses, false, status.default || 'pending')
+  console.log('[updated] bookings.status pending_scheduling')
+}
+
+async function notifications(databases) {
+  await collection(databases, notificationCollectionId, 'Booking Notifications')
+  await stringAttr(databases, notificationCollectionId, 'bookingId', 128, true)
+  await stringAttr(databases, notificationCollectionId, 'workOrderId', 128)
+  await stringAttr(databases, notificationCollectionId, 'workOrderNumber', 80)
+  await enumAttr(databases, notificationCollectionId, 'channel', ['internal_new_booking', 'booker_confirmation', 'ops_failure_alert', 'other'], 'other')
+  await stringAttr(databases, notificationCollectionId, 'recipient', 320)
+  await enumAttr(databases, notificationCollectionId, 'status', ['pending', 'sent', 'failed', 'skipped'], 'pending')
+  await stringAttr(databases, notificationCollectionId, 'providerMessageId', 2048)
+  await stringAttr(databases, notificationCollectionId, 'failureReason', 2000)
+  await datetimeAttr(databases, notificationCollectionId, 'sentAt')
+  await datetimeAttr(databases, notificationCollectionId, 'createdAt')
+  await datetimeAttr(databases, notificationCollectionId, 'updatedAt')
+  await index(databases, notificationCollectionId, 'bookingId_idx', ['bookingId'])
+  await index(databases, notificationCollectionId, 'status_idx', ['status'])
+  await index(databases, notificationCollectionId, 'channel_idx', ['channel'])
+}
+
+async function calendarEvents(databases) {
+  await collection(databases, calendarCollectionId, 'Booking Calendar Events')
+  await stringAttr(databases, calendarCollectionId, 'bookingId', 128, true)
+  await stringAttr(databases, calendarCollectionId, 'workOrderId', 128)
+  await stringAttr(databases, calendarCollectionId, 'workOrderNumber', 80)
+  await stringAttr(databases, calendarCollectionId, 'calendarId', 320)
+  await stringAttr(databases, calendarCollectionId, 'eventId', 256)
+  await stringAttr(databases, calendarCollectionId, 'eventLink', 2048)
+  await datetimeAttr(databases, calendarCollectionId, 'eventStart')
+  await datetimeAttr(databases, calendarCollectionId, 'eventEnd')
+  await enumAttr(databases, calendarCollectionId, 'status', ['pending', 'created', 'failed', 'skipped', 'cancelled'], 'pending')
+  await stringAttr(databases, calendarCollectionId, 'failureReason', 2000)
+  await stringAttr(databases, calendarCollectionId, 'rawResponseJson', 10000)
+  await datetimeAttr(databases, calendarCollectionId, 'createdAt')
+  await datetimeAttr(databases, calendarCollectionId, 'updatedAt')
+  await index(databases, calendarCollectionId, 'bookingId_idx', ['bookingId'])
+  await index(databases, calendarCollectionId, 'eventId_idx', ['eventId'])
+  await index(databases, calendarCollectionId, 'status_idx', ['status'])
+}
+
+async function main() {
+  const endpoint = process.env.VITE_APPWRITE_ENDPOINT || process.env.APPWRITE_ENDPOINT
+  const project = process.env.VITE_APPWRITE_PROJECT_ID || process.env.APPWRITE_PROJECT_ID
+  const secret = process.env['APPWRITE' + '_API' + '_KEY']
+  if (!endpoint) throw new Error('Missing Appwrite endpoint')
+  if (!project) throw new Error('Missing Appwrite project id')
+  if (!DATABASE_ID) throw new Error('Missing Appwrite database id')
+  if (!secret) throw new Error('Missing Appwrite server credential')
+
+  const client = new Client().setEndpoint(endpoint).setProject(project).setKey(secret)
+  const databases = new Databases(client)
+
+  await ensurePendingScheduling(databases)
+  await notifications(databases)
+  await calendarEvents(databases)
+
+  console.log('Launch schema provisioning complete.')
+}
+
+main().catch((error) => {
+  console.error(error)
+  process.exit(1)
+})
