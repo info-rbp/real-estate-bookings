@@ -101,6 +101,8 @@ export default function BookService() {
   const config = selectedService ? getServiceBookingConfig(selectedService.id) : null
   const flowSteps = useMemo(() => (config ? (['service', ...config.steps] as Array<'service' | BookingStepId>) : (['service'] as Array<'service' | BookingStepId>)), [config])
   const activeStep = flowSteps[currentStep]
+  const missingCalendarSlot = Boolean(config?.calendarRequired && (!state.calendarEventStart || !state.calendarEventEnd))
+  const hasCalendarFallbackNotes = Boolean(missingCalendarSlot && state.bookerNotes.trim())
 
   useEffect(() => {
     listActiveServices().then(setServices).catch((err) => setError(err.message))
@@ -165,8 +167,8 @@ export default function BookService() {
       })
     }
 
-    if (config.calendarRequired && (!state.calendarEventStart || !state.calendarEventEnd)) {
-      errors.push('Select a calendar slot, or submit only after availability fallback notes are added.')
+    if (missingCalendarSlot && !hasCalendarFallbackNotes) {
+      errors.push('Select a calendar slot, or add timing notes so this can be submitted for scheduling review.')
     }
 
     return errors
@@ -180,7 +182,7 @@ export default function BookService() {
       property: ['propertyAddress', 'propertySuburb', 'propertyPostcode', 'propertyType'],
       access: ['accessMethod', 'accessInstructions'],
       contacts: config.requiredFields.filter((field) => field.startsWith('primaryContact')),
-      calendar_booking: config.calendarRequired ? ['calendarEventStart', 'calendarEventEnd'] : [],
+      calendar_booking: [],
       ofi_batch_details: ['preferredInspectionDate', 'bookingContactName', 'bookingContactPhone', 'bookingContactEmail'],
       ofi_properties: [],
       key_collection: ['keyCollectionAddress', 'keyCollectionSuburb', 'keyCollectionPostcode', 'keyCollectionContactName', 'keyCollectionContactPhone', 'keyCollectionContactEmail', 'keyCollectionInstructions'],
@@ -211,7 +213,7 @@ export default function BookService() {
     setError('')
 
     const isOfi = config.serviceType === 'open_for_inspection'
-    const submitForReviewDueToNoCalendarSlots = Boolean(config.calendarRequired && !state.calendarEventStart && state.bookerNotes)
+    const submitForReviewDueToNoCalendarSlots = Boolean(missingCalendarSlot && state.bookerNotes.trim())
     const bookingServiceDetails = {
       ...details,
       bookerNotes: state.bookerNotes,
@@ -280,7 +282,7 @@ export default function BookService() {
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div>
             <h1 className="text-4xl font-display font-medium text-on-surface mb-2">Select a Service</h1>
-            <p className="text-on-surface-variant">Choose the Rent On Time service you wish to request.</p>
+            <p className="text-on-surface-variant">Choose the ProInspect service you wish to request.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {services.filter((service) => isSupportedBookingServiceType(service.id)).map((service) => (
@@ -300,15 +302,15 @@ export default function BookService() {
 
     if (!config || !selectedService) return null
     const title = stepLabels[activeStep as BookingStepId]
-    const notice = config.adminSchedulingRequired ? <div className="p-4 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm">This service is submitted for admin scheduling review. No Google Calendar slot is selected at submission.</div> : config.calendarRequired ? <div className="p-4 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm">This service needs a confirmed calendar slot before submission unless no slots are available and timing notes are supplied.</div> : config.calendarRecommended ? <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">Calendar booking is recommended. Preferred timing notes can be submitted for review.</div> : undefined
+    const notice = config.adminSchedulingRequired ? <div className="p-4 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm">This service is submitted for admin scheduling review. No Google Calendar slot is selected at submission.</div> : config.calendarRequired ? <div className="p-4 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm">Select a confirmed calendar slot. If no slots are available, continue and add timing notes so the request can be submitted for scheduling review.</div> : config.calendarRecommended ? <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">Calendar booking is recommended. Preferred timing notes can be submitted for review.</div> : undefined
 
     if (activeStep === 'property') return <BookingStepShell title={title} description="Where should we attend?" notice={notice}><PropertyDetailsStep state={state} update={update} /></BookingStepShell>
     if (activeStep === 'access' || activeStep === 'access_safety') return <BookingStepShell title={title} description="How should we access the property safely?" notice={notice}><AccessDetailsStep state={state} update={update} details={details} updateDetails={updateDetails} /></BookingStepShell>
     if (activeStep === 'contacts') return <BookingStepShell title={title} description="Who should we coordinate with?"><ContactsStep contacts={state.contacts} onChange={(contacts) => update('contacts', contacts)} /></BookingStepShell>
-    if (activeStep === 'calendar_booking') return <BookingStepShell title={title} description="Choose an available appointment slot." notice={notice}><CalendarBookingStep serviceType={config.serviceType} durationMinutes={config.durationMinutes} calendarRequired={config.calendarRequired} calendarRecommended={config.calendarRecommended} state={state} update={update} /></BookingStepShell>
+    if (activeStep === 'calendar_booking') return <BookingStepShell title={title} description="Choose an available appointment slot, or continue to add timing notes for review." notice={notice}><CalendarBookingStep serviceType={config.serviceType} durationMinutes={config.durationMinutes} calendarRequired={config.calendarRequired} calendarRecommended={config.calendarRecommended} state={state} update={update} /></BookingStepShell>
     if (activeStep === 'scheduling') return <BookingStepShell title={title} description="Add preferred timing for admin review." notice={notice}><PreferredScheduling details={details} updateDetails={updateDetails} /></BookingStepShell>
-    if (activeStep === 'notes') return <BookingStepShell title={title} description="Add anything else the team should know."><NotesStep label={config.notesLabel} value={state.bookerNotes} onChange={(value) => update('bookerNotes', value)} /></BookingStepShell>
-    if (activeStep === 'review') return <BookingStepShell title="Review & Submit" description="Please confirm the details below."><ReviewStep service={selectedService} config={config} state={state} details={details} ofiProperties={ofiProperties} errors={validationErrors} onAuthorityChange={(confirmed) => update('hasLegalAuthority', confirmed)} />{error && <div className="p-4 bg-red-50 border border-red-200 text-red-800 text-sm rounded-lg">{error}</div>}</BookingStepShell>
+    if (activeStep === 'notes') return <BookingStepShell title={title} description={missingCalendarSlot ? 'No calendar slot selected. Add preferred timing notes so ProInspect can review scheduling.' : 'Add anything else the team should know.'}><NotesStep label={missingCalendarSlot ? 'Preferred timing notes / no-slot fallback details' : config.notesLabel} value={state.bookerNotes} onChange={(value) => update('bookerNotes', value)} /></BookingStepShell>
+    if (activeStep === 'review') return <BookingStepShell title="Review & Submit" description="Please confirm the details below.">{missingCalendarSlot && hasCalendarFallbackNotes && <div className="p-4 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm">This request will be submitted for scheduling review because no confirmed calendar slot has been selected.</div>}<ReviewStep service={selectedService} config={config} state={state} details={details} ofiProperties={ofiProperties} errors={validationErrors} onAuthorityChange={(confirmed) => update('hasLegalAuthority', confirmed)} />{error && <div className="p-4 bg-red-50 border border-red-200 text-red-800 text-sm rounded-lg">{error}</div>}</BookingStepShell>
     if (activeStep === 'ofi_batch_details') return <BookingStepShell title={title} description="Set batch-level OFI instructions." notice={notice}><OpenForInspectionBatchStep details={details} updateDetails={updateDetails} /></BookingStepShell>
     if (activeStep === 'ofi_properties') return <BookingStepShell title={title} description="Add each OFI property in this batch." notice={notice}><OpenForInspectionPropertiesStep properties={ofiProperties} onChange={setOfiProperties} /></BookingStepShell>
 
@@ -323,7 +325,7 @@ export default function BookService() {
           <h2 className="text-3xl font-display font-medium text-on-surface mb-3">Work Order Submitted</h2>
           <p className="text-lg text-on-surface-variant mb-2">Work Order Number: <span className="font-bold text-primary">{confirmedWO.workOrderNumber}</span></p>
           <div className="mb-8"><StatusBadge status={confirmedWO.status} /></div>
-          <p className="text-on-surface-variant mb-8 max-w-md mx-auto">{confirmedWO.status === 'quote_required' ? 'An admin will review the details and provide a quote shortly.' : 'Your request has been received for acceptance and scheduling.'}</p>
+          <p className="text-on-surface-variant mb-8 max-w-md mx-auto">{confirmedWO.status === 'quote_required' ? 'An admin will review the details and provide a quote shortly.' : confirmedWO.status === 'pending_scheduling' ? 'Your request has been received for scheduling review.' : 'Your request has been received for acceptance and scheduling.'}</p>
           <div className="flex gap-4 justify-center">
             <button onClick={() => navigate('/dashboard/bookings')} className="terris-btn-primary">View My Work Orders</button>
             <button onClick={() => navigate('/dashboard')} className="terris-btn-outline">Dashboard</button>
@@ -380,7 +382,7 @@ export default function BookService() {
                 </div>
               ) : <div className="text-sm text-on-surface-variant italic">Select a service to see pricing.</div>}
             </div>
-            {config && <div className="bg-primary p-6 rounded-lg text-on-primary"><div className="flex items-center gap-3 mb-4"><Search size={24} className="text-secondary" /><h4 className="font-bold">{config.label}</h4></div><p className="text-xs opacity-80 leading-relaxed">{config.calendarRequired ? `${config.durationMinutes} minute calendar booking required.` : config.adminSchedulingRequired ? 'Admin will review scheduling and route planning.' : config.calendarRecommended ? 'Calendar booking is optional and recommended.' : 'Submitted for standard review.'}</p></div>}
+            {config && <div className="bg-primary p-6 rounded-lg text-on-primary"><div className="flex items-center gap-3 mb-4"><Search size={24} className="text-secondary" /><h4 className="font-bold">{config.label}</h4></div><p className="text-xs opacity-80 leading-relaxed">{config.calendarRequired ? `${config.durationMinutes} minute calendar booking required, unless submitted for scheduling review with notes.` : config.adminSchedulingRequired ? 'Admin will review scheduling and route planning.' : config.calendarRecommended ? 'Calendar booking is optional and recommended.' : 'Submitted for standard review.'}</p></div>}
           </div>
         </div>
       </div>
