@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-and-typecheck:
+    runs-on: ubuntu-latest
+    env:
+      VITE_BRAND_NAME: ProInspect
+      VITE_APPWRITE_ENDPOINT: https://example.appwrite.io/v1
+      VITE_APPWRITE_PROJECT_ID: example-project
+      VITE_APPWRITE_DATABASE_ID: example-database
+      VITE_APPWRITE_USERS_COLLECTION_ID: users
+      VITE_APPWRITE_CLIENTS_COLLECTION_ID: clients
+      VITE_APPWRITE_SERVICES_COLLECTION_ID: services
+      VITE_APPWRITE_CLIENT_PRICING_COLLECTION_ID: clientPricing
+      VITE_APPWRITE_BOOKINGS_COLLECTION_ID: bookings
+      VITE_APPWRITE_BOOKING_SERVICE_DETAILS_COLLECTION_ID: bookingServiceDetails
+      VITE_APPWRITE_BOOKING_PROPERTIES_COLLECTION_ID: bookingProperties
+      VITE_APPWRITE_PROPERTIES_COLLECTION_ID: properties
+      VITE_APPWRITE_LEADS_COLLECTION_ID: leads
+      VITE_APPWRITE_OPEN_INSPECTIONS_COLLECTION_ID: openInspections
+      VITE_APPWRITE_INSPECTION_CHECK_INS_COLLECTION_ID: inspectionCheckIns
+      VITE_APPWRITE_PAYMENTS_COLLECTION_ID: payments
+      VITE_APPWRITE_SUBSCRIPTIONS_COLLECTION_ID: subscriptions
+      VITE_APPWRITE_AUDIT_LOGS_COLLECTION_ID: auditLogs
+      VITE_APPWRITE_SERVICE_AREAS_COLLECTION_ID: serviceAreas
+      VITE_APPWRITE_RATE_CARDS_COLLECTION_ID: rateCards
+      VITE_APPWRITE_RATE_CARD_ITEMS_COLLECTION_ID: rateCardItems
+      VITE_APPWRITE_WORK_ORDER_CONTACTS_COLLECTION_ID: workOrderContacts
+      VITE_APPWRITE_WORK_ORDER_STATUS_HISTORY_COLLECTION_ID: workOrderStatusHistory
+      VITE_APPWRITE_ACCESS_ISSUES_COLLECTION_ID: accessIssues
+      VITE_APPWRITE_REGIONAL_BATCHES_COLLECTION_ID: regionalBatches
+      VITE_APPWRITE_OPEN_INSPECTION_PLANS_COLLECTION_ID: openInspectionPlans
+      VITE_APPWRITE_OPEN_INSPECTION_ITEMS_COLLECTION_ID: openInspectionItems
+      VITE_APPWRITE_INVOICE_LINES_COLLECTION_ID: invoiceLines
+      VITE_APPWRITE_STORAGE_PROPERTY_IMAGES_BUCKET_ID: propertyImages
+      VITE_APPWRITE_STORAGE_REPORTS_BUCKET_ID: reports
+      VITE_APPWRITE_FUNCTION_PROFILE_UPDATE_ID: profile-update
+      VITE_APPWRITE_FUNCTION_ADMIN_USER_ASSIGNMENT_ID: admin-user-assignment
+      VITE_APPWRITE_FUNCTION_PRICING_ID: pricing
+      VITE_APPWRITE_FUNCTION_CREATE_WORK_ORDER_ID: create-work-order
+      VITE_APPWRITE_FUNCTION_FETCH_CALENDAR_AVAILABILITY_ID: fetch-calendar-availability
+      VITE_APPWRITE_FUNCTION_GENERATE_INVOICE_LINES_ID: generate-invoice-lines
+      VITE_APPWRITE_FUNCTION_STRIPE_CHECKOUT_ID: stripe-checkout
+      VITE_APPWRITE_FUNCTION_STRIPE_WEBHOOK_ID: stripe-webhook
+      VITE_STRIPE_PUBLISHABLE_KEY: pk_test_placeholder
+      PUBLIC_SITE_URL: https://example.com
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate environment contract
+        run: npm run check:env
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
