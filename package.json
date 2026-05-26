@@ -14,7 +14,7 @@
     "services:import": "node --env-file=.env.local scripts/import-services-and-pricing.mjs data/services-pricing.csv",
     "premium-pricing:apply": "node --env-file=.env.local scripts/apply-premium-pricing.mjs",
     "services:check": "node --env-file=.env.local scripts/check-services-and-pricing.mjs",
-    "deploy": "wrangler deploy --assets=./dist --name rbp-real-estate",
+    "deploy": "wrangler deploy",
     "check:env": "node scripts/check-required-env.mjs",
     "check:env:local": "node --env-file=.env.local scripts/check-required-env.mjs",
     "check:env:functions": "node --env-file=.env.local scripts/check-required-env.mjs --functions"
