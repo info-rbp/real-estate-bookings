@@ -8,6 +8,7 @@
     "preview": "vite preview",
     "appwrite:provision:staging": "node scripts/provision-appwrite-staging.mjs",
     "appwrite:provision:local": "node --env-file=.env.local scripts/provision-appwrite-staging.mjs",
+    "appwrite:provision:launch": "node --env-file=.env.local scripts/provision-launch-schema.mjs",
     "service-areas:import": "node --env-file=.env.local scripts/import-service-areas.mjs data/service-areas.csv",
     "service-areas:check": "node --env-file=.env.local scripts/check-service-area.mjs",
     "services:import": "node --env-file=.env.local scripts/import-services-and-pricing.mjs data/services-pricing.csv",
