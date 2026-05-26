@@ -99,7 +99,9 @@ function buildEmailBodies({ payload, profile, workOrder, booker }) {
       ? 'This request needs pricing review before confirmation.'
       : workOrder.status === 'pending_scheduling'
         ? 'This request has been received for scheduling review.'
-        : 'The request has been saved and will be processed by ProInspect.',
+        : workOrder.status === 'confirmed'
+          ? 'Your booking has been created and the selected attendance time has been reserved.'
+          : 'The request has been saved and will be processed by ProInspect.',
     '',
     'ProInspect will follow up if more information is required.',
   ].join('\n');
@@ -112,6 +114,18 @@ function buildEmailBodies({ payload, profile, workOrder, booker }) {
     internalText,
     bookerText,
   };
+}
+
+function buildFailureAlertText({ workOrder, kind, detail, recipient }) {
+  return [
+    '[Action required] Booking notification or calendar event failed',
+    '',
+    `Work order: ${workOrder.workOrderNumber}`,
+    `Failure type: ${kind}`,
+    recipient ? `Recipient / target: ${recipient}` : undefined,
+    detail ? `Detail: ${detail}` : undefined,
+    buildDashboardLink(workOrder) ? `Dashboard: ${buildDashboardLink(workOrder)}` : undefined,
+  ].filter(Boolean).join('\n');
 }
 
 async function sendWithProvider({ to, subject, text, log }) {
@@ -286,6 +300,8 @@ module.exports = async ({ req, res, log, error }) => {
   const bookingPropertiesCollectionId = env('BOOKING_PROPERTIES_COLLECTION_ID', 'APPWRITE_BOOKING_PROPERTIES_COLLECTION_ID', 'VITE_APPWRITE_BOOKING_PROPERTIES_COLLECTION_ID');
   const bookingNotificationsCollectionId = env('BOOKING_NOTIFICATIONS_COLLECTION_ID', 'APPWRITE_BOOKING_NOTIFICATIONS_COLLECTION_ID');
   const bookingCalendarEventsCollectionId = env('BOOKING_CALENDAR_EVENTS_COLLECTION_ID', 'APPWRITE_BOOKING_CALENDAR_EVENTS_COLLECTION_ID');
+  const operationsEmail = env('OPERATIONS_EMAIL_TO');
+  const operationsAlertEmail = env('OPERATIONS_ALERT_EMAIL_TO') || operationsEmail;
 
   async function getCollectionInfo(collectionId) {
     const attributes = await databases.listAttributes(databaseId, collectionId);
@@ -334,6 +350,39 @@ module.exports = async ({ req, res, log, error }) => {
     }
   }
 
+  async function sendFailureAlert({ workOrder, kind, detail, recipient }) {
+    if (!operationsAlertEmail) {
+      return;
+    }
+
+    try {
+      const result = await sendWithProvider({
+        to: operationsAlertEmail,
+        subject: '[Action required] Booking notification or calendar event failed',
+        text: buildFailureAlertText({ workOrder, kind, detail, recipient }),
+        log,
+      });
+
+      await logNotification({
+        workOrder,
+        channel: 'ops_failure_alert',
+        recipient: operationsAlertEmail,
+        status: result.skipped ? 'skipped' : 'sent',
+        providerMessageId: result.providerMessageId,
+        failureReason: result.reason,
+      });
+    } catch (alertError) {
+      error('Failure alert email failed: ' + alertError.message);
+      await logNotification({
+        workOrder,
+        channel: 'ops_failure_alert',
+        recipient: operationsAlertEmail,
+        status: 'failed',
+        failureReason: alertError.message,
+      });
+    }
+  }
+
   async function logCalendarEvent({ workOrder, result, status, failureReason }) {
     if (bookingCalendarEventsCollectionId) {
       try {
@@ -371,6 +420,24 @@ module.exports = async ({ req, res, log, error }) => {
       }, info.attributes));
     } catch (e) {
       error('Error updating booking calendar metadata: ' + e.message);
+    }
+  }
+
+  async function promoteBookingAfterCalendarCreation(workOrder, bookingsInfo) {
+    const nextStatus = validStatus('confirmed', bookingsInfo.statusValues, workOrder.status);
+    if (nextStatus === workOrder.status) {
+      return workOrder;
+    }
+
+    try {
+      const updated = await databases.updateDocument(databaseId, bookingsCollectionId, workOrder.$id, pickSchemaSafe({
+        status: nextStatus,
+        updatedAt: new Date().toISOString(),
+      }, bookingsInfo.attributes));
+      return updated;
+    } catch (e) {
+      error('Error promoting booking status after calendar creation: ' + e.message);
+      return workOrder;
     }
   }
 
@@ -608,22 +675,29 @@ module.exports = async ({ req, res, log, error }) => {
 
   const booker = extractPrimaryBooker(payload, profile);
   const emailBodies = buildEmailBodies({ payload, profile, workOrder, booker });
-  const operationsEmail = env('OPERATIONS_EMAIL_TO');
 
   try {
     const result = await sendWithProvider({ to: operationsEmail, subject: emailBodies.internalSubject, text: emailBodies.internalText, log });
     await logNotification({ workOrder, channel: 'internal_new_booking', recipient: operationsEmail, status: result.skipped ? 'skipped' : 'sent', providerMessageId: result.providerMessageId, failureReason: result.reason });
+    if (result.skipped) {
+      await sendFailureAlert({ workOrder, kind: 'internal_new_booking', detail: result.reason, recipient: operationsEmail });
+    }
   } catch (e) {
     error('Internal booking email failed: ' + e.message);
     await logNotification({ workOrder, channel: 'internal_new_booking', recipient: operationsEmail, status: 'failed', failureReason: e.message });
+    await sendFailureAlert({ workOrder, kind: 'internal_new_booking', detail: e.message, recipient: operationsEmail });
   }
 
   try {
     const result = await sendWithProvider({ to: booker.email, subject: emailBodies.bookerSubject, text: emailBodies.bookerText, log });
     await logNotification({ workOrder, channel: 'booker_confirmation', recipient: booker.email, status: result.skipped ? 'skipped' : 'sent', providerMessageId: result.providerMessageId, failureReason: result.reason });
+    if (result.skipped) {
+      await sendFailureAlert({ workOrder, kind: 'booker_confirmation', detail: result.reason, recipient: booker.email });
+    }
   } catch (e) {
     error('Booker confirmation email failed: ' + e.message);
     await logNotification({ workOrder, channel: 'booker_confirmation', recipient: booker.email, status: 'failed', failureReason: e.message });
+    await sendFailureAlert({ workOrder, kind: 'booker_confirmation', detail: e.message, recipient: booker.email });
   }
 
   try {
@@ -631,10 +705,16 @@ module.exports = async ({ req, res, log, error }) => {
     await logCalendarEvent({ workOrder, result: calendarResult, status: calendarResult.skipped ? 'skipped' : 'created', failureReason: calendarResult.reason });
     if (!calendarResult.skipped) {
       workOrder = { ...workOrder, calendarEventId: calendarResult.eventId, calendarId: calendarResult.calendarId, calendarEventLink: calendarResult.eventLink };
+      if (workOrder.status === 'pending_acceptance') {
+        workOrder = await promoteBookingAfterCalendarCreation(workOrder, bookingsInfo);
+      }
+    } else if (calendarResult.reason && calendarResult.reason.includes('credentials missing')) {
+      await sendFailureAlert({ workOrder, kind: 'calendar_event', detail: calendarResult.reason, recipient: env('GOOGLE_CALENDAR_ID') || 'Google Calendar' });
     }
   } catch (e) {
     error('Calendar event creation failed: ' + e.message);
     await logCalendarEvent({ workOrder, result: undefined, status: 'failed', failureReason: e.message });
+    await sendFailureAlert({ workOrder, kind: 'calendar_event', detail: e.message, recipient: env('GOOGLE_CALENDAR_ID') || 'Google Calendar' });
   }
 
   try {
