@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { brand } from '../config/brand'
 
 export default function Footer() {
   return (
@@ -7,7 +8,7 @@ export default function Footer() {
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           <div className="space-y-8">
             <p className="text-sm leading-6 text-gray-300">
-              ProInspect provides property field support, attendance, reporting and workflow coordination for approved agencies, landlords and property professionals.
+              {brand.name} provides property field support, attendance, reporting and workflow coordination for approved agencies, landlords and property professionals.
             </p>
           </div>
           <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
@@ -41,7 +42,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-16 border-t border-white/10 pt-8 sm:mt-20 lg:mt-24">
-          <p className="text-xs leading-5 text-gray-400">&copy; 2026 ProInspect. All rights reserved.</p>
+          <p className="text-xs leading-5 text-gray-400">&copy; 2026 {brand.legalName}. All rights reserved.</p>
         </div>
       </div>
     </footer>
