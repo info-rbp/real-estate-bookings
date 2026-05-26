@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Footer from '../components/Footer'
 import PublicNav from '../components/PublicNav'
@@ -60,6 +61,19 @@ const sections = [
 ]
 
 export default function Terms() {
+  useEffect(() => {
+    document.title = 'Terms of Service | ProInspect'
+
+    const description = 'Read the ProInspect terms covering booking authority, service scope, pricing, cancellations, access issues, reports, GST and platform use.'
+    let metaDescription = document.querySelector<HTMLMetaElement>('meta[name="description"]')
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta')
+      metaDescription.name = 'description'
+      document.head.appendChild(metaDescription)
+    }
+    metaDescription.setAttribute('content', description)
+  }, [])
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <PublicNav />
