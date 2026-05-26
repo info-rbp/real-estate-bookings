@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Footer from '../components/Footer'
 import PublicNav from '../components/PublicNav'
@@ -54,6 +55,19 @@ const sections = [
 ]
 
 export default function Privacy() {
+  useEffect(() => {
+    document.title = 'Privacy Policy | ProInspect'
+
+    const description = 'Read how ProInspect collects, uses, stores and discloses lead, account, booking, access, image and calendar-related information.'
+    let metaDescription = document.querySelector<HTMLMetaElement>('meta[name="description"]')
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta')
+      metaDescription.name = 'description'
+      document.head.appendChild(metaDescription)
+    }
+    metaDescription.setAttribute('content', description)
+  }, [])
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <PublicNav />
