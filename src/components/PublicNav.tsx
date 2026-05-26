@@ -1,7 +1,8 @@
-import { Link } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
-import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Menu, X } from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
+import { brand } from '../config/brand'
 
 export default function PublicNav() {
   const { user } = useAuth()
@@ -17,9 +18,9 @@ export default function PublicNav() {
   return (
     <header className="bg-surface border-b border-outline-variant shadow-sm sticky top-0 z-50">
       <nav className="flex justify-between items-center px-6 md:px-10 h-20 w-full max-w-7xl mx-auto">
-        <Link to="/" className="text-2xl font-bold text-primary">ProInspect</Link>
+        <Link to="/" className="text-2xl font-bold text-primary">{brand.name}</Link>
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map(link => (
+          {navLinks.map((link) => (
             <Link key={link.label} to={link.to} className="text-base text-on-surface-variant hover:text-primary transition-colors">
               {link.label}
             </Link>
@@ -45,7 +46,7 @@ export default function PublicNav() {
       </nav>
       {mobileOpen && (
         <div className="md:hidden border-t border-outline-variant bg-surface-container-lowest px-6 py-4 space-y-3">
-          {navLinks.map(link => (
+          {navLinks.map((link) => (
             <Link key={link.label} to={link.to} className="block text-base text-on-surface-variant" onClick={() => setMobileOpen(false)}>
               {link.label}
             </Link>
