@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { databases, appwriteConfig } from '../lib/appwrite';
 import { Query } from 'appwrite';
 import {
   Calendar,
   MapPin,
   Clock,
-  FileText,
-  User,
   Users,
   ChevronLeft,
   Key,
@@ -16,10 +14,12 @@ import {
   History
 } from 'lucide-react';
 import { StatusBadge } from '../components/shared/StatusBadge';
+import { useAuth } from '../hooks/useAuth'
 
 export default function BookingDetail() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
+  const { profile } = useAuth()
   const [workOrder, setWorkOrder] = useState<any>(null);
   const [statusHistory, setStatusHistory] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
@@ -36,6 +36,13 @@ export default function BookingDetail() {
           appwriteConfig.bookingsCollectionId!,
           bookingId
         );
+
+        if (profile?.clientId && wo.clientId && wo.clientId !== profile.clientId && profile.role !== 'admin' && profile.role !== 'staff') {
+          setError('You do not have permission to view this Work Order.');
+          setLoading(false);
+          return;
+        }
+
         setWorkOrder(wo);
 
         const history = await databases.listDocuments(
@@ -59,7 +66,7 @@ export default function BookingDetail() {
       }
     }
     loadData();
-  }, [bookingId]);
+  }, [bookingId, profile?.clientId, profile?.role]);
 
   if (loading) return <div className="max-w-7xl mx-auto px-6 py-20 text-center text-on-surface-variant">Loading Work Order details...</div>;
   if (error) return <div className="max-w-7xl mx-auto px-6 py-20 text-center"><div className="p-8 bg-red-50 text-red-800 border border-red-100 rounded-2xl">{error}</div></div>;
@@ -73,9 +80,7 @@ export default function BookingDetail() {
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Main Content */}
         <div className="lg:col-span-8 space-y-8">
-          {/* Header Card */}
           <div className="terris-card p-8 bg-white overflow-hidden relative">
             <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -87,7 +92,6 @@ export default function BookingDetail() {
             </div>
           </div>
 
-          {/* Property Section */}
           <div className="terris-card p-8 bg-white">
             <div className="flex items-center gap-3 mb-6 border-b border-outline-variant pb-4">
               <MapPin className="text-primary" />
@@ -107,7 +111,6 @@ export default function BookingDetail() {
             </div>
           </div>
 
-          {/* Contacts Section */}
           <div className="terris-card p-8 bg-white">
             <div className="flex items-center gap-3 mb-6 border-b border-outline-variant pb-4">
               <Users className="text-primary" />
@@ -125,7 +128,6 @@ export default function BookingDetail() {
             </div>
           </div>
 
-          {/* Access & Safety */}
           <div className="terris-card p-8 bg-white">
             <div className="flex items-center gap-3 mb-6 border-b border-outline-variant pb-4">
               <Key className="text-primary" />
@@ -165,9 +167,7 @@ export default function BookingDetail() {
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className="lg:col-span-4 space-y-8">
-          {/* Schedule Card */}
           <div className="terris-card p-6 bg-white border-none shadow-lg">
              <div className="flex items-center gap-3 mb-6">
               <Calendar className="text-secondary" />
@@ -194,7 +194,6 @@ export default function BookingDetail() {
             </div>
           </div>
 
-          {/* Pricing Card */}
           <div className="terris-card p-6 bg-primary text-on-primary border-none shadow-lg">
              <div className="flex items-center gap-3 mb-6">
               <DollarSign className="text-secondary" />
@@ -216,14 +215,13 @@ export default function BookingDetail() {
             </div>
           </div>
 
-          {/* Status History */}
           <div className="terris-card p-6 bg-white">
             <div className="flex items-center gap-3 mb-6">
               <History className="text-on-surface-variant" />
               <h3 className="text-xl font-display font-medium">History</h3>
             </div>
             <div className="space-y-6">
-              {statusHistory.map((entry, i) => (
+              {statusHistory.map((entry) => (
                 <div key={entry.$id} className="relative pl-6 pb-6 border-l border-outline-variant last:pb-0">
                   <div className="absolute left-[-5px] top-0 w-[9px] h-[9px] rounded-full bg-primary" />
                   <p className="text-xs font-bold text-primary uppercase mb-1">{entry.toStatus.replace(/_/g, ' ')}</p>
