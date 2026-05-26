@@ -20,6 +20,19 @@ ProInspect supports approved agencies, landlords and property teams with:
 - Payments: Stripe browser and webhook integration hooks
 - Deployment: Cloudflare Workers Static Assets via Wrangler
 
+## White-label configuration
+
+The rebuild now includes a small central brand configuration layer in `src/config/brand.ts`.
+
+Brand values are driven by:
+
+- `VITE_BRAND_NAME`
+- `VITE_BRAND_LEGAL_NAME`
+- `VITE_BRAND_TAGLINE`
+- `VITE_BRAND_DOMAIN`
+
+This covers the app shell, portal entry points and default document branding. Marketing copy still needs a final pass if the product is re-labelled away from ProInspect.
+
 ## Supported service catalogue
 
 The current launch catalogue is limited to these seven services:
@@ -88,6 +101,7 @@ npm run build
 
 These must be configured for local builds and Cloudflare deployment:
 
+- `VITE_BRAND_NAME`
 - `VITE_APPWRITE_*` collection, bucket and function IDs used by the frontend
 - `VITE_STRIPE_PUBLISHABLE_KEY`
 - `PUBLIC_SITE_URL`
@@ -118,7 +132,7 @@ Use `npm run check:env:functions` to verify local values before function deploym
 The repository includes two provisioning layers:
 
 - `scripts/provision-appwrite-staging.mjs` creates the baseline collections, indexes and storage buckets.
-- `scripts/provision-launch-schema.mjs` adds launch-readiness updates such as `pending_scheduling`, booking notification logs, booking calendar event logs and booking calendar metadata fields.
+- `scripts/provision-launch-schema.mjs` adds launch-readiness updates such as `pending_scheduling`, booking notification logs, booking calendar event logs, booking calendar metadata fields, and launch catalogue reconciliation.
 
 After provisioning, import the approved service catalogue from `data/services-pricing.csv` so the database matches the public pricing tables and booking flows.
 
@@ -130,6 +144,8 @@ Production deployment targets Cloudflare Workers Static Assets.
 - Build command: `npm run build`
 - Deploy command: `npm run deploy`
 - Output directory: `dist`
+- Wrangler config: `wrangler.toml`
+- SPA fallback: `public/_redirects` and Wrangler `not_found_handling = "single-page-application"`
 
 Run this sequence before every deploy:
 
