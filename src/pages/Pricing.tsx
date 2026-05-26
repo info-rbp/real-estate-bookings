@@ -1,25 +1,83 @@
-import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import PublicNav from '../components/PublicNav';
-import Footer from '../components/Footer';
-import { ArrowRight, CheckCircle, Info } from 'lucide-react';
+import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { ArrowRight, CheckCircle, Info } from 'lucide-react'
+import PublicNav from '../components/PublicNav'
+import Footer from '../components/Footer'
 
-const standardPrices = [
-  ['Property Condition Report', '$200 + GST', '$120 + GST', '90 minutes', 'Calendar booking', 'Custom quote for outside-area or complex scopes'],
-  ['Routine Inspection', '$60 + GST', '$40 + GST', '30 minutes', 'Calendar booking', 'Custom quote for outside-area or non-standard reporting'],
-  ['Exit Inspection', '$150 + GST', '$40 + GST', '60 minutes', 'Calendar booking', 'Custom quote for complex disputes or missing PCR references'],
-  ['Open For Inspection', '$80 + GST', '$40 + GST', 'Variable', 'Scheduling review', 'Batch route review for 1 to 10 properties'],
-  ['Insurance Claims Management', '$90 + GST', '$50 + GST', '60 minutes default', 'Review recommended', 'Custom quote for complex claims, safety issues or expanded scope'],
-  ['Maintenance Requests', '$80 + GST', '$50 + GST', '60 minutes default', 'Review recommended', 'Urgent, complex or contractor-heavy work may need review'],
-  ['Key Installation', '$150 + GST', '$70 + GST', '60 minutes', 'Calendar booking', 'Custom quote if key collection or installation is non-standard'],
-];
+type PricingRow = {
+  service: string
+  standardExGst: number
+  premiumExGst: number
+  duration: string
+  scheduling: string
+  trigger: string
+}
+
+const pricingRows: PricingRow[] = [
+  {
+    service: 'Property Condition Report',
+    standardExGst: 200,
+    premiumExGst: 120,
+    duration: '90 minutes',
+    scheduling: 'Calendar booking',
+    trigger: 'Custom quote for outside-area or complex scopes',
+  },
+  {
+    service: 'Routine Inspection',
+    standardExGst: 60,
+    premiumExGst: 40,
+    duration: '30 minutes',
+    scheduling: 'Calendar booking',
+    trigger: 'Custom quote for outside-area or non-standard reporting',
+  },
+  {
+    service: 'Exit Inspection',
+    standardExGst: 150,
+    premiumExGst: 40,
+    duration: '60 minutes',
+    scheduling: 'Calendar booking',
+    trigger: 'Custom quote for complex disputes or missing PCR references',
+  },
+  {
+    service: 'Open For Inspection',
+    standardExGst: 80,
+    premiumExGst: 40,
+    duration: 'Variable',
+    scheduling: 'Scheduling review',
+    trigger: 'Batch route review for 1 to 10 properties',
+  },
+  {
+    service: 'Insurance Claims Management',
+    standardExGst: 90,
+    premiumExGst: 50,
+    duration: '60 minutes default',
+    scheduling: 'Review recommended',
+    trigger: 'Custom quote for complex claims, safety issues or expanded scope',
+  },
+  {
+    service: 'Maintenance Requests',
+    standardExGst: 80,
+    premiumExGst: 50,
+    duration: '60 minutes default',
+    scheduling: 'Review recommended',
+    trigger: 'Urgent, complex or contractor-heavy work may need review',
+  },
+  {
+    service: 'Key Installation',
+    standardExGst: 150,
+    premiumExGst: 70,
+    duration: '60 minutes',
+    scheduling: 'Calendar booking',
+    trigger: 'Custom quote if key collection or installation is non-standard',
+  },
+]
 
 const quoteTriggers = [
   'Property is outside the Perth and Peel standard service areas.',
   'Urgent, after-hours, unsafe, incomplete or complex attendance is requested.',
   'The job requires non-standard reporting, additional properties or extended coordination.',
   'Insurance or maintenance scope is unclear, high-risk or dependent on third-party approvals.',
-];
+]
 
 const faqs = [
   {
@@ -42,24 +100,32 @@ const faqs = [
     answer:
       'Where retained in the agreement, the $180 + GST new property onboarding bundle is a subscription onboarding offer only. Conditions apply and it must be reconciled against the required PCR, key installation and access setup scope.',
   },
-];
+]
+
+function formatCurrency(amount: number) {
+  return `$${amount.toFixed(2)}`
+}
+
+function incGst(amount: number) {
+  return amount * 1.1
+}
 
 export default function PricingPage() {
   useEffect(() => {
-    document.title = 'Pricing for Property Field Services | ProInspect';
+    document.title = 'Pricing for Property Field Services | ProInspect'
 
     const description =
-      'View ProInspect standard pricing, premium customer pricing and subscription support for property condition reports, routine inspections, exit inspections, OFI attendance, insurance claim support, maintenance requests and key installation.';
-    let metaDescription = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+      'View ProInspect standard pricing, approved premium pricing and subscription support for property condition reports, routine inspections, exit inspections, OFI attendance, insurance claim support, maintenance requests and key installation.'
+    let metaDescription = document.querySelector<HTMLMetaElement>('meta[name="description"]')
 
     if (!metaDescription) {
-      metaDescription = document.createElement('meta');
-      metaDescription.name = 'description';
-      document.head.appendChild(metaDescription);
+      metaDescription = document.createElement('meta')
+      metaDescription.name = 'description'
+      document.head.appendChild(metaDescription)
     }
 
-    metaDescription.setAttribute('content', description);
-  }, []);
+    metaDescription.setAttribute('content', description)
+  }, [])
 
   return (
     <div className="bg-white">
@@ -67,27 +133,17 @@ export default function PricingPage() {
       <main className="isolate">
         <section className="bg-gray-950 px-6 py-24 sm:py-32 lg:px-8">
           <div className="mx-auto max-w-4xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">
-              ProInspect Pricing
-            </p>
-            <h1 className="mt-5 text-4xl font-bold tracking-tight text-white sm:text-6xl">
-              Simple Pricing for Property Field Services
-            </h1>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">ProInspect Pricing</p>
+            <h1 className="mt-5 text-4xl font-bold tracking-tight text-white sm:text-6xl">Simple Pricing for Property Field Services</h1>
             <p className="mt-6 text-lg leading-8 text-gray-200">
               Standard rates cover ProInspect field services across Perth and Peel. Premium prices apply only to approved premium, subscription or agreed volume clients. Outside-area, urgent or complex work may require review or custom quote.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link
-                to="/login"
-                className="inline-flex items-center rounded-md bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/85"
-              >
+              <Link to="/login" className="inline-flex items-center rounded-md bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/85">
                 Book a Service
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
               </Link>
-              <Link
-                to="/engage-us"
-                className="inline-flex items-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100"
-              >
+              <Link to="/engage-us" className="inline-flex items-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100">
                 Request Premium Pricing
               </Link>
             </div>
@@ -97,39 +153,89 @@ export default function PricingPage() {
         <section className="py-20 sm:py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
-                Standard and Premium Rates
-              </p>
-              <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                Current Service Pricing
-              </h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Standard and Premium Rates</p>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Current Service Pricing</h2>
               <p className="mt-6 text-lg leading-8 text-gray-600">
-                Prices are shown excluding GST. Booking confirmation, service area matching and final scope checks happen through the client portal workflow.
+                Prices are shown both excluding and including GST so quoting and approval checks are easier to compare.
               </p>
             </div>
 
-            <div className="mt-12 overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
+            <div className="mt-12 grid gap-8 xl:grid-cols-2">
+              <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
+                <div className="bg-gray-50 px-5 py-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Standard pricing</h3>
+                  <p className="mt-1 text-sm text-gray-600">Standard Perth and Peel service rates.</p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
+                    <thead className="bg-white text-xs font-semibold uppercase tracking-wide text-gray-600">
+                      <tr>
+                        <th scope="col" className="px-5 py-4">Service</th>
+                        <th scope="col" className="px-5 py-4">Ex GST</th>
+                        <th scope="col" className="px-5 py-4">Inc GST</th>
+                        <th scope="col" className="px-5 py-4">Duration</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 bg-white">
+                      {pricingRows.map((row) => (
+                        <tr key={row.service} className="align-top">
+                          <th scope="row" className="px-5 py-4 font-semibold text-gray-900">{row.service}</th>
+                          <td className="px-5 py-4 text-gray-700">{formatCurrency(row.standardExGst)}</td>
+                          <td className="px-5 py-4 text-gray-700">{formatCurrency(incGst(row.standardExGst))}</td>
+                          <td className="px-5 py-4 text-gray-700">{row.duration}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
+                <div className="bg-gray-50 px-5 py-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Approved premium pricing</h3>
+                  <p className="mt-1 text-sm text-gray-600">Available only for approved premium, subscription or agreed volume clients.</p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
+                    <thead className="bg-white text-xs font-semibold uppercase tracking-wide text-gray-600">
+                      <tr>
+                        <th scope="col" className="px-5 py-4">Service</th>
+                        <th scope="col" className="px-5 py-4">Ex GST</th>
+                        <th scope="col" className="px-5 py-4">Inc GST</th>
+                        <th scope="col" className="px-5 py-4">Scheduling</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 bg-white">
+                      {pricingRows.map((row) => (
+                        <tr key={row.service} className="align-top">
+                          <th scope="row" className="px-5 py-4 font-semibold text-gray-900">{row.service}</th>
+                          <td className="px-5 py-4 text-gray-700">{formatCurrency(row.premiumExGst)}</td>
+                          <td className="px-5 py-4 text-gray-700">{formatCurrency(incGst(row.premiumExGst))}</td>
+                          <td className="px-5 py-4 text-gray-700">{row.scheduling}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
                   <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-600">
                     <tr>
                       <th scope="col" className="px-5 py-4">Service</th>
-                      <th scope="col" className="px-5 py-4">Standard</th>
-                      <th scope="col" className="px-5 py-4">Premium</th>
-                      <th scope="col" className="px-5 py-4">Duration</th>
-                      <th scope="col" className="px-5 py-4">Scheduling</th>
+                      <th scope="col" className="px-5 py-4">Scheduling path</th>
                       <th scope="col" className="px-5 py-4">Review trigger</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    {standardPrices.map(([service, standard, premium, duration, scheduling, trigger]) => (
-                      <tr key={service} className="align-top">
-                        <th scope="row" className="px-5 py-4 font-semibold text-gray-900">{service}</th>
-                        <td className="px-5 py-4 text-gray-700">{standard}</td>
-                        <td className="px-5 py-4 text-gray-700">{premium}</td>
-                        <td className="px-5 py-4 text-gray-700">{duration}</td>
-                        <td className="px-5 py-4 text-gray-700">{scheduling}</td>
-                        <td className="px-5 py-4 text-gray-600">{trigger}</td>
+                    {pricingRows.map((row) => (
+                      <tr key={`${row.service}-review`} className="align-top">
+                        <th scope="row" className="px-5 py-4 font-semibold text-gray-900">{row.service}</th>
+                        <td className="px-5 py-4 text-gray-700">{row.scheduling}</td>
+                        <td className="px-5 py-4 text-gray-600">{row.trigger}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -152,12 +258,8 @@ export default function PricingPage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
-                  Subscription and Recurring Support
-                </p>
-                <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                  Subscription Support for Approved Portfolios
-                </h2>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Subscription and Recurring Support</p>
+                <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Subscription Support for Approved Portfolios</h2>
                 <p className="mt-6 text-lg leading-8 text-gray-600">
                   Subscription arrangements are designed for agencies or landlords who need recurring property field support across an agreed portfolio, using agreed inclusions and approved premium rates.
                 </p>
@@ -211,9 +313,7 @@ export default function PricingPage() {
         <section className="bg-white py-20 sm:py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="relative isolate overflow-hidden rounded-3xl bg-gray-950 px-6 py-16 text-center shadow-2xl sm:px-16">
-              <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                Ready to Book Property Field Support?
-              </h2>
+              <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl">Ready to Book Property Field Support?</h2>
               <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-200">
                 Use the client portal for standard bookings, or contact ProInspect to discuss premium pricing, subscription support or custom quote requirements.
               </p>
@@ -231,5 +331,5 @@ export default function PricingPage() {
       </main>
       <Footer />
     </div>
-  );
+  )
 }
