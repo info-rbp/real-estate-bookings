@@ -20,6 +20,7 @@ import AdminWorkOrders from './admin/AdminWorkOrders'
 import AdminInvoices from './admin/AdminInvoices'
 import AdminRegionalBatches from './admin/AdminRegionalBatches'
 import AdminOpenInspections from './admin/AdminOpenInspections'
+import AdminSettings from './admin/AdminSettings'
 
 export default function AdminDashboard() {
   const { profile } = useAuth()
@@ -83,7 +84,8 @@ export default function AdminDashboard() {
             <Route path="/invoices" element={<AdminInvoices />} />
             <Route path="/regions" element={<AdminRegionalBatches />} />
             <Route path="/inspections" element={<AdminOpenInspections />} />
-            <Route path="*" element={<div className="py-20 text-center text-on-surface-variant italic">Module implementation in progress...</div>} />
+            <Route path="/settings" element={<AdminSettings />} />
+            <Route path="*" element={<div className="py-20 text-center text-on-surface-variant italic">Select an admin module from the navigation.</div>} />
           </Routes>
         </div>
       </div>
