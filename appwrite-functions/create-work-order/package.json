@@ -4,6 +4,7 @@
   "description": "Appwrite Function to create a new Work Order",
   "main": "src/main.js",
   "dependencies": {
+    "google-auth-library": "^9.15.1",
     "node-appwrite": "^11.1.0"
   }
 }
