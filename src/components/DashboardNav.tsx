@@ -1,6 +1,7 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
+import { Bolt, Calendar, Home, Settings } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
-import { Bell, Calendar, Home, LogOut, Settings, Plus, Bolt } from 'lucide-react'
+import { brand } from '../config/brand'
 
 const navLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: Home },
@@ -8,30 +9,40 @@ const navLinks = [
   { to: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 
+function initials(name?: string | null) {
+  return String(name || 'User')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || '')
+    .join('')
+}
+
 export default function DashboardLayout() {
-  const { user, profile, signOut } = useAuth()
+  const { profile } = useAuth()
   const location = useLocation()
 
   return (
     <div className="min-h-screen bg-surface-container">
-      {/* Sidebar Navigation */}
       <nav className="h-screen w-64 fixed left-0 top-0 bg-surface-container border-r border-outline-variant flex flex-col py-8">
         <div className="px-4 mb-8">
-          <Link to="/" className="text-2xl font-bold text-primary">ProInspect</Link>
+          <Link to="/" className="text-2xl font-bold text-primary">{brand.name}</Link>
         </div>
         <div className="flex items-center gap-4 px-4 mb-8">
-          <img 
-            alt="Client Profile Picture" 
-            className="w-12 h-12 rounded-full object-cover" 
-            src={profile?.avatar_url || `https://ui-avatars.com/api/?name=${profile?.full_name}&background=random`}
-          />
+          {profile?.avatar_url ? (
+            <img alt="Client Profile Picture" className="w-12 h-12 rounded-full object-cover" src={profile.avatar_url} />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-semibold">
+              {initials(profile?.full_name)}
+            </div>
+          )}
           <div>
             <p className="text-sm font-semibold text-on-surface">{profile?.full_name || 'User'}</p>
-            <p className="text-xs text-on-surface-variant">Premium Client</p>
+            <p className="text-xs text-on-surface-variant">{profile?.role === 'admin' ? 'Platform Admin' : profile?.role === 'staff' ? 'Operations Staff' : 'Client Portal User'}</p>
           </div>
         </div>
         <div className="flex-grow space-y-1 px-2">
-          {navLinks.map(link => (
+          {navLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
@@ -54,7 +65,6 @@ export default function DashboardLayout() {
         </div>
       </nav>
 
-      {/* Main Content Canvas */}
       <main className="ml-64 p-10 min-h-screen">
         <Outlet />
       </main>
