@@ -16,7 +16,8 @@
     "services:check": "node --env-file=.env.local scripts/check-services-and-pricing.mjs",
     "deploy": "wrangler deploy --assets=./dist --name rbp-real-estate",
     "check:env": "node scripts/check-required-env.mjs",
-    "check:env:local": "node --env-file=.env.local scripts/check-required-env.mjs"
+    "check:env:local": "node --env-file=.env.local scripts/check-required-env.mjs",
+    "check:env:functions": "node --env-file=.env.local scripts/check-required-env.mjs --functions"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^6.4.0",
