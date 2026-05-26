@@ -1,19 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
 import {
-  LayoutDashboard,
+  AlertCircle,
+  Calendar,
   ClipboardList,
   FileText,
-  Settings,
-  Map,
-  Calendar,
   Layers,
-  ChevronRight,
+  LayoutDashboard,
+  Map,
+  Settings,
   TrendingUp,
   Users,
-  AlertCircle
 } from 'lucide-react'
+import { Query } from 'appwrite'
+import { useAuth } from '../hooks/useAuth'
+import { appwriteConfig, databases } from '../lib/appwrite'
 
 import AdminWorkOrders from './admin/AdminWorkOrders'
 import AdminInvoices from './admin/AdminInvoices'
@@ -34,7 +35,7 @@ export default function AdminDashboard() {
     { id: 'settings', label: 'Settings', icon: Settings, path: '/admin/dashboard/settings' },
   ]
 
-  const activeTab = tabs.find(tab => location.pathname === tab.path)?.id || 'overview'
+  const activeTab = tabs.find((tab) => location.pathname === tab.path)?.id || 'overview'
 
   if (profile?.role !== 'admin' && profile?.role !== 'staff') {
     return (
@@ -50,7 +51,6 @@ export default function AdminDashboard() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
       <div className="flex flex-col lg:flex-row gap-10">
-        {/* Sidebar Navigation */}
         <div className="lg:w-64 shrink-0">
           <div className="terris-card bg-white p-2 sticky top-10">
             <div className="p-4 mb-4">
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
               <div className="mt-1 font-display font-medium text-lg truncate">{profile.full_name}</div>
             </div>
             <nav className="space-y-1">
-              {tabs.map(tab => (
+              {tabs.map((tab) => (
                 <Link
                   key={tab.id}
                   to={tab.path}
@@ -76,7 +76,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Main Content Area */}
         <div className="flex-1 min-w-0">
           <Routes>
             <Route path="/" element={<OverviewTab />} />
@@ -93,28 +92,79 @@ export default function AdminDashboard() {
 }
 
 function OverviewTab() {
-  const stats = [
-    { label: 'Pending Acceptance', value: '12', icon: AlertCircle, color: 'text-amber-500', bg: 'bg-amber-50' },
-    { label: 'Scheduled Today', value: '8', icon: Calendar, color: 'text-primary', bg: 'bg-primary/5' },
-    { label: 'Completed (MTD)', value: '145', icon: TrendingUp, color: 'text-green-500', bg: 'bg-green-50' },
-    { label: 'Open Regional Batches', value: '4', icon: Layers, color: 'text-blue-500', bg: 'bg-blue-50' },
-  ]
+  const [workOrders, setWorkOrders] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let mounted = true
+
+    async function loadOverview() {
+      setLoading(true)
+      setError('')
+
+      try {
+        const response = await databases.listDocuments(
+          appwriteConfig.databaseId!,
+          appwriteConfig.bookingsCollectionId!,
+          [Query.orderDesc('$createdAt'), Query.limit(100)],
+        )
+
+        if (mounted) {
+          setWorkOrders(response.documents)
+        }
+      } catch (err: any) {
+        if (mounted) {
+          setError(`Failed to load admin overview: ${err.message}`)
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadOverview()
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  const stats = useMemo(() => {
+    const pendingAcceptance = workOrders.filter((item) => ['pending', 'submitted', 'pending_acceptance', 'pending_scheduling', 'requires_information', 'quote_required'].includes(String(item.status))).length
+    const scheduled = workOrders.filter((item) => ['scheduled', 'confirmed', 'accepted'].includes(String(item.status))).length
+    const completed = workOrders.filter((item) => String(item.status) === 'completed').length
+    const openRegional = workOrders.filter((item) => String(item.status) === 'awaiting_batch').length
+
+    return [
+      { label: 'Pending Acceptance', value: pendingAcceptance, icon: AlertCircle, color: 'text-amber-500', bg: 'bg-amber-50' },
+      { label: 'Scheduled / Confirmed', value: scheduled, icon: Calendar, color: 'text-primary', bg: 'bg-primary/5' },
+      { label: 'Completed', value: completed, icon: TrendingUp, color: 'text-green-500', bg: 'bg-green-50' },
+      { label: 'Awaiting Batch', value: openRegional, icon: Layers, color: 'text-blue-500', bg: 'bg-blue-50' },
+    ]
+  }, [workOrders])
+
+  const recentActivity = useMemo(() => workOrders.slice(0, 4), [workOrders])
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
         <h1 className="text-4xl font-display font-medium text-on-surface mb-2">Admin Overview</h1>
-        <p className="text-on-surface-variant">Real-time status of the ProInspect operations.</p>
+        <p className="text-on-surface-variant">Live snapshot of the current ProInspect operations dataset.</p>
       </div>
 
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, i) => (
-          <div key={i} className="terris-card bg-white p-6 relative overflow-hidden group">
+        {stats.map((stat) => (
+          <div key={stat.label} className="terris-card bg-white p-6 relative overflow-hidden group">
             <div className={`absolute top-0 right-0 p-3 ${stat.bg} rounded-bl-3xl transition-transform group-hover:scale-110`}>
               <stat.icon className={stat.color} size={24} />
             </div>
             <div className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">{stat.label}</div>
-            <div className="text-3xl font-display font-medium text-on-surface">{stat.value}</div>
+            <div className="text-3xl font-display font-medium text-on-surface">{loading ? '--' : stat.value}</div>
           </div>
         ))}
       </div>
@@ -122,31 +172,38 @@ function OverviewTab() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="terris-card bg-white p-8">
           <h3 className="text-xl font-display font-medium mb-6 flex justify-between items-center">
-            Recent Activity
-            <button className="text-xs text-primary font-bold hover:underline">View All</button>
+            Recent Work Orders
+            <Link to="/admin/dashboard/work-orders" className="text-xs text-primary font-bold hover:underline">View All</Link>
           </h3>
           <div className="space-y-6">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="flex gap-4 items-start">
+            {loading ? (
+              <div className="text-sm text-on-surface-variant">Loading recent work orders...</div>
+            ) : recentActivity.length > 0 ? recentActivity.map((item) => (
+              <div key={item.$id} className="flex gap-4 items-start">
                 <div className="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center shrink-0">
                   <ClipboardList size={18} className="text-on-surface-variant" />
                 </div>
                 <div>
                   <div className="text-sm text-on-surface leading-tight">
-                    <span className="font-bold text-primary">ROT-WO-2024-00{i}</span> was updated to <span className="font-bold italic">Completed</span> by Staff
+                    <span className="font-bold text-primary">{item.workOrderNumber}</span> is currently <span className="font-bold italic">{String(item.status).replace(/_/g, ' ')}</span>
                   </div>
-                  <div className="text-xs text-on-surface-variant mt-1">2 hours ago</div>
+                  <div className="text-xs text-on-surface-variant mt-1">{item.propertySuburb || item.propertyAddress}</div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="text-sm text-on-surface-variant">No work orders available yet.</div>
+            )}
           </div>
         </div>
 
         <div className="terris-card bg-white p-8">
-           <h3 className="text-xl font-display font-medium mb-6">Regional Distribution</h3>
-           <div className="aspect-square bg-surface-variant/30 rounded-2xl flex items-center justify-center italic text-on-surface-variant text-sm">
-             Chart visualization pending
-           </div>
+          <h3 className="text-xl font-display font-medium mb-6 flex items-center gap-2">
+            <Users size={18} className="text-on-surface-variant" />
+            Operational note
+          </h3>
+          <div className="rounded-2xl bg-surface-variant/30 p-6 text-sm leading-7 text-on-surface-variant">
+            This overview is intentionally read-only. Workflow mutations such as acceptance, scheduling, batching and invoice generation should continue to flow through the dedicated admin modules and Appwrite Functions.
+          </div>
         </div>
       </div>
     </div>
