@@ -1,4 +1,5 @@
 const { Client, Databases, ID, Query } = require('node-appwrite');
+const { JWT } = require('google-auth-library');
 
 function env(...names) {
   for (const name of names) {
@@ -13,6 +14,256 @@ function parseBody(body) {
   } catch {
     return null;
   }
+}
+
+function safeJson(value) {
+  try {
+    return JSON.stringify(value ?? {});
+  } catch {
+    return '{}';
+  }
+}
+
+function serviceLabel(serviceType) {
+  return String(serviceType || '')
+    .split('_')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function extractPrimaryBooker(payload, profile) {
+  const contacts = Array.isArray(payload.contacts) ? payload.contacts : [];
+  const explicitBooker = contacts.find((contact) => ['booker', 'requester', 'primary'].includes(String(contact.role || '').toLowerCase()));
+  const firstContact = explicitBooker || contacts[0] || {};
+
+  return {
+    name: payload.bookerName || firstContact.name || firstContact.fullName || profile.full_name || profile.name || 'Booker',
+    email: payload.bookerEmail || firstContact.email || profile.email || profile.userEmail,
+    phone: payload.bookerPhone || firstContact.phone || firstContact.mobile || profile.phone,
+  };
+}
+
+function formatAddress(payload) {
+  return [payload.propertyAddress, payload.propertySuburb, payload.propertyState || 'WA', payload.propertyPostcode]
+    .filter(Boolean)
+    .join(', ');
+}
+
+function buildDashboardLink(workOrder) {
+  const baseUrl = env('APP_URL', 'PUBLIC_SITE_URL', 'VITE_PUBLIC_SITE_URL');
+  if (!baseUrl) return undefined;
+  return `${baseUrl.replace(/\/$/, '')}/dashboard/bookings/${workOrder.$id}`;
+}
+
+function buildEmailBodies({ payload, profile, workOrder, booker }) {
+  const serviceName = serviceLabel(payload.serviceType) || payload.serviceId || 'Booking';
+  const address = formatAddress(payload) || 'Address not supplied';
+  const selectedTime = payload.calendarEventStart && payload.calendarEventEnd
+    ? `${payload.calendarEventStart} to ${payload.calendarEventEnd}`
+    : 'Submitted for review';
+  const dashboardLink = buildDashboardLink(workOrder) || 'Dashboard link unavailable';
+  const details = safeJson(payload.bookingServiceDetails || {});
+  const ofiCount = Array.isArray(payload.ofiProperties) ? payload.ofiProperties.length : undefined;
+
+  const internalText = [
+    `New ProInspect booking request: ${workOrder.workOrderNumber}`,
+    '',
+    `Service: ${serviceName}`,
+    `Client: ${profile.clientName || profile.clientId || 'Unknown client'}`,
+    `Booker: ${booker.name}${booker.email ? ` <${booker.email}>` : ''}${booker.phone ? ` / ${booker.phone}` : ''}`,
+    `Property: ${address}`,
+    `Access method: ${payload.accessMethod || 'Not supplied'}`,
+    `Access notes: ${payload.accessInstructions || payload.keyCollectionDetails || 'Not supplied'}`,
+    `Requested/calendar time: ${selectedTime}`,
+    `Pricing classification: ${payload.pricingClassification || 'Not supplied'}`,
+    `Requires quote: ${workOrder.requiresQuote ? 'Yes' : 'No'}`,
+    ofiCount ? `OFI property count: ${ofiCount}` : undefined,
+    '',
+    'Service details JSON:',
+    details,
+    '',
+    `Dashboard: ${dashboardLink}`,
+  ].filter(Boolean).join('\n');
+
+  const bookerText = [
+    `Thanks ${booker.name},`,
+    '',
+    `ProInspect has received your booking request ${workOrder.workOrderNumber}.`,
+    '',
+    `Service: ${serviceName}`,
+    `Property: ${address}`,
+    `Selected time / status: ${selectedTime}`,
+    '',
+    workOrder.status === 'quote_required'
+      ? 'This request needs pricing review before confirmation.'
+      : workOrder.status === 'pending_scheduling'
+        ? 'This request has been received for scheduling review.'
+        : 'The request has been saved and will be processed by ProInspect.',
+    '',
+    'ProInspect will follow up if more information is required.',
+  ].join('\n');
+
+  return {
+    serviceName,
+    address,
+    internalSubject: `[ProInspect] New ${serviceName} booking - ${payload.propertySuburb || ''} ${payload.propertyPostcode || ''}`.trim(),
+    bookerSubject: `ProInspect booking request received - ${serviceName}`,
+    internalText,
+    bookerText,
+  };
+}
+
+async function sendWithProvider({ to, subject, text, log }) {
+  const provider = String(env('EMAIL_PROVIDER') || '').toLowerCase();
+  const from = env('EMAIL_FROM');
+
+  if (!provider || !from || !to) {
+    return { skipped: true, reason: 'EMAIL_PROVIDER, EMAIL_FROM or recipient missing' };
+  }
+
+  if (provider === 'resend') {
+    const apiKey = env('RESEND_API_KEY');
+    if (!apiKey) return { skipped: true, reason: 'RESEND_API_KEY missing' };
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from, to: Array.isArray(to) ? to : [to], subject, text }),
+    });
+    const body = await response.text();
+    if (!response.ok) throw new Error(`Resend failed: ${response.status} ${body}`);
+    return { provider, providerMessageId: safeJson(body) };
+  }
+
+  if (provider === 'sendgrid') {
+    const apiKey = env('SENDGRID_API_KEY');
+    if (!apiKey) return { skipped: true, reason: 'SENDGRID_API_KEY missing' };
+    const recipients = (Array.isArray(to) ? to : [to]).map((email) => ({ email }));
+    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ personalizations: [{ to: recipients }], from: { email: from }, subject, content: [{ type: 'text/plain', value: text }] }),
+    });
+    const body = await response.text();
+    if (!response.ok) throw new Error(`SendGrid failed: ${response.status} ${body}`);
+    return { provider, providerMessageId: response.headers.get('x-message-id') || undefined };
+  }
+
+  if (provider === 'mailgun') {
+    const apiKey = env('MAILGUN_API_KEY');
+    const domain = env('MAILGUN_DOMAIN');
+    if (!apiKey || !domain) return { skipped: true, reason: 'MAILGUN_API_KEY or MAILGUN_DOMAIN missing' };
+    const form = new URLSearchParams();
+    form.append('from', from);
+    form.append('to', Array.isArray(to) ? to.join(',') : to);
+    form.append('subject', subject);
+    form.append('text', text);
+    const response = await fetch(`https://api.mailgun.net/v3/${domain}/messages`, {
+      method: 'POST',
+      headers: { Authorization: `Basic ${Buffer.from(`api:${apiKey}`).toString('base64')}` },
+      body: form,
+    });
+    const body = await response.text();
+    if (!response.ok) throw new Error(`Mailgun failed: ${response.status} ${body}`);
+    return { provider, providerMessageId: safeJson(body) };
+  }
+
+  if (provider === 'gmail') {
+    const clientEmail = env('GOOGLE_CLIENT_EMAIL', 'GMAIL_CLIENT_EMAIL');
+    const privateKey = env('GOOGLE_PRIVATE_KEY', 'GMAIL_PRIVATE_KEY')?.replace(/\\n/g, '\n');
+    const delegatedUser = env('GMAIL_DELEGATED_USER', 'EMAIL_FROM');
+    if (!clientEmail || !privateKey || !delegatedUser) return { skipped: true, reason: 'Gmail credentials missing' };
+    const auth = new JWT({
+      email: clientEmail,
+      key: privateKey,
+      scopes: ['https://www.googleapis.com/auth/gmail.send'],
+      subject: delegatedUser,
+    });
+    const token = await auth.getAccessToken();
+    const recipients = Array.isArray(to) ? to.join(', ') : to;
+    const raw = Buffer.from([
+      `From: ${from}`,
+      `To: ${recipients}`,
+      `Subject: ${subject}`,
+      'MIME-Version: 1.0',
+      'Content-Type: text/plain; charset=utf-8',
+      '',
+      text,
+    ].join('\r\n')).toString('base64url');
+    const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token.token || token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ raw }),
+    });
+    const body = await response.text();
+    if (!response.ok) throw new Error(`Gmail failed: ${response.status} ${body}`);
+    return { provider, providerMessageId: safeJson(body) };
+  }
+
+  log?.(`Unknown EMAIL_PROVIDER ${provider}; notification skipped`);
+  return { skipped: true, reason: `Unknown EMAIL_PROVIDER ${provider}` };
+}
+
+async function createGoogleCalendarEvent({ payload, profile, workOrder, booker }) {
+  const calendarId = env('GOOGLE_CALENDAR_ID');
+  const clientEmail = env('GOOGLE_CLIENT_EMAIL');
+  const privateKey = env('GOOGLE_PRIVATE_KEY')?.replace(/\\n/g, '\n');
+  const shouldCreateEvent = Boolean(calendarId && clientEmail && privateKey && payload.calendarEventStart && payload.calendarEventEnd && payload.serviceType !== 'open_for_inspection');
+
+  if (!shouldCreateEvent) {
+    return { skipped: true, reason: 'Calendar credentials missing, no selected slot, or OFI scheduling review' };
+  }
+
+  const auth = new JWT({
+    email: clientEmail,
+    key: privateKey,
+    scopes: ['https://www.googleapis.com/auth/calendar.events'],
+  });
+  const token = await auth.getAccessToken();
+  const serviceName = serviceLabel(payload.serviceType) || payload.serviceId || 'Booking';
+  const suburb = payload.propertySuburb || 'Property';
+  const dashboardLink = buildDashboardLink(workOrder);
+  const address = formatAddress(payload);
+  const accessSummary = [payload.accessMethod, payload.accessInstructions, payload.keyCollectionDetails]
+    .filter(Boolean)
+    .join(' | ');
+
+  const event = {
+    summary: `${serviceName} - ${suburb} - ${workOrder.workOrderNumber}`,
+    location: address,
+    description: [
+      `Service: ${serviceName}`,
+      `Client/agency: ${profile.clientName || profile.clientId || 'Unknown client'}`,
+      `Booker: ${booker.name}${booker.email ? ` <${booker.email}>` : ''}${booker.phone ? ` / ${booker.phone}` : ''}`,
+      `Access: ${accessSummary || 'Not supplied'}`,
+      `Service details: ${safeJson(payload.bookingServiceDetails || {})}`,
+      dashboardLink ? `Dashboard: ${dashboardLink}` : undefined,
+    ].filter(Boolean).join('\n'),
+    start: { dateTime: payload.calendarEventStart, timeZone: env('GOOGLE_CALENDAR_TIMEZONE') || 'Australia/Perth' },
+    end: { dateTime: payload.calendarEventEnd, timeZone: env('GOOGLE_CALENDAR_TIMEZONE') || 'Australia/Perth' },
+    reminders: { useDefault: true },
+  };
+
+  if (env('GOOGLE_CALENDAR_INVITE_BOOKER') === 'true' && booker.email) {
+    event.attendees = [{ email: booker.email, displayName: booker.name }];
+  }
+
+  const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token.token || token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(event),
+  });
+  const body = await response.json().catch(async () => ({ raw: await response.text() }));
+  if (!response.ok) throw new Error(`Google Calendar failed: ${response.status} ${safeJson(body)}`);
+
+  return {
+    calendarId,
+    eventId: body.id,
+    eventLink: body.htmlLink,
+    eventStart: payload.calendarEventStart,
+    eventEnd: payload.calendarEventEnd,
+    raw: body,
+  };
 }
 
 module.exports = async ({ req, res, log, error }) => {
@@ -33,6 +284,8 @@ module.exports = async ({ req, res, log, error }) => {
   const rateCardsCollectionId = env('RATE_CARDS_COLLECTION_ID', 'APPWRITE_RATE_CARDS_COLLECTION_ID', 'VITE_APPWRITE_RATE_CARDS_COLLECTION_ID');
   const bookingServiceDetailsCollectionId = env('BOOKING_SERVICE_DETAILS_COLLECTION_ID', 'APPWRITE_BOOKING_SERVICE_DETAILS_COLLECTION_ID', 'VITE_APPWRITE_BOOKING_SERVICE_DETAILS_COLLECTION_ID');
   const bookingPropertiesCollectionId = env('BOOKING_PROPERTIES_COLLECTION_ID', 'APPWRITE_BOOKING_PROPERTIES_COLLECTION_ID', 'VITE_APPWRITE_BOOKING_PROPERTIES_COLLECTION_ID');
+  const bookingNotificationsCollectionId = env('BOOKING_NOTIFICATIONS_COLLECTION_ID', 'APPWRITE_BOOKING_NOTIFICATIONS_COLLECTION_ID');
+  const bookingCalendarEventsCollectionId = env('BOOKING_CALENDAR_EVENTS_COLLECTION_ID', 'APPWRITE_BOOKING_CALENDAR_EVENTS_COLLECTION_ID');
 
   async function getCollectionInfo(collectionId) {
     const attributes = await databases.listAttributes(databaseId, collectionId);
@@ -59,13 +312,73 @@ module.exports = async ({ req, res, log, error }) => {
     return statusValues[0] || fallback;
   }
 
-  // 1. Authenticate user
+  async function logNotification({ workOrder, channel, recipient, status, providerMessageId, failureReason }) {
+    if (!bookingNotificationsCollectionId) return;
+    try {
+      const info = await getCollectionInfo(bookingNotificationsCollectionId);
+      await databases.createDocument(databaseId, bookingNotificationsCollectionId, ID.unique(), pickSchemaSafe({
+        bookingId: workOrder.$id,
+        workOrderId: workOrder.$id,
+        workOrderNumber: workOrder.workOrderNumber,
+        channel,
+        recipient,
+        status,
+        providerMessageId,
+        failureReason,
+        sentAt: status === 'sent' ? new Date().toISOString() : undefined,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }, info.attributes));
+    } catch (e) {
+      error('Error logging booking notification: ' + e.message);
+    }
+  }
+
+  async function logCalendarEvent({ workOrder, result, status, failureReason }) {
+    if (bookingCalendarEventsCollectionId) {
+      try {
+        const info = await getCollectionInfo(bookingCalendarEventsCollectionId);
+        await databases.createDocument(databaseId, bookingCalendarEventsCollectionId, ID.unique(), pickSchemaSafe({
+          bookingId: workOrder.$id,
+          workOrderId: workOrder.$id,
+          workOrderNumber: workOrder.workOrderNumber,
+          calendarId: result?.calendarId || env('GOOGLE_CALENDAR_ID'),
+          eventId: result?.eventId,
+          eventLink: result?.eventLink,
+          eventStart: result?.eventStart,
+          eventEnd: result?.eventEnd,
+          status,
+          failureReason,
+          rawResponseJson: result?.raw ? safeJson(result.raw) : undefined,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }, info.attributes));
+      } catch (e) {
+        error('Error logging calendar event: ' + e.message);
+      }
+    }
+
+    try {
+      const info = await getCollectionInfo(bookingsCollectionId);
+      await databases.updateDocument(databaseId, bookingsCollectionId, workOrder.$id, pickSchemaSafe({
+        calendarId: result?.calendarId,
+        calendarEventId: result?.eventId,
+        calendarEventLink: result?.eventLink,
+        calendarEventStart: result?.eventStart,
+        calendarEventEnd: result?.eventEnd,
+        calendarEventStatus: status,
+        updatedAt: new Date().toISOString(),
+      }, info.attributes));
+    } catch (e) {
+      error('Error updating booking calendar metadata: ' + e.message);
+    }
+  }
+
   const userId = req.headers['x-appwrite-user-id'];
   if (!userId) {
     return res.json({ error: 'UNAUTHORIZED' }, 401);
   }
 
-  // 2. Load user profile
   let profile;
   try {
     const profiles = await databases.listDocuments(databaseId, usersCollectionId, [
@@ -85,7 +398,6 @@ module.exports = async ({ req, res, log, error }) => {
     return res.json({ error: 'ACCOUNT_NOT_ACTIVE' }, 403);
   }
 
-  // 3. Validate payload
   const payload = parseBody(req.body);
   if (!payload) {
     return res.json({ error: 'INVALID_JSON' }, 400);
@@ -115,13 +427,11 @@ module.exports = async ({ req, res, log, error }) => {
     }
   }
 
-  // 4. Server-side Pricing Calculation
   let basePriceExGst = 0;
   let requiresQuote = payload.outsideServiceArea || payload.pricingClassification === 'outside_service_area';
 
   if (!requiresQuote) {
     try {
-      // Find active rate card for client
       const rateCards = await databases.listDocuments(databaseId, rateCardsCollectionId, [
         Query.equal('clientId', profile.clientId),
         Query.equal('status', 'active'),
@@ -144,7 +454,6 @@ module.exports = async ({ req, res, log, error }) => {
       }
     } catch (err) {
       error('Pricing calculation error: ' + err.message);
-      // Fallback or error
     }
   }
 
@@ -167,13 +476,11 @@ module.exports = async ({ req, res, log, error }) => {
   if (payload.serviceType === 'insurance_claims_management' && (payload.bookingServiceDetails?.quoteRequired || payload.bookingServiceDetails?.scopeIncomplete)) status = 'quote_required';
   status = validStatus(status, bookingsInfo.statusValues);
 
-  // 5. Generate Work Order Number
   const date = new Date();
   const yearMonth = date.getFullYear().toString() + (date.getMonth() + 1).toString().padStart(2, '0');
   const shortId = ID.unique().substring(0, 8).toUpperCase();
-  const workOrderNumber = `ROT-WO-${yearMonth}-${shortId}`;
+  const workOrderNumber = `PRO-WO-${yearMonth}-${shortId}`;
 
-  // 6. Create Work Order
   let workOrder;
   try {
     const bookingDocument = pickSchemaSafe({
@@ -210,7 +517,6 @@ module.exports = async ({ req, res, log, error }) => {
       notes: payload.bookerNotes,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      // Capture all other fields from payload if they exist in schema
       accessMethod: payload.accessMethod,
       accessInstructions: payload.accessInstructions,
       lockboxCode: payload.lockboxCode,
@@ -286,8 +592,7 @@ module.exports = async ({ req, res, log, error }) => {
     }
   }
 
-  // 7. Create Contacts
-  if (payload.contacts && Array.isArray(payload.contacts)) {
+  if (payload.contacts && Array.isArray(payload.contacts) && contactsCollectionId) {
     for (const contact of payload.contacts) {
       try {
         await databases.createDocument(databaseId, contactsCollectionId, ID.unique(), {
@@ -301,7 +606,37 @@ module.exports = async ({ req, res, log, error }) => {
     }
   }
 
-  // 8. Audit Log & Status History
+  const booker = extractPrimaryBooker(payload, profile);
+  const emailBodies = buildEmailBodies({ payload, profile, workOrder, booker });
+  const operationsEmail = env('OPERATIONS_EMAIL_TO');
+
+  try {
+    const result = await sendWithProvider({ to: operationsEmail, subject: emailBodies.internalSubject, text: emailBodies.internalText, log });
+    await logNotification({ workOrder, channel: 'internal_new_booking', recipient: operationsEmail, status: result.skipped ? 'skipped' : 'sent', providerMessageId: result.providerMessageId, failureReason: result.reason });
+  } catch (e) {
+    error('Internal booking email failed: ' + e.message);
+    await logNotification({ workOrder, channel: 'internal_new_booking', recipient: operationsEmail, status: 'failed', failureReason: e.message });
+  }
+
+  try {
+    const result = await sendWithProvider({ to: booker.email, subject: emailBodies.bookerSubject, text: emailBodies.bookerText, log });
+    await logNotification({ workOrder, channel: 'booker_confirmation', recipient: booker.email, status: result.skipped ? 'skipped' : 'sent', providerMessageId: result.providerMessageId, failureReason: result.reason });
+  } catch (e) {
+    error('Booker confirmation email failed: ' + e.message);
+    await logNotification({ workOrder, channel: 'booker_confirmation', recipient: booker.email, status: 'failed', failureReason: e.message });
+  }
+
+  try {
+    const calendarResult = await createGoogleCalendarEvent({ payload, profile, workOrder, booker });
+    await logCalendarEvent({ workOrder, result: calendarResult, status: calendarResult.skipped ? 'skipped' : 'created', failureReason: calendarResult.reason });
+    if (!calendarResult.skipped) {
+      workOrder = { ...workOrder, calendarEventId: calendarResult.eventId, calendarId: calendarResult.calendarId, calendarEventLink: calendarResult.eventLink };
+    }
+  } catch (e) {
+    error('Calendar event creation failed: ' + e.message);
+    await logCalendarEvent({ workOrder, result: undefined, status: 'failed', failureReason: e.message });
+  }
+
   try {
     const statusHistoryInfo = await getCollectionInfo(statusHistoryCollectionId);
     await databases.createDocument(databaseId, statusHistoryCollectionId, ID.unique(), pickSchemaSafe({
