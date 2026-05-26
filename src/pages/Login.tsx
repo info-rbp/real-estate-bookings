@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import Footer from '../components/Footer'
 import { useAuth } from '../hooks/useAuth'
+import { brand, brandTitle } from '../config/brand'
 
 function needsApprovalNotice(profile?: { role?: string; status?: string; clientId?: string | null } | null) {
   if (!profile) return false
@@ -23,9 +24,9 @@ export default function Login() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    document.title = 'ProInspect Client Portal'
+    document.title = brandTitle('Client Portal')
 
-    const description = 'Log in to the ProInspect client portal, request account access, or create an account for approval before booking property field services.'
+    const description = `Log in to the ${brand.name} client portal, request account access, or create an account for approval before booking property field services.`
     let metaDescription = document.querySelector<HTMLMetaElement>('meta[name="description"]')
     if (!metaDescription) {
       metaDescription = document.createElement('meta')
@@ -48,7 +49,7 @@ export default function Login() {
         setError(result.error)
       } else if (needsApprovalNotice(result.profile)) {
         await signOut()
-        setNotice('Your account is pending approval. ProInspect will notify you once portal access has been approved.')
+        setNotice(`Your account is pending approval. ${brand.name} will notify you once portal access has been approved.`)
       } else if (result.profile?.role === 'admin') {
         navigate('/admin/dashboard')
       } else {
@@ -70,7 +71,7 @@ export default function Login() {
         setIsLogin(true)
         setPassword('')
         setFullName('')
-        setNotice('Your account request has been created. New accounts may require approval before booking services.')
+        setNotice(`Your account request has been created. New accounts may require approval before booking services.`)
       }
     }
 
@@ -102,7 +103,7 @@ export default function Login() {
     <div className="min-h-screen flex flex-col bg-surface">
       <header className="bg-white border-b border-outline-variant shadow-sm">
         <nav className="flex justify-between items-center px-10 h-20 max-w-7xl mx-auto">
-          <Link to="/" className="text-2xl font-display font-medium text-primary">ProInspect</Link>
+          <Link to="/" className="text-2xl font-display font-medium text-primary">{brand.name}</Link>
           <div className="hidden md:flex items-center gap-8">
             <Link to="/services" className="text-base text-on-surface-variant hover:text-primary transition-colors">Services</Link>
             <Link to="/about" className="text-base text-on-surface-variant hover:text-primary transition-colors">About</Link>
@@ -118,7 +119,7 @@ export default function Login() {
 
         <div className="w-full max-w-[480px] bg-white rounded-2xl terris-card relative z-10 flex flex-col overflow-hidden">
           <div className="p-8 text-center bg-surface-variant/30">
-            <div className="text-3xl font-display font-medium text-primary mb-1">ProInspect Client Portal</div>
+            <div className="text-3xl font-display font-medium text-primary mb-1">{brand.name} Client Portal</div>
             <p className="text-sm text-on-surface-variant">Approved client access for booking and account management</p>
           </div>
 
