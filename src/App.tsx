@@ -40,8 +40,17 @@ function ProtectedRoute({
     return <Navigate to="/login" replace />
   }
 
-  if (allowedRoles && (!profile || !allowedRoles.includes(profile.role))) {
+  if (!profile || profile.status !== 'active') {
+    return <Navigate to="/login" replace />
+  }
+
+  if (allowedRoles && !allowedRoles.includes(profile.role)) {
     return <Navigate to="/" replace />
+  }
+
+  const requiresClientAssignment = allowedRoles?.some((role) => role === 'client_admin' || role === 'client_user')
+  if (requiresClientAssignment && !profile.clientId) {
+    return <Navigate to="/login" replace />
   }
 
   return <>{children}</>
