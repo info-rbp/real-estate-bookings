@@ -1,106 +1,156 @@
-import { Link } from 'react-router-dom';
-import PublicNav from '../components/PublicNav';
-import Footer from '../components/Footer';
-import { ShieldCheck, Clock, Calendar, CheckCircle } from 'lucide-react';
+import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import PublicNav from '../components/PublicNav'
+import Footer from '../components/Footer'
+import { ArrowRight, CalendarCheck, CheckCircle, ClipboardList, FileText, Home as HomeIcon, KeyRound, MapPin, ShieldCheck, Wrench } from 'lucide-react'
 
-import { MarketingHero } from '../components/shared/MarketingHero';
+const services = [
+  { title: 'Property Condition Reports', description: 'Visual attendance, photographs and a standard property condition report using the agreed system or template.', icon: ClipboardList },
+  { title: 'Routine Inspections', description: 'Periodic property attendance with photographs, notes and routine inspection reporting support.', icon: CalendarCheck },
+  { title: 'Exit Inspections', description: 'End-of-tenancy inspection attendance with condition observations, photos and report support.', icon: CheckCircle },
+  { title: 'Open For Inspection', description: 'Open home attendance requests for up to 10 properties, reviewed for scheduling and route planning.', icon: HomeIcon },
+  { title: 'Insurance Claims Management', description: 'Field support for claim-related attendance, observations, photographs and evidence collation where approved.', icon: FileText },
+  { title: 'Maintenance Requests', description: 'Property attendance, issue observations, photos and approved contractor coordination support.', icon: Wrench },
+  { title: 'Key Installation', description: 'Key collection and lockbox or key-safe installation with placement instructions and photo confirmation where feasible.', icon: KeyRound },
+]
+
+const workflow = [
+  'Select the service that matches the property task.',
+  'Provide property, access, safety and contact details.',
+  'Choose a calendar slot or submit timing notes for review.',
+  'Receive confirmation, photos, notes or report output.',
+]
 
 export default function Home() {
+  useEffect(() => {
+    document.title = 'Property Field Support, Booked On Demand | ProInspect'
+
+    const description = 'ProInspect helps real estate agencies and landlords book property condition reports, routine inspections, exit inspections, open for inspection attendance, insurance claim support, maintenance requests and key installation services.'
+    let metaDescription = document.querySelector<HTMLMetaElement>('meta[name="description"]')
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta')
+      metaDescription.name = 'description'
+      document.head.appendChild(metaDescription)
+    }
+    metaDescription.setAttribute('content', description)
+  }, [])
+
   return (
-    <div className="min-h-screen flex flex-col bg-surface">
+    <div className="min-h-screen flex flex-col bg-white">
       <PublicNav />
-
-      <main className="flex-1 pt-0">
-        {/* Hero */}
-        <MarketingHero
-          title="Reliable Field Support for Real Estate Agencies"
-          subtitle="ProInspect provides on-demand property inspection and work order management to help your agency save time and enhance client satisfaction."
-          ctaText="Book a Work Order"
-          ctaLink="/login"
-        />
-
-        {/* How it Works */}
-        <section className="py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-6 md:px-10">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-display font-medium text-on-surface mb-4">Streamline Your Workflow in 3 Simple Steps</h2>
-              <p className="text-lg text-on-surface-variant max-w-3xl mx-auto">Our process is designed for maximum efficiency, giving you back valuable time to focus on your clients.</p>
+      <main className="flex-1">
+        <section className="relative isolate overflow-hidden bg-gray-950">
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.22),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.2),transparent_34%)]" aria-hidden="true" />
+          <div className="mx-auto grid max-w-7xl gap-12 px-6 py-24 sm:py-32 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:px-8">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">ProInspect Field Services</p>
+              <h1 className="mt-5 text-4xl font-bold tracking-tight text-white sm:text-6xl">Property Field Support, Booked On Demand</h1>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-200">
+                ProInspect helps real estate agencies, property managers and landlords book reliable property attendance services without adding more field work to an already overloaded team. Because apparently property work does not do itself, no matter how many dashboards humans invent.
+              </p>
+              <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+                <Link to="/login" className="inline-flex items-center justify-center rounded-md bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/85">
+                  Book a Service
+                  <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                </Link>
+                <Link to="/engage-us" className="inline-flex items-center justify-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100">
+                  Request Agency Access
+                </Link>
+              </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-              {[
-                { icon: Calendar, title: '1. Issue a Work Order', desc: 'Submit a detailed service request via our portal—from condition reports to routine inspections.' },
-                { icon: Clock, title: '2. Professional Attendance', desc: 'Our field professionals complete the work to the highest standard, with full access and safety compliance.' },
-                { icon: CheckCircle, title: '3. Digital Reporting', desc: 'Receive professional reports directly in your preferred system, ready for tenant or landlord review.' },
-              ].map((step, i) => (
-                <div key={i} className="flex flex-col items-center text-center p-8 terris-card border-none bg-surface-variant">
-                  <div className="bg-primary text-on-primary w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                    <step.icon size={32} />
+
+            <div className="rounded-3xl bg-white/10 p-6 ring-1 ring-white/15 backdrop-blur">
+              <div className="rounded-2xl bg-white p-6 shadow-xl">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <ShieldCheck className="h-6 w-6" aria-hidden="true" />
                   </div>
-                  <h3 className="text-2xl font-display font-medium text-on-surface mb-3">{step.title}</h3>
-                  <p className="text-base text-on-surface-variant">{step.desc}</p>
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">Built for authorised property work</h2>
+                    <p className="text-sm text-gray-600">Access, safety, service area and booking details captured before attendance.</p>
+                  </div>
+                </div>
+                <dl className="mt-8 grid grid-cols-2 gap-4 text-sm">
+                  <div className="rounded-xl bg-gray-50 p-4"><dt className="text-gray-500">Bookable services</dt><dd className="mt-1 text-2xl font-bold text-gray-900">7</dd></div>
+                  <div className="rounded-xl bg-gray-50 p-4"><dt className="text-gray-500">OFI batch size</dt><dd className="mt-1 text-2xl font-bold text-gray-900">1-10</dd></div>
+                  <div className="rounded-xl bg-gray-50 p-4"><dt className="text-gray-500">Standard region</dt><dd className="mt-1 text-2xl font-bold text-gray-900">Perth</dd></div>
+                  <div className="rounded-xl bg-gray-50 p-4"><dt className="text-gray-500">Quote path</dt><dd className="mt-1 text-2xl font-bold text-gray-900">Yes</dd></div>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 sm:py-24">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Service Catalogue</p>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Seven Property Field Services</h2>
+              <p className="mt-6 text-lg leading-8 text-gray-600">
+                Each service is designed for practical property attendance, evidence capture, reporting support or access-related field work.
+              </p>
+            </div>
+
+            <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {services.map((service) => {
+                const Icon = service.icon
+                return (
+                  <article key={service.title} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-md">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <Icon className="h-6 w-6" aria-hidden="true" />
+                    </div>
+                    <h3 className="mt-5 text-xl font-semibold text-gray-900">{service.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-gray-600">{service.description}</p>
+                  </article>
+                )
+              })}
+            </div>
+
+            <div className="mt-10 text-center">
+              <Link to="/services" className="inline-flex items-center rounded-md bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-gray-800">
+                View service details
+                <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-gray-50 py-20 sm:py-24">
+          <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:px-8">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">How it works</p>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">A Simple Booking Workflow</h2>
+              <p className="mt-6 text-lg leading-8 text-gray-600">
+                Calendar-based services use available appointment slots. Open For Inspection, urgent, outside-area and complex requests may be submitted for scheduling or quote review.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {workflow.map((item, index) => (
+                <div key={item} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-900 text-sm font-bold text-white">{index + 1}</div>
+                  <p className="mt-4 text-sm leading-7 text-gray-700">{item}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Core Services */}
-        <section className="py-24 bg-gray-100">
-          <div className="max-w-7xl mx-auto px-6 md:px-10">
-            <div className="text-center mb-16">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Partner in Property Management</h2>
-                <p className="text-lg text-gray-600 max-w-3xl mx-auto">We offer a comprehensive suite of services designed to support real estate agencies at every stage of the tenancy lifecycle.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-              <div className="md:col-span-7 bg-white p-10 rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row items-center gap-8">
-                <div className="flex-1 space-y-4">
-                  <h3 className="text-2xl font-semibold text-gray-900">Property Condition Reports</h3>
-                  <p className="text-base text-gray-600">Detailed, unbiased reports with high-quality photos to accurately document property condition at the start of a tenancy.</p>
-                  <Link to="/services" className="text-primary font-semibold">Learn more →</Link>
-                </div>
-                <div className="w-full md:w-1/3 bg-gray-100 h-48 rounded-xl overflow-hidden">
-                  <img src="https://images.pexels.com/photos/534247/pexels-photo-534247.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Property Report" className="w-full h-full object-cover"/>
-                </div>
+        <section className="py-20 sm:py-24">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="rounded-3xl bg-primary px-6 py-14 text-center text-white shadow-xl sm:px-12">
+              <MapPin className="mx-auto h-10 w-10" aria-hidden="true" />
+              <h2 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl">Perth and Peel Standard Service Area</h2>
+              <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-white/90">
+                Standard pricing applies where the property matches the approved Perth and Peel service area. Outside-area, urgent, complex or unclear work can still be submitted but may require admin review or custom quote before confirmation.
+              </p>
+              <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+                <Link to="/pricing" className="rounded-md bg-white px-5 py-3 text-sm font-semibold text-primary shadow-sm hover:bg-gray-100">View Pricing</Link>
+                <Link to="/engage-us" className="rounded-md border border-white/60 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10">Discuss Coverage</Link>
               </div>
-              <div className="md:col-span-5 bg-primary text-white p-10 rounded-2xl shadow-lg flex flex-col justify-between">
-                <div className="space-y-4">
-                  <ShieldCheck size={32} />
-                  <h3 className="text-2xl font-semibold">Routine & Exit Inspections</h3>
-                  <p className="text-base opacity-90">Ensure properties are being maintained and manage tenancy handovers smoothly with our professional inspection services.</p>
-                  <Link to="/services" className="text-white font-semibold underline">Explore all services</Link>
-                </div>
-              </div>
-              <div className="md:col-span-12 bg-white p-10 rounded-2xl border border-gray-200 shadow-sm flex flex-col lg:flex-row-reverse items-center gap-8">
-                <div className="flex-1 space-y-4">
-                   <h3 className="text-2xl font-semibold text-gray-900">A Full Suite of Support Services</h3>
-                  <p className="text-base text-gray-600">From attending viewings to coordinating maintenance and providing 3D virtual tours, we offer a wide range of services to give your team the capacity it needs to grow.</p>
-                  <Link to="/services" className="text-primary font-semibold">Discover how we can help →</Link>
-                </div>
-                <div className="w-full lg:w-2/5 bg-gray-100 rounded-xl overflow-hidden h-64">
-                  <img src="https://images.pexels.com/photos/4050318/pexels-photo-4050318.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Virtual Tour Creation" className="w-full h-full object-cover"/>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="py-24 bg-primary">
-          <div className="max-w-7xl mx-auto px-6 md:px-10 text-center">
-            <h2 className="text-4xl font-display font-medium text-on-primary mb-4">Ready to Enhance Your Agency's Efficiency?</h2>
-            <p className="text-lg text-on-primary/80 mb-8 max-w-2xl mx-auto">Let ProInspect handle the fieldwork so you can focus on building client relationships and growing your business.</p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/login" className="terris-btn-primary bg-white text-primary hover:bg-surface-variant">
-                Get Started
-              </Link>
-              <Link to="/about" className="terris-btn-outline border-white text-white hover:bg-white/10">
-                About Us
-              </Link>
             </div>
           </div>
         </section>
       </main>
-
       <Footer />
     </div>
   )
