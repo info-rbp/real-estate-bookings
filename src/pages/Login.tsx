@@ -1,8 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
 import { Eye, EyeOff } from 'lucide-react'
 import Footer from '../components/Footer'
+import { useAuth } from '../hooks/useAuth'
+
+function needsApprovalNotice(profile?: { role?: string; status?: string; clientId?: string | null } | null) {
+  if (!profile) return false
+  if (profile.role === 'admin' || profile.role === 'staff') return false
+  return profile.status === 'pending' || profile.role === 'pending' || !profile.clientId
+}
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true)
@@ -13,8 +19,21 @@ export default function Login() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [loading, setLoading] = useState(false)
-  const { requestPasswordReset, signIn, signUp } = useAuth()
+  const { requestPasswordReset, signIn, signOut, signUp } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    document.title = 'ProInspect Client Portal'
+
+    const description = 'Log in to the ProInspect client portal, request account access, or create an account for approval before booking property field services.'
+    let metaDescription = document.querySelector<HTMLMetaElement>('meta[name="description"]')
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta')
+      metaDescription.name = 'description'
+      document.head.appendChild(metaDescription)
+    }
+    metaDescription.setAttribute('content', description)
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -27,6 +46,9 @@ export default function Login() {
 
       if (result.error) {
         setError(result.error)
+      } else if (needsApprovalNotice(result.profile)) {
+        await signOut()
+        setNotice('Your account is pending approval. ProInspect will notify you once portal access has been approved.')
       } else if (result.profile?.role === 'admin') {
         navigate('/admin/dashboard')
       } else {
@@ -44,8 +66,11 @@ export default function Login() {
       if (result.error) {
         setError(result.error)
       } else {
-        setNotice('Your account was created. Check your email if verification is enabled in Appwrite.')
-        navigate('/dashboard')
+        await signOut()
+        setIsLogin(true)
+        setPassword('')
+        setFullName('')
+        setNotice('Your account request has been created. New accounts may require approval before booking services.')
       }
     }
 
@@ -93,11 +118,15 @@ export default function Login() {
 
         <div className="w-full max-w-[480px] bg-white rounded-2xl terris-card relative z-10 flex flex-col overflow-hidden">
           <div className="p-8 text-center bg-surface-variant/30">
-            <div className="text-3xl font-display font-medium text-primary mb-1">ProInspect</div>
-            <p className="text-sm text-on-surface-variant">Work Order Platform</p>
+            <div className="text-3xl font-display font-medium text-primary mb-1">ProInspect Client Portal</div>
+            <p className="text-sm text-on-surface-variant">Approved client access for booking and account management</p>
           </div>
 
-          <div className="flex border-b border-outline-variant">
+          <div className="px-8 pt-6 text-sm leading-6 text-on-surface-variant">
+            New accounts may require approval before booking services.
+          </div>
+
+          <div className="flex border-b border-outline-variant mt-4">
             <button
               onClick={() => {
                 setIsLogin(true)
@@ -136,7 +165,7 @@ export default function Login() {
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="John Doe"
+                  placeholder="Jordan Rivers"
                   className="terris-input"
                 />
               </div>
@@ -148,7 +177,7 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="alex.rivers@example.com"
+                placeholder="name@agency.com.au"
                 required
                 className="terris-input"
               />
@@ -190,7 +219,7 @@ export default function Login() {
               disabled={loading}
               className="terris-btn-primary w-full mt-2"
             >
-              {loading ? 'Please wait...' : isLogin ? 'Login to Portal' : 'Create Account'}
+              {loading ? 'Please wait...' : isLogin ? 'Login to Portal' : 'Request Account Access'}
             </button>
           </form>
 
