@@ -1,74 +1,137 @@
 # ProInspect Work Order Platform
 
-A contract-compliant real-estate Work Order booking platform for ProInspect, built with Vite, React, TypeScript, and Appwrite.
+A production-focused property field services platform for ProInspect, built with Vite, React, TypeScript and Appwrite.
 
-## Overview
+## What the app does
 
-This app is built with **Vite** and deployed as **Cloudflare Workers Static Assets** using **Wrangler**.
-## Cloudflare Pages Deployment
+ProInspect supports approved agencies, landlords and property teams with:
 
-- **Production branch:** `main`
-- **Build command:** `npm run build`
-- **Output directory:** `dist`
+- public marketing pages for services, pricing, legal information and access requests
+- client portal login and account approval workflow
+- seven supported booking flows for property field services
+- Appwrite-backed work-order creation, audit logging and supporting records
+- booking email notifications and Google Calendar event creation through Appwrite Functions
+- deployment to Cloudflare Workers Static Assets
 
-Before every deployment, run:
+## Core stack
+
+- Frontend: React, Vite, TypeScript, Tailwind CSS
+- Backend platform: Appwrite Databases, Auth, Functions and Storage
+- Payments: Stripe browser and webhook integration hooks
+- Deployment: Cloudflare Workers Static Assets via Wrangler
+
+## Supported service catalogue
+
+The current launch catalogue is limited to these seven services:
+
+1. Property Condition Report
+2. Routine Inspection
+3. Exit Inspection
+4. Open For Inspection
+5. Insurance Claims Management
+6. Maintenance Requests
+7. Key Installation
+
+Keep the public pages, `data/services-pricing.csv`, service imports and booking workflows aligned to this catalogue.
+
+## Local setup
+
+1. Install dependencies.
 
 ```bash
-npm ci
+npm install
+```
+
+2. Copy the example environment file and fill in the required values.
+
+```bash
+cp .env.example .env.local
+```
+
+3. Validate frontend and booking-function configuration.
+
+```bash
+npm run check:env:local
+npm run check:env:functions
+```
+
+4. Provision Appwrite baseline collections, then apply launch-specific schema updates.
+
+```bash
+npm run appwrite:provision:local
+npm run appwrite:provision:launch
+```
+
+5. Import service areas and the approved launch pricing catalogue.
+
+```bash
+npm run service-areas:import
+npm run services:import
+```
+
+6. Run the development server.
+
+```bash
+npm run dev
+```
+
+7. Run verification checks before deploying.
+
+```bash
 npm run typecheck
 npm run build
 ```
 
-Required Vite environment variables (Cloudflare Pages > Settings > Environment variables):
+## Environment variables
 
-- `VITE_APPWRITE_ENDPOINT`
-- `VITE_APPWRITE_PROJECT_ID`
-- `VITE_APPWRITE_DATABASE_ID`
-- `VITE_APPWRITE_USERS_COLLECTION_ID`
-- `VITE_APPWRITE_CLIENTS_COLLECTION_ID`
-- `VITE_APPWRITE_SERVICES_COLLECTION_ID`
-- `VITE_APPWRITE_CLIENT_PRICING_COLLECTION_ID`
-- `VITE_APPWRITE_BOOKINGS_COLLECTION_ID`
-- `VITE_APPWRITE_PROPERTIES_COLLECTION_ID`
-- `VITE_APPWRITE_LEADS_COLLECTION_ID`
-- `VITE_APPWRITE_OPEN_INSPECTIONS_COLLECTION_ID`
-- `VITE_APPWRITE_INSPECTION_CHECK_INS_COLLECTION_ID`
-- `VITE_APPWRITE_PAYMENTS_COLLECTION_ID`
-- `VITE_APPWRITE_SUBSCRIPTIONS_COLLECTION_ID`
-- `VITE_APPWRITE_AUDIT_LOGS_COLLECTION_ID`
-- `VITE_APPWRITE_SERVICE_AREAS_COLLECTION_ID`
-- `VITE_APPWRITE_RATE_CARDS_COLLECTION_ID`
-- `VITE_APPWRITE_RATE_CARD_ITEMS_COLLECTION_ID`
-- `VITE_APPWRITE_WORK_ORDER_CONTACTS_COLLECTION_ID`
-- `VITE_APPWRITE_WORK_ORDER_STATUS_HISTORY_COLLECTION_ID`
-- `VITE_APPWRITE_ACCESS_ISSUES_COLLECTION_ID`
-- `VITE_APPWRITE_REGIONAL_BATCHES_COLLECTION_ID`
-- `VITE_APPWRITE_OPEN_INSPECTION_PLANS_COLLECTION_ID`
-- `VITE_APPWRITE_OPEN_INSPECTION_ITEMS_COLLECTION_ID`
-- `VITE_APPWRITE_INVOICE_LINES_COLLECTION_ID`
-- `VITE_APPWRITE_STORAGE_PROPERTY_IMAGES_BUCKET_ID`
-- `VITE_APPWRITE_STORAGE_REPORTS_BUCKET_ID`
-- `VITE_APPWRITE_FUNCTION_PROFILE_UPDATE_ID`
-- `VITE_APPWRITE_FUNCTION_ADMIN_USER_ASSIGNMENT_ID`
-- `VITE_APPWRITE_FUNCTION_PRICING_ID`
-- `VITE_APPWRITE_FUNCTION_STRIPE_CHECKOUT_ID`
-- `VITE_APPWRITE_FUNCTION_STRIPE_WEBHOOK_ID`
-- `VITE_APPWRITE_FUNCTION_CREATE_WORK_ORDER_ID`
-- `VITE_APPWRITE_FUNCTION_FETCH_CALENDAR_AVAILABILITY_ID`
-- `VITE_APPWRITE_FUNCTION_GENERATE_INVOICE_LINES_ID`
+### Frontend build-time variables
 
+These must be configured for local builds and Cloudflare deployment:
 
-This application has been upgraded from a generic booking portal to a professional Work Order management system. It supports multi-step Work Order creation, service-area classification, rate card pricing, regional batching, open-for-inspection planning, and automated invoice line generation.
+- `VITE_APPWRITE_*` collection, bucket and function IDs used by the frontend
+- `VITE_STRIPE_PUBLISHABLE_KEY`
+- `PUBLIC_SITE_URL`
 
-## Deployment (Cloudflare Workers Static Assets)
+Use `npm run check:env` or `npm run check:env:local` to verify these names are populated.
 
-- **Production domain:** `real-estate.remotebusinesspartner.com.au`
-- **Worker name:** `rbp-real-estate`
-- **Build command:** `npm run build`
-- **Deploy command:** `npm run deploy`
-- **Assets directory:** `dist`
+### Booking function variables
 
-### Local verification before deploy
+These must be configured on the `create-work-order` Appwrite Function before deployment:
+
+- `BOOKING_NOTIFICATIONS_COLLECTION_ID`
+- `BOOKING_CALENDAR_EVENTS_COLLECTION_ID`
+- `EMAIL_PROVIDER`
+- `EMAIL_FROM`
+- `OPERATIONS_EMAIL_TO`
+- `OPERATIONS_ALERT_EMAIL_TO`
+- provider-specific credentials such as `RESEND_API_KEY`, `SENDGRID_API_KEY`, `MAILGUN_*`, or `GMAIL_DELEGATED_USER`
+- `GOOGLE_CALENDAR_ID`
+- `GOOGLE_CLIENT_EMAIL`
+- `GOOGLE_PRIVATE_KEY`
+- `GOOGLE_CALENDAR_TIMEZONE`
+- optional `GOOGLE_CALENDAR_INVITE_BOOKER`
+
+Use `npm run check:env:functions` to verify local values before function deployment.
+
+## Appwrite provisioning and launch readiness
+
+The repository includes two provisioning layers:
+
+- `scripts/provision-appwrite-staging.mjs` creates the baseline collections, indexes and storage buckets.
+- `scripts/provision-launch-schema.mjs` adds launch-readiness updates such as `pending_scheduling`, booking notification logs, booking calendar event logs and booking calendar metadata fields.
+
+After provisioning, import the approved service catalogue from `data/services-pricing.csv` so the database matches the public pricing tables and booking flows.
+
+## Cloudflare deployment
+
+Production deployment targets Cloudflare Workers Static Assets.
+
+- Production branch: `main`
+- Build command: `npm run build`
+- Deploy command: `npm run deploy`
+- Output directory: `dist`
+
+Run this sequence before every deploy:
 
 ```bash
 npm ci
@@ -77,208 +140,33 @@ npm run typecheck
 npm run build
 ```
 
-`npm run check:env` verifies required variable names only and does not print values. It may fail locally if production variables are intentionally unset.
+## Booking workflow notes
 
-### Environment and Appwrite platform requirements
+- Calendar-based services can fall back to scheduling review when no slot exists and timing notes are supplied.
+- Open For Inspection requests are submitted for scheduling review and route planning rather than instant confirmation.
+- Booking creation must remain durable even if email delivery or Google Calendar event creation fails.
+- Booking notification failures and calendar failures are logged for manual follow-up.
 
-- Cloudflare production environment variables must be configured in Cloudflare project/worker settings and must **not** be committed to this repository.
-- Appwrite Web Platform allowed origins should include:
-  - `real-estate.remotebusinesspartner.com.au`
-  - `localhost`
-  - optional: workers.dev hostname used for direct Worker testing.
+## Recommended smoke tests
 
-## Technical Stack
+Before production launch, verify these flows with a real test client profile:
 
-- **Frontend:** React, Vite, TypeScript, Tailwind CSS
-- **Backend:** Appwrite (Databases, Auth, Functions, Storage, Teams)
-- **State Management:** React Hooks
-- **Routing:** React Router v6
+1. Submit a standard calendar-based booking and confirm the work order is saved.
+2. Confirm operations and booker emails are sent.
+3. Confirm a Google Calendar event is created for calendar-based services.
+4. Confirm OFI accepts 10 properties and rejects 11.
+5. Confirm no-slot calendar fallback submits for scheduling review when timing notes are provided.
+6. Confirm pending client accounts are not granted immediate dashboard access.
 
-## Core Domain Model
+## Key scripts
 
-- **Work Order:** A formal request for service. Replaces "Booking" terminology.
-- **Service Area:** WA regions (Perth and Peel, Gascoyne, etc.) classified by Suburb + Postcode.
-- **Rate Card:** Client-specific pricing for ProInspect services.
-- **Regional Batch:** Grouping of Work Orders for "Other Regions" to meet attendance thresholds.
-- **Access Issue:** Formal record of attendance failure with automated fee calculation (20%).
-- **Open Inspection Plan:** Weekly planning for recurring property viewings.
-
-## Local Setup
-
-1. **Install Dependencies:**
-   ```bash
-   npm install
-   ```
-
-2. **Environment Variables:**
-   Copy `.env.example` to `.env.local` and fill in your Appwrite credentials.
-   ```bash
-   cp .env.example .env.local
-   ```
-
-3. **Provision Appwrite:**
-   Run the staging provisioning script to set up collections and indexes.
-   ```bash
-   npm run appwrite:provision:staging
-   ```
-
-4. **Run Development Server:**
-   ```bash
-   npm run dev
-   ```
-
-5. **Typecheck and Build:**
-   ```bash
-   npm run typecheck
-   npm run build
-   ```
-
-## Work Order Lifecycle
-
-Work Orders move through a strict status machine:
-`draft` -> `submitted` -> `pending_acceptance` -> `accepted` -> `scheduled` -> `in_progress` -> `completed` -> `report_delivered` -> `invoiced` -> `paid`
-
-Other statuses include `declined`, `requires_information`, `quote_required`, `awaiting_batch`, `cancelled`, `access_issue`, `reattendance_required`, and `failed`.
-
-## Documentation
-
-- [Appwrite Schema and Permissions](docs/appwrite/schema-and-permissions.md)
-- [Original Product Specification](booking_portal_project_specification.md)
-- [Original Project README](bookpro_project_readme.md)
-- `bookpro_home/code.html`
-- `login_register/code.html`
-- `book_a_service_step_1_service_selection/code.html`
-- `client_dashboard/code.html`
-
-### Option 2: Run a simple local web server
-
-Serving the folder locally is the easiest way to browse the prototype cleanly and avoid browser restrictions around local assets.
-
-From the repository root:
-
-```bash
-python3 -m http.server 8000
-```
-
-Then open:
-
-```text
-http://localhost:8000/bookpro_home/code.html
-```
-
-You can swap the path to any other screen folder to inspect a different part of the flow.
-
-## Recommended way to review the prototype
-
-Start with these pages in order:
-
-1. `bookpro_home/code.html`
-2. `services/code.html` or `real_estate_services/code.html`
-3. `login_register/code.html`
-4. `sign_up_step_1_account_basics/code.html`
-5. `sign_up_step_2_professional_profile/code.html`
-6. `sign_up_step_3_security_preferences/code.html`
-7. `book_a_service_step_1_service_selection/code.html`
-8. `book_a_service_step_2_property_details/code.html`
-9. `book_a_service_step_3_scheduling/code.html`
-10. `book_a_service_step_4_review_confirm/code.html`
-11. `client_dashboard/code.html`
-12. `client_dashboard_bookings/code.html`
-13. `client_dashboard_settings/code.html`
-
-That sequence tells the clearest story of how the product is intended to work.
-
-## How the components come together
-
-The prototype is organized around a few major application areas.
-
-### 1. Public website
-
-The public site introduces the service, explains what can be booked, and funnels users into account creation or sign-in.
-
-Relevant folders:
-
-- `bookpro_home/`
-- `services/`
-- `real_estate_services/`
-
-### 2. Authentication and onboarding
-
-Users enter through the shared login/register screen, then move through a multi-step signup process that captures identity, role, and security preferences.
-
-Relevant folders:
-
-- `login_register/`
-- `sign_up_step_1_account_basics/`
-- `sign_up_step_2_professional_profile/`
-- `sign_up_step_3_security_preferences/`
-
-### 3. Booking workflow
-
-Once a user is in the platform, the booking flow guides them through selecting a service, entering property details, choosing a schedule, and reviewing the request before confirmation.
-
-Relevant folders:
-
-- `book_a_service_step_1_service_selection/`
-- `book_a_service_step_2_property_details/`
-- `book_a_service_step_3_scheduling/`
-- `book_a_service_step_4_review_confirm/`
-
-### 4. Client dashboard
-
-After a booking is placed, the dashboard becomes the main workspace for tracking requests, reviewing booking states, and managing account settings.
-
-Relevant folders:
-
-- `client_dashboard/`
-- `client_dashboard_booking_integrated/`
-- `client_dashboard_bookings/`
-- `client_dashboard_settings/`
-
-### 5. Design system and documentation
-
-The docs explain both the intended product behavior and the design language that should be preserved when the prototype becomes a real application.
-
-Relevant files:
-
-- `professional_saas_interface/DESIGN.md`
-- `bookpro_project_readme.md`
-- `booking_portal_project_specification.md`
-
-## If you are turning this into a real application
-
-The prototype is already broken into logical feature groups, which makes it a reasonable source for a production build. A practical implementation path would look like this:
-
-1. Create an application shell using React or Next.js.
-2. Convert each `code.html` screen into reusable page components.
-3. Extract shared layout pieces such as navigation, cards, buttons, form fields, and status badges.
-4. Turn the signup and booking flows into routed multi-step forms with shared state.
-5. Add authentication and role handling for client, staff, and admin users.
-6. Add a backend for bookings, services, users, availability, and status changes.
-7. Integrate Google Calendar for availability and booking sync.
-8. Add notifications for confirmations, reminders, and status updates.
-
-## Suggested application structure
-
-If this project is promoted from prototype to app, the current folders map naturally to these product modules:
-
-- Marketing pages
-- Auth and onboarding
-- Booking flow
-- Client dashboard
-- Admin and staff tools
-- Shared design system
-- Integrations and backend services
-
-The existing prototype already provides the screen-level reference for the first four of those.
-
-## Notes for contributors
-
-- Treat the HTML files as reference implementations for layout and flow.
-- Use `screen.png` files for quick visual comparison while rebuilding pages into components.
-- Keep the design language aligned with `professional_saas_interface/DESIGN.md`.
-- Use `bookpro_project_readme.md` and `booking_portal_project_specification.md` as the source of truth for product intent.
-
-## Next step
-
-The cleanest next move is to convert this repository from a prototype archive into a real app scaffold while preserving these flows and visual references. Which we wll eventually do.
+- `npm run typecheck`
+- `npm run build`
+- `npm run check:env`
+- `npm run check:env:local`
+- `npm run check:env:functions`
+- `npm run appwrite:provision:local`
+- `npm run appwrite:provision:launch`
+- `npm run service-areas:import`
+- `npm run services:import`
+- `npm run deploy`
